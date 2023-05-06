@@ -1,0 +1,84 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TODO>FULLstack>Expressjs + localstorage",
+            "type": "node",
+            "request": "launch",
+            "runtimeVersion": "16",
+            "cwd": "${workspaceFolder}/todo/localstorage_basicjs",
+            "program": "./index.js"
+        },
+        {
+            "name": "TODO>FULLstack>React + localstorage",
+            "type": "node",
+            "request": "launch",
+            "runtimeVersion": "16",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "start"
+            ],
+            "cwd": "${workspaceFolder}/todo/localstorage_react",
+        },
+        {
+            "name": "TODO>frontend>React",
+            "type": "node",
+            "request": "launch",
+            "runtimeVersion": "16",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "start"
+            ],
+            "cwd": "${workspaceFolder}/todo/django_frontend_react2",
+            // "preLaunchTask": "TODO: Django backend",
+        },
+        {
+            "name": "TODO>Frontend>Expressjs",
+            "type": "node",
+            "request": "launch",
+            "runtimeVersion": "16",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "start"
+            ],
+            "env": {
+                "NODE_ENV": "development",
+                "PORT": "3000"
+            },
+            "serverReadyAction":{
+                "action": "openExternally",
+                "pattern": "Started at (https?://\\S+|[0-9]+)/",
+                "uriFormat": "%s"
+            },
+            "cwd": "${workspaceFolder}/todo/django_frontend_basicjs",
+            // "preLaunchTask": "TODO: Django backend",
+        },
+        {
+            "name": "Docker Node.js Launch",
+            "type": "docker",
+            "request": "launch",
+            "preLaunchTask": "docker-run: debug",
+            "platform": "node"
+        },
+        {
+            "name": "TODO>Backend>Django",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/todo/django_backend/manage.py",
+            "args": [
+                "runserver"
+            ],
+            "serverReadyAction":{
+                "action": "openExternally",
+                "pattern": "Starting development server at (https?://\\S+|[0-9]+)/",
+                "uriFormat": "%s/todo"
+              },
+            "env": {
+                "PYTHONDONTWRITEBYTECODE": "1",
+                "DEBUG": "true",
+                // "REDIS_URL": "redis://localhost:6379",
+            },
+            "django": true
+        }
+    ]
+}

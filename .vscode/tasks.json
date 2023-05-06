@@ -1,0 +1,78 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "docker-build",
+            "label": "docker-build",
+            "platform": "node",
+            "dockerBuild": {
+                "dockerfile": "${workspaceFolder}/Dockerfile",
+                "context": "${workspaceFolder}",
+                "tag": "testnode1",
+                "pull": true
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: release",
+            "dependsOn": [
+                "docker-build"
+            ],
+            "dockerRun": {
+                "image": "testnode1",
+                "ports": [
+                    {
+                        "hostPort": 3000,
+                        "containerPort": 3000
+                    }
+                ],
+                "remove": true,
+                "env": {
+                    "NODE_ENV": "production"
+                }
+            },
+            "platform": "node"
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: debug",
+            "dependsOn": [
+                "docker-build"
+            ],
+            "dockerRun": {
+                "env": {
+                    "DEBUG": "*",
+                    "NODE_ENV": "development"
+                }
+            },
+            "node": {
+                "enableDebugging": true
+            }
+        },
+        {
+            "type": "npm",
+            "script": "start",
+            "path": "todo/react_app",
+            "problemMatcher": [],
+            "label": "npm: start - todo/react_app",
+            "detail": "react-scripts start"
+        },
+        {
+            "label": "TODO: Django backend",
+            "type": "shell",
+            // "command": "python manage.py runserver",
+            // "command": "/home/crivella/.virtualenvs/django/bin/python",
+            "command": "C:/Users/crivella/Envs/django/Scripts/python.exe",
+            "args": [
+                "manage.py",
+                "runserver"
+            ],
+            "detail": "Start django development server",
+            "options": {
+                "cwd": "${workspaceFolder}/todo/django_backend"
+            },
+            "problemMatcher": [],   
+            "isBackground": true
+        }
+    ]
+}
