@@ -1,0 +1,22 @@
+{
+  "name": ".",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-errors": "^2.0.0",
+    "pino": "^8.11.0",
+    "pino-http": "^8.3.3",
+    "pino-pretty": "^10.0.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
+  }
+}
