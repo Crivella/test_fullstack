@@ -1,0 +1,9 @@
+django>=4.0.0
+djangorestframework
+django-filter
+django-cors-headers
+django-cache-fallback
+pillow
+redis
+requests
+pyreadline3
