@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'corsheaders',
-    'cache_fallback'
+    # 'cache_fallback'
 ]
 
 MIDDLEWARE = [
@@ -84,7 +84,7 @@ TEMPLATES = [
     },
 ]
 
-LOGIN_REDIRECT_URL = '/api'
+LOGIN_REDIRECT_URL = '/accounts/login/success'
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
