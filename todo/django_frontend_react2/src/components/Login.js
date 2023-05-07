@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
 
-export default function LoginForm ({ theme, onLogin }) {
+export default function LoginForm ({ theme, login }) {
     const [validated, setValidated] = useState(false);
     const [failed, setFailed] = useState(false);
 
@@ -19,7 +19,7 @@ export default function LoginForm ({ theme, onLogin }) {
         fdata.append('password', Password.current.value);
 
         setValidated(false);
-        const user = onLogin(fdata);
+        const user = login(fdata);
         if (!user) setFailed(true);
     };
     
@@ -51,4 +51,23 @@ export default function LoginForm ({ theme, onLogin }) {
             </Form>
         </Container>
     );
+}
+
+export function LoginModal({ theme, show, setShow, login }) {
+    const onLogin = (fdata) => {
+        const user = login(fdata);
+        setShow(!user);
+    };
+
+
+    return (
+        <Modal show={show} onHide={() => setShow(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>Login</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <LoginForm theme={theme} login={onLogin} />
+            </Modal.Body>
+        </Modal>
+    )
 }

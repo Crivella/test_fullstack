@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, ListGroup } from 'react-bootstrap';
 
-export default function TodoList({ todos, updateTodo }) {
+export default function TodoList({ list: todos, updateItem: updateTodo }) {
     return (
         <Container className='py-2'>
             <ListGroup className='p-2 bg-dark text-white'>
