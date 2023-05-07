@@ -2,7 +2,9 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 // import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
+import { Container } from 'react-bootstrap';
 import Login from './components/Login';
+import CustomNavbar from './components/Navbar';
 import TodoList from './components/TodoList';
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
@@ -24,10 +26,11 @@ export function App() {
   };
 
   return (
-    <div className="container">
+    <Container fluid>
+      <CustomNavbar user={user} onUserChange={getUser} />
       <TodoList user={user}/>
       <Login user={user} onUserChange={getUser} />
-    </div>
+    </Container>
   );
 }
 

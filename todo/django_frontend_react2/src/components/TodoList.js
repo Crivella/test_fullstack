@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
-import { ListGroup } from 'react-bootstrap';
+import { Container, ListGroup } from 'react-bootstrap';
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -20,11 +20,6 @@ export default function TodoList({ user }) {
       }).then(({data}) => setTodos(data));
     };
 
-  const TEST = () => {
-    console.log(todos);
-    setTodos(todos);
-  };
-
   const addTodo = (todo) => {
     setTodos([...todos, todo]);
   }
@@ -40,24 +35,22 @@ export default function TodoList({ user }) {
 
 
   return (
-    <ListGroup className='container pt-3 bg-dark text-white'>
-      <h1>Todo List</h1>
-      <ul className='list-group'>
-        <ListGroup.Item className='list-group-item d-flex justify-content-between bg-primary text-white'>
-          <span>Titles</span>
-          <span>Completed</span>
-        </ListGroup.Item>
-        {todos.map((todo) => (
-          // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-          <ListGroup.Item key={todo.id} className='list-group-item d-flex justify-content-between'>
-            <span>{todo.title}</span>
-            <input type='checkbox' checked={todo.completed} onChange={(e) => updateTodo(todo, e)}/>
+    <Container className='py-2'>
+      <ListGroup className='p-2 bg-dark text-white'>
+          <ListGroup.Item className='list-group-item d-flex justify-content-between bg-primary text-white'>
+            <span>Titles</span>
+            <span>Completed</span>
           </ListGroup.Item>
-        ))}
-      </ul>
-      <input type='checkbox' onChange={TEST} />
-      <AddForm user={user} addTodo={addTodo} />
-    </ListGroup>
+          {todos.map((todo) => (
+            // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
+            <ListGroup.Item key={todo.id} className='list-group-item d-flex justify-content-between'>
+              <span>{todo.title}</span>
+              <input type='checkbox' checked={todo.completed} onChange={(e) => updateTodo(todo, e)}/>
+            </ListGroup.Item>
+          ))}
+        <AddForm user={user} addTodo={addTodo} />
+      </ListGroup>
+    </Container>
   );
 }
 

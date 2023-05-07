@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useRef, useState } from 'react';
-import { Alert, Button, Col, Form, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -56,7 +56,7 @@ export default function Login ({user, onUserChange}) {
     }
     
     return (
-        <div className="container pt-3 bg-danger">
+        <Container className="pt-3 bg-danger">
             <Alert variant="danger" show={failed}  onClose={() => setFailed(false)} dismissible>
                 Wrong username or password
             </Alert>
@@ -81,6 +81,6 @@ export default function Login ({user, onUserChange}) {
                     </Button>
                 </Row>
             </Form>
-        </div>
+        </Container>
     );
 }
