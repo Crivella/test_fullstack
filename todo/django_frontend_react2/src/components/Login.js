@@ -1,6 +1,6 @@
 import axios from 'axios';
-import React from 'react';
-import Form from './Form';
+import React, { useRef, useState } from 'react';
+import { Alert, Button, Col, Form, Row } from "react-bootstrap";
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -9,26 +9,43 @@ axios.defaults.withCredentials = true
 
 
 export default function Login ({user, onUserChange}) {
-    const loginSubmit = async (data) => {
+    const [validated, setValidated] = useState(false);
+    const [failed, setFailed] = useState(false);
+
+    const Username = useRef();
+    const Password = useRef();
+    
+    const loginSubmit = async (e) => {
+        e.preventDefault();
         console.log('loginSubmit')
-        console.log(data)
+        console.log(e)
+
+        setValidated(true);
+
+        const uname = Username.current.value
+        const pword = Password.current.value
+
+        if (!uname) return;
+        if (!pword) return;
 
         const fdata = new FormData();
-        fdata.append('username', data.Username);
-        fdata.append('password', data.Password);
+        fdata.append('username', uname);
+        fdata.append('password', pword);
         await axios.post(`${endpoint}/accounts/login/`, fdata, {})
             .catch((err) => console.log(err));
 
         onUserChange()
-        return Boolean(user)
+        if (!user) setFailed(true);
+        e.target.reset();
+        setValidated(false);
     };
 
-    const logoutSubmit = async (data) => {
+    const logoutSubmit = async (e) => {
         console.log('logoutSubmit')
-        console.log(data)
-        // e.preventDefault();
-        // await axios.post(`${endpoint}/accounts/logout/`, {}, {})
-        // onUserChange()
+        console.log(e)
+        e.preventDefault();
+        await axios.post(`${endpoint}/accounts/logout/`, {}, {})
+        onUserChange()
     };
 
     if (user) {
@@ -42,21 +59,26 @@ export default function Login ({user, onUserChange}) {
         );
     }
     
-    const fields = [
-        {"label": "Username", "required": true},
-        {"label": "Password", "required": true}
-    ]
-    
     return (
-        <div>
-            <Form fields={fields} onSubmit={loginSubmit} />
-            {/* <form className={'row g-3 ' + getValidationClass()}>
-                <InputText label="Username" text={Username} required={true}/>
-                <InputText label="Password" text={Password} required={true}/>
-                <div className='col-12'>
-                    <button className='btn btn-primary' type="submit" onClick={loginSubmit}>Login</button>
-                </div>
-            </form> */}
+        <div className="container">
+            <Alert variant="danger" show={failed}  onClose={() => setFailed(false)} dismissible>
+                Wrong username or password
+            </Alert>
+            <Form validated={validated} onSubmit={loginSubmit}>
+                <Row className="g-3">
+                    <Form.Group as={Col} className="col-md-4" controlId="formBasicUsername">
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control type="user" placeholder="Username" ref={Username} required />
+                    </Form.Group>
+                    <Form.Group as={Col} className="col-md-4" controlId="formBasicPassword">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control type="password" placeholder="Password" ref={Password} required />
+                    </Form.Group>
+                    <Button variant="primary" type="submit">
+                        Submit
+                    </Button>
+                </Row>
+            </Form>
         </div>
     );
 }
