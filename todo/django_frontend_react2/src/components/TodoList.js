@@ -33,9 +33,13 @@ export default function TodoList({ user }) {
   }
 
   return (
-    <div>
+    <div className='container pt-3 bg-dark text-white'>
       <h1>Todo List</h1>
-      <ul>
+      <ul className='list-group'>
+        <div className='list-group-item d-flex justify-content-between bg-primary text-white'>
+          <div>Titles</div>
+          <div>Completed</div>
+        </div>
         {todos.map((e) => (
           <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
         ))}
@@ -65,10 +69,9 @@ function Todo({user, todo, updateTodo}) {
   };
 
   return (
-    <li>
+    <li className='list-group-item list-group-item-action d-flex justify-content-between'>
       {todo.title}
       <input type='checkbox' checked={todo.completed} onChange={toggleCompleted}/>
-      {errCompleted ? "Error!!" : ""}
     </li>
   );
 }
@@ -94,7 +97,7 @@ function AddForm({user, addTodo}) {
 
   if (user) {
     return (
-      <div>
+      <div className='container'>
         <h2>Add Todo</h2>
         <form onSubmit={handleSubmit}>
           <p>
