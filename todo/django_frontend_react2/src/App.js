@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 // import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/css/bootstrap.css';
 import Login from './components/Login';
 import TodoList from './components/TodoList';
 
@@ -27,7 +27,7 @@ export function App() {
   };
 
   return (
-    <div className="App">
+    <div className="container">
       <TodoList user={user}/>
       <Login user={user} onUserChange={getUser} />
     </div>
