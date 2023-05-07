@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 // import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import { Container, Modal } from 'react-bootstrap';
-import Login from './components/Login';
+import LoginForm from './components/Login';
 import CustomNavbar from './components/Navbar';
 import TodoList from './components/TodoList';
 
@@ -14,14 +14,22 @@ axios.defaults.withCredentials = true
 
 export function App() {
     // State
+    const [theme, setTheme] = useState("light"); // ["dark", "light"
     const [user, setUser] = useState("");
     const [show, setShow] = useState(false);
+    const [todos, setTodos] = useState([]);
 
     // Lifecycle
     useEffect(() => {
         getUser();
-        // setUser(localStorage.getItem("user"));
+        refreshData();
     }, []);
+
+    const refreshData = () => {
+        axios.get(`${endpoint}/api/todo/`, {
+            headers: { 'Content-Type': 'application/json' }
+        }).then(({data}) => setTodos(data));
+    };
 
     const getUser = () => {
         return axios.get(`${endpoint}/accounts/get-user/`, {})
@@ -32,25 +40,34 @@ export function App() {
     const onLogin = async (fdata) => {
         await axios.post(`${endpoint}/accounts/login/`, fdata, {})
         const uname = await getUser()
-        if (uname) setShow(false);
+        if (uname) {setShow(false); refreshData()};
         return getUser()
     }
     const onLogout = async () => {
         await axios.post(`${endpoint}/accounts/logout/`, {}, {})
+        refreshData();
         return getUser()
+    }
+
+    const updateTodo = (todo, e) => {
+        axios.patch(`${endpoint}/api/todo/` + todo.id + "/", 
+            {...todo, completed: e.target.checked}
+        )
+            .then(() => todo.completed = !todo.completed)
+            .then(() => setTodos([...todos]))
+            .catch((e) => console.log('Cant edit todo while not logged in!'));
     }
 
     return (
         <Container fluid>
-            <CustomNavbar user={user} onLogin={() => setShow(true)} onLogout={onLogout} />
-            <LoginModal show={show} setShow={setShow} user={user} onLogin={onLogin} />
-            <TodoList user={user}/>
-            {/* <Login user={user} onUserChange={getUser} /> */}
+            <CustomNavbar theme={theme} user={user} onLogin={() => setShow(true)} onLogout={onLogout} />
+            <LoginModal theme={theme} show={show} setShow={setShow} user={user} onLogin={onLogin} />
+            <TodoList theme={theme} todos={todos} updateTodo={updateTodo}/>
         </Container>
     );
 }
 
-function LoginModal({ show, setShow, onLogin }) {
+function LoginModal({ theme, show, setShow, onLogin }) {
     const handleClose = () => setShow(false);
 
     return (
@@ -59,7 +76,7 @@ function LoginModal({ show, setShow, onLogin }) {
                 <Modal.Title>Login</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Login onLogin={onLogin} />
+                <LoginForm theme={theme} onLogin={onLogin} />
             </Modal.Body>
         </Modal>
     )

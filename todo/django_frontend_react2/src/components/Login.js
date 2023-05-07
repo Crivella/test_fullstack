@@ -1,14 +1,7 @@
-import axios from 'axios';
 import React, { useRef, useState } from 'react';
 import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
-const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
-axios.defaults.xsrfHeaderName = 'X-CSRFToken'
-axios.defaults.xsrfCookieName = 'csrftoken'
-axios.defaults.withCredentials = true
-
-
-export default function LoginForm ({ onLogin }) {
+export default function LoginForm ({ theme, onLogin }) {
     const [validated, setValidated] = useState(false);
     const [failed, setFailed] = useState(false);
 
@@ -31,7 +24,7 @@ export default function LoginForm ({ onLogin }) {
     };
     
     return (
-        <Container className="pt-3 bg-danger">
+        <Container className={`pt-3 bg-${theme}`}>
             <Alert variant="danger" show={failed}  onClose={() => setFailed(false)} dismissible>
                 Wrong username or password
             </Alert>
