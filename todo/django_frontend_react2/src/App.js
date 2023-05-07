@@ -5,23 +5,25 @@ import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import { LoginModal } from './components/Login';
 import CustomNavbar from './components/Navbar';
+import ThemeWrapper from './components/ThemeWrapper';
 import TodoList from './components/TodoList';
 
 export function App() {
     // State
-    const [theme, setTheme] = useState("light"); // ["dark", "light"
     const [show, setShow] = useState(false);
 
     return (
         <Container fluid>
-            <APIAuthWrapper>
-                <CustomNavbar theme={theme} login={() => setShow(true)} />
-                <LoginModal theme={theme} show={show} setShow={setShow} />
-                <APIListWrapper>
-                    <TodoList theme={theme}/>
-                    <div> test</div>
-                </APIListWrapper>
-            </APIAuthWrapper>
+            <ThemeWrapper>
+                <APIAuthWrapper extras={['theme']}>
+                    <CustomNavbar login={() => setShow(true)} />
+                    <LoginModal show={show} setShow={setShow} />
+                    <APIListWrapper>
+                        <TodoList/>
+                        <div> test</div>
+                    </APIListWrapper>
+                </APIAuthWrapper>
+            </ThemeWrapper>
         </Container>
     );
 }

@@ -1,4 +1,5 @@
 export default function PassPropsWrapper({ children, newProps }) {
+    Array.isArray(children) || (children = [children]);
     return (
         <>
             {children.map((e) => {

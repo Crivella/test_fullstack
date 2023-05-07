@@ -8,10 +8,12 @@ axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
 
-export default function APIListWrapper({ children, user }) {
+export default function APIListWrapper(props) {
     const [list, setList] = useState([]); // [{}
 
-    useEffect(() => {getList()}, [user]);
+    useEffect(() => {getList()}, [props.user]);
+
+    const {children, ...extras} = props;
 
     const getList = () => {
         return axios.get(`${endpoint}/`, {
@@ -46,8 +48,9 @@ export default function APIListWrapper({ children, user }) {
     };
 
     const newProps = {
+        ...extras,
         'list': list, // [{}, {}, {}]
-        'getList': getList,
+        // 'getList': getList,
         'getItem': getItem,
         'updateItem': updateItem,
         'deleteItem': deleteItem,

@@ -8,10 +8,12 @@ axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
 
-export default function APIAuthWrapper({ children }) {
+export default function APIAuthWrapper(props) {
     const [user, setUser] = useState("");
 
     useEffect(() => {updateUser()}, []);
+
+    const {children, ...extras} = props;
 
     const updateUser = () => {
         return axios.get(`${endpoint}/get-user/`, {
@@ -34,6 +36,7 @@ export default function APIAuthWrapper({ children }) {
     };
 
     const newProps = {
+        ...extras,
         'user': user,
         'login': login,
         'logout': logout,
