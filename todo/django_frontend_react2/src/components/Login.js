@@ -8,14 +8,14 @@ axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
 
-export default function Login ({user, onUserChange}) {
+export default function LoginForm ({ onLogin }) {
     const [validated, setValidated] = useState(false);
     const [failed, setFailed] = useState(false);
 
     const Username = useRef();
     const Password = useRef();
-    
-    const loginSubmit = async (e) => {
+
+    const onSubmit = (e) => {
         e.preventDefault();
         setValidated(true);
         const form = e.currentTarget;
@@ -24,43 +24,18 @@ export default function Login ({user, onUserChange}) {
         const fdata = new FormData();
         fdata.append('username', Username.current.value);
         fdata.append('password', Password.current.value);
-        await axios.post(`${endpoint}/accounts/login/`, fdata, {})
-            .then(onUserChange)
-            .then((u) => {
-                if (u) return setValidated(false);
 
-                e.target.reset();
-                setFailed(true);
-            })
-            .then(() => setValidated(false))
-            .catch((e) => console.log(e));
+        setValidated(false);
+        const user = onLogin(fdata);
+        if (!user) setFailed(true);
     };
-
-    const logoutSubmit = async (e) => {
-        console.log('logoutSubmit')
-        console.log(e)
-        e.preventDefault();
-        await axios.post(`${endpoint}/accounts/logout/`, {}, {})
-        onUserChange()
-    };
-
-    if (user) {
-        return (
-            <div>
-                <h1>Hello {user}</h1>
-                <form onSubmit={logoutSubmit}>
-                    <button type="submit">Logout</button>
-                </form>
-            </div>
-        );
-    }
     
     return (
         <Container className="pt-3 bg-danger">
             <Alert variant="danger" show={failed}  onClose={() => setFailed(false)} dismissible>
                 Wrong username or password
             </Alert>
-            <Form validated={validated} onSubmit={loginSubmit} noValidate>
+            <Form validated={validated} onSubmit={onSubmit} noValidate>
                 <Row className="g-3">
                     <Form.Group as={Col} className="col-md-4" controlId="formBasicUsername">
                         <Form.Label>Username</Form.Label>
