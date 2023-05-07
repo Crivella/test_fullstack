@@ -1,22 +1,42 @@
-import React from 'react';
-import { Container, ListGroup } from 'react-bootstrap';
+import { useState } from 'react';
+import { Alert, Button, Card, Container, ListGroup } from 'react-bootstrap';
 
-export default function TodoList({ list: todos, updateItem: updateTodo }) {
+export default function TodoList({ list, updateItem, deleteItem }) {
+    const [active, setActive] = useState(null);
+
+    const onCheck = (todo, e) => {
+        const data = {...todo, completed: e.target.checked};
+        updateItem(todo.id, data);
+    };
+
+    const onSelect = (id) => {
+        active === id ? setActive(null) : setActive(id);
+    };
+
     return (
         <Container className='py-2'>
             <ListGroup className='p-2 bg-dark text-white'>
-                    <ListGroup.Item className='list-group-item d-flex justify-content-between bg-primary text-white'>
-                        <span>Titles</span>
-                        <span>Completed</span>
-                    </ListGroup.Item>
-                    {todos.map((todo) => (
-                        // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-                        <ListGroup.Item key={todo.id} className='list-group-item d-flex justify-content-between'>
+                <ListGroup.Item className='list-group-item d-flex justify-content-between bg-primary text-white'>
+                    <span>Titles</span>
+                    <span>Completed</span>
+                </ListGroup.Item>
+                {list.map((todo) => (
+                    // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
+                    <ListGroup.Item as={Card} key={todo.id} className=''>
+                        <Card.Header className='d-flex justify-content-between text-dark'  onClick={() => onSelect(todo.id)}>
                             <span>{todo.title}</span>
-                            <input type='checkbox' checked={todo.completed} onChange={(e) => updateTodo(todo, e)}/>
-                        </ListGroup.Item>
-                    ))}
-                {/* <AddForm user={user} addTodo={addTodo} /> */}
+                            <input type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)}/>
+                        </Card.Header>
+                        <Card.Body as={Alert} show={active == todo.id} className='text-dark'>
+                            <Card.Text>{todo.description}</Card.Text>
+                            <Card.Text>{todo.private ? 'Private' : 'Public'}</Card.Text>
+                            <Container className='d-flex justify-content-between'>
+                                <Button variant='primary' size='sm'>Edit</Button>
+                                <Button variant='danger' size='sm' onClick={() => deleteItem(todo.id)}>Delete</Button>
+                            </Container>
+                        </Card.Body>
+                    </ListGroup.Item>
+                ))}
             </ListGroup>
         </Container>
     );
