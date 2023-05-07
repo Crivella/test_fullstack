@@ -19,10 +19,7 @@ export function App() {
 
   const getUser = async () => {
     await axios.get(`${endpoint}/accounts/get-user/`, {})
-      .then(({data}) => {
-        // console.log(data);
-        setUser(data.username);
-      })
+      .then(({data}) => setUser(data.username))
       .catch((err) => console.log(err));
   };
 

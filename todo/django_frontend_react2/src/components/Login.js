@@ -35,12 +35,13 @@ export default function Login ({user, onUserChange}) {
             .catch((err) => console.log(err));
 
         onUserChange()
-        if (!user) setFailed(true);
         e.target.reset();
+        setFailed(true);
         setValidated(false);
     };
 
     const logoutSubmit = async (e) => {
+        setFailed(false)
         console.log('logoutSubmit')
         console.log(e)
         e.preventDefault();
