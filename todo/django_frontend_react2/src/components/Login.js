@@ -17,31 +17,26 @@ export default function Login ({user, onUserChange}) {
     
     const loginSubmit = async (e) => {
         e.preventDefault();
-        console.log('loginSubmit')
-        console.log(e)
-
         setValidated(true);
-
-        const uname = Username.current.value
-        const pword = Password.current.value
-
-        if (!uname) return;
-        if (!pword) return;
+        const form = e.currentTarget;
+        if (form.checkValidity() === false) return;
 
         const fdata = new FormData();
-        fdata.append('username', uname);
-        fdata.append('password', pword);
+        fdata.append('username', Username.current.value);
+        fdata.append('password', Password.current.value);
         await axios.post(`${endpoint}/accounts/login/`, fdata, {})
-            .catch((err) => console.log(err));
+            .then(onUserChange)
+            .then((u) => {
+                if (u) return setValidated(false);
 
-        onUserChange()
-        e.target.reset();
-        setFailed(true);
-        setValidated(false);
+                e.target.reset();
+                setFailed(true);
+            })
+            .then(() => setValidated(false))
+            .catch((e) => console.log(e));
     };
 
     const logoutSubmit = async (e) => {
-        setFailed(false)
         console.log('logoutSubmit')
         console.log(e)
         e.preventDefault();
@@ -61,19 +56,25 @@ export default function Login ({user, onUserChange}) {
     }
     
     return (
-        <div className="container">
+        <div className="container pt-3 bg-danger">
             <Alert variant="danger" show={failed}  onClose={() => setFailed(false)} dismissible>
                 Wrong username or password
             </Alert>
-            <Form validated={validated} onSubmit={loginSubmit}>
+            <Form validated={validated} onSubmit={loginSubmit} noValidate>
                 <Row className="g-3">
                     <Form.Group as={Col} className="col-md-4" controlId="formBasicUsername">
                         <Form.Label>Username</Form.Label>
                         <Form.Control type="user" placeholder="Username" ref={Username} required />
+                        <Form.Control.Feedback type="invalid">
+                            Please provide a valid username.
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group as={Col} className="col-md-4" controlId="formBasicPassword">
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" placeholder="Password" ref={Password} required />
+                        <Form.Control.Feedback type="invalid">
+                            Please provide a valid password.
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <Button variant="primary" type="submit">
                         Submit

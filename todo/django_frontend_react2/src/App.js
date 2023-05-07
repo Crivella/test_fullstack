@@ -17,9 +17,9 @@ export function App() {
     // setUser(localStorage.getItem("user"));
   }, []);
 
-  const getUser = async () => {
-    await axios.get(`${endpoint}/accounts/get-user/`, {})
-      .then(({data}) => setUser(data.username))
+  const getUser = () => {
+    return axios.get(`${endpoint}/accounts/get-user/`, {})
+      .then(({data}) => {setUser(data.username); return data.username})
       .catch((err) => console.log(err));
   };
 
