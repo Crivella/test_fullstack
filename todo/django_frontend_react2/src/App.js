@@ -15,12 +15,11 @@ export function App() {
     return (
         <Container fluid>
             <ThemeWrapper>
-                <APIAuthWrapper extras={['theme']}>
+                <APIAuthWrapper>
                     <CustomNavbar login={() => setShow(true)} />
                     <LoginModal show={show} setShow={setShow} />
                     <APIListWrapper>
                         <TodoList/>
-                        <div> test</div>
                     </APIListWrapper>
                 </APIAuthWrapper>
             </ThemeWrapper>
