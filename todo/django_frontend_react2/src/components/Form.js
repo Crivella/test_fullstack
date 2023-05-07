@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Alert } from "react-bootstrap";
 import { InputText } from "./commons";
 
 export default function Form({ fields, onSubmit }) {
@@ -12,11 +13,19 @@ export default function Form({ fields, onSubmit }) {
         setValidated(true);
 
         const data = Object.fromEntries(fields.map((field) => [field.label, e.target.elements[field.label].value]));
-        await onSubmit(data) ? setValidated(false) : setFailed(true);
+        if (Object.values(data).some((value) => !value)) return;
+
+        e.target.reset();
+        setValidated(false);
+        const res =  await onSubmit(data) 
+        if (!res) setFailed(true);
     };
 
     return (
         <div>
+            <Alert variant="danger" show={failed}  onClose={() => setFailed(false)} dismissible>
+                Wrong username or password
+            </Alert>
             <form className={'row g-3 ' + getValidationClass()} onSubmit={handleSubmit} noValidate>
                 {fields.map((field, idx) => <InputText key={idx} label={field.label} required={field.required}/>
                     )}
@@ -24,10 +33,6 @@ export default function Form({ fields, onSubmit }) {
                     <button className='btn btn-primary' type="submit">Login</button>
                 </div>
             </form>
-            <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                Login failed!
-            </div>
         </div>
     );
 }
