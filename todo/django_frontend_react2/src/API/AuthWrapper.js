@@ -11,7 +11,7 @@ axios.defaults.withCredentials = true
 export default function APIAuthWrapper({ children }) {
     const [user, setUser] = useState("");
 
-    useEffect(() => {console.log(children); updateUser()}, []);
+    useEffect(() => {updateUser()}, []);
 
     const updateUser = () => {
         return axios.get(`${endpoint}/get-user/`, {

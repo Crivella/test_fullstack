@@ -1,8 +1,4 @@
-import { useEffect } from "react";
-
 export default function PassPropsWrapper({ children, newProps }) {
-    useEffect(() => console.log(children), []);
-    
     return (
         <>
             {children.map((e) => {
