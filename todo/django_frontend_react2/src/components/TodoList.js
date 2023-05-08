@@ -25,8 +25,8 @@ export default function TodoList({ list, updateItem, deleteItem, ...rest }) {
                 {list.map((todo) => (
                     // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
                     <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>
-                        <Card.Header className='d-flex justify-content-between' onClick={() => onSelect(todo.id)}>
-                            <span>{todo.title}</span>
+                        <Card.Header className='d-flex justify-content-between' >
+                            <span onClick={() => onSelect(todo.id)}>{todo.title}</span>
                             <input type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)}/>
                         </Card.Header>
                         <Card.Body as={Alert} show={active == todo.id} variant={themeContrast2}>
