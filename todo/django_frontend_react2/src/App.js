@@ -2,6 +2,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import React, { useState } from 'react';
 import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
+import './App.css';
 import { LoginModal } from './components/Login';
 import CustomNavbar from './components/Navbar';
 import ThemeWrapper from './components/ThemeWrapper';
