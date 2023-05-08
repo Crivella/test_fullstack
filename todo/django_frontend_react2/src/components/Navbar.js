@@ -1,31 +1,34 @@
-import { Button, Container, Nav, Navbar } from "react-bootstrap";
+import { Button, Container, Form, Nav, Navbar } from "react-bootstrap";
 
 export default function CustomNavbar(props) {
     const {user, login, logout} = props;
-    const {theme, themeContrast1, themeContrast2} = props;
+    const {theme, themeContrast1, setTheme} = props;
 
     const getLoginLogout = () => {
         if (user) {
             return (
-                <Nav>
+                <>
                     <Button className="mx-1" variant={`outline-${themeContrast1}`} >{user}</Button>
                     <Button className="mx-1" variant={`outline-${themeContrast1}`} onClick={logout}>Logout</Button>
-                </Nav>
+                </>
             );
         } else {
             return (
-                <Nav>
-                    <Button className="mx-1" variant={`outline-${themeContrast1}`} onClick={login}>Login</Button>
-                </Nav>
+                <Button className="mx-1" variant={`outline-${themeContrast1}`} onClick={login}>Login</Button>
             );
         }
     };
             
     return (
         <Navbar bg={theme} variant={theme} text={themeContrast1} sticky="top" className="border border-success">
-            <Container fluid className="justify-content-between">
-                <Navbar.Brand className={`text-${themeContrast1}`} href="#home">Todo</Navbar.Brand>
-                {getLoginLogout()}
+            <Container fluid className="d-flex justify-content-between">
+                <Nav className="d-flex">
+                    <Navbar.Brand className={`text-${themeContrast1}`} href="#home">Todo</Navbar.Brand>
+                </Nav>
+                <Form className="d-flex">
+                    <Form.Check type="switch" checked={theme === 'dark'} onChange={(e) => {e.target.checked ? setTheme('dark') : setTheme('light')}} />
+                    {getLoginLogout()}
+                </Form>
             </Container>
         </Navbar>
     );
