@@ -1,10 +1,8 @@
-import { useState } from 'react';
 import { Alert, Button, Card, Container, ListGroup } from 'react-bootstrap';
 
-export default function TodoList({ list, updateItem, deleteItem, ...rest }) {
-    const [active, setActive] = useState(null);
-
+export default function TodoList({ active, setActive, list, updateItem, deleteItem, ...rest }) {
     const {theme, themeContrast1, themeContrast2} = rest;
+    const {setShowTodo, setFormHeader, setFormAction} = rest;
 
     const onCheck = (todo, e) => {
         const data = {...todo, completed: e.target.checked};
@@ -13,6 +11,12 @@ export default function TodoList({ list, updateItem, deleteItem, ...rest }) {
 
     const onSelect = (id) => {
         active === id ? setActive(null) : setActive(id);
+    };
+
+    const onEdit = () => {
+        setShowTodo(true);
+        setFormHeader('Edit Item');
+        setFormAction('edit');
     };
 
     return (
@@ -33,7 +37,7 @@ export default function TodoList({ list, updateItem, deleteItem, ...rest }) {
                             <Card.Text>{todo.description}</Card.Text>
                             <Card.Text>{todo.private ? 'Private' : 'Public'}</Card.Text>
                             <Container className='d-flex justify-content-between'>
-                                <Button variant='primary' size='sm'>Edit</Button>
+                                <Button variant='primary' size='sm' onClick={onEdit}>Edit</Button>
                                 <Button variant='danger' size='sm' onClick={() => deleteItem(todo.id)}>Delete</Button>
                             </Container>
                         </Card.Body>
@@ -43,51 +47,3 @@ export default function TodoList({ list, updateItem, deleteItem, ...rest }) {
         </Container>
     );
 }
-
-// function AddForm({user, addTodo}) {
-//     const todoTitle = useRef();
-//     const todoDesc = useRef();
-//     const todoPriv = useRef();
-
-//     const handleSubmit = (e) => {
-//         e.preventDefault();
-//         axios.post(`${endpoint}/api/todo/`, {
-//             title: todoTitle.current.value,
-//             description: todoDesc.current.value,
-//             private: todoPriv.current.checked,
-//         }, {
-//             headers: { 'Content-Type': 'application/json' }
-//         })
-//         .then(({data}) => addTodo(data))
-//         .then(() => e.target.reset())
-//         .catch((err) => console.log(err));
-//     };
-
-//     if (user) {
-//         return (
-//             <div className='container'>
-//                 <h2>Add Todo</h2>
-//                 <form onSubmit={handleSubmit}>
-//                     <p>
-//                         <label htmlFor="Title">Title: </label>
-//                         <input type='text' ref={todoTitle} />
-//                     </p>
-//                     <p>
-//                         <label htmlFor="Description">Description: </label>
-//                         <input type='text' ref={todoDesc} />
-//                     </p>
-//                     <p>
-//                         <label htmlFor="Private">Private: </label>
-//                         <input type='checkbox' ref={todoPriv} />
-//                     </p>
-//                     <button type="submit">Submit</button>
-//                 </form>
-//             </div>
-//         );
-//     }
-//     return (
-//         <div>
-//             <h2>Must be logged in to submit</h2>
-//         </div>
-//     );
-// }

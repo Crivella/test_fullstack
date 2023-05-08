@@ -6,19 +6,23 @@ import './App.css';
 import { LoginModal } from './components/Login';
 import CustomNavbar from './components/Navbar';
 import ThemeWrapper from './components/ThemeWrapper';
+import { TodoFormModal } from './components/TodoForm';
 import TodoList from './components/TodoList';
 
 export function App() {
     // State
-    const [show, setShow] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
+    const [showTodo, setShowTodo] = useState(false);
+
 
     return (
         <ThemeWrapper theme='dark'>
             <APIAuthWrapper>
-                <CustomNavbar login={() => setShow(true)} />
-                <LoginModal show={show} setShow={setShow} />
                 <APIListWrapper>
-                    <TodoList/>
+                    <CustomNavbar setShowLogin={setShowLogin}  setShowTodo={setShowTodo}/>
+                    <LoginModal show={showLogin} setShow={setShowLogin} />
+                    <TodoFormModal show={showTodo} setShow={setShowTodo} />
+                    <TodoList setShowTodo={setShowTodo} />
                 </APIListWrapper>
             </APIAuthWrapper>
         </ThemeWrapper>
