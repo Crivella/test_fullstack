@@ -22,7 +22,7 @@ export default function ThemeWrapper(props) {
     }
 
     return (
-        <Container fluid className={`vh-100 bg-${theme}`}>
+        <Container fluid className={`vh-100 bg-${theme} overflow-auto`}>
             <PassPropsWrapper newProps={newProps}>
                 {children}
             </PassPropsWrapper>
