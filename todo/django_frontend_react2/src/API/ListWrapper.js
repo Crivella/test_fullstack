@@ -40,7 +40,7 @@ export default function APIListWrapper(props) {
 
     const deleteItem = (id) => {
         axios.delete(`${endpoint}/${id}/`, {}) 
-            .then(() => {setList(list.filter((e) => e.id !== id)); return true})
+            .then(() => {setList(list.filter((e) => e.id !== id)); setActive(null); return true})
             .catch((err) => console.log(err));
     };
 
@@ -74,6 +74,7 @@ export default function APIListWrapper(props) {
         'addItem': addItem,
         'formHeader': formHeader,
         'setFormHeader': setFormHeader,
+        'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
         'onSubmit': onSubmit,
     }

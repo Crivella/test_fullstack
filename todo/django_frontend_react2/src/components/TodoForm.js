@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
 
 
-function TodoForm({onSubmit, theme, list, active}) {
+function TodoForm({onSubmit, formAction, theme, list, active}) {
     const [validated, setValidated] = useState(false);
     const [failed, setFailed] = useState(false);
     
@@ -11,7 +11,7 @@ function TodoForm({onSubmit, theme, list, active}) {
     const priv = useRef();
 
     useEffect(() => {
-        if (!active) return;
+        if (!active || formAction === 'add') return;
         const data = list.find((item) => item.id === active);
         title.current.value = data.title;
         desc.current.value = data.description;
