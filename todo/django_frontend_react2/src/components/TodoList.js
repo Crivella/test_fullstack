@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Alert, Button, Card, Container, ListGroup } from 'react-bootstrap';
 
-export default function TodoList({ list, updateItem, deleteItem }) {
+export default function TodoList({ list, updateItem, deleteItem, ...rest }) {
     const [active, setActive] = useState(null);
+
+    const {theme, themeContrast1, themeContrast2} = rest;
 
     const onCheck = (todo, e) => {
         const data = {...todo, completed: e.target.checked};
@@ -15,19 +17,19 @@ export default function TodoList({ list, updateItem, deleteItem }) {
 
     return (
         <Container className='py-2'>
-            <ListGroup className='p-2 bg-dark text-white'>
-                <ListGroup.Item className='list-group-item d-flex justify-content-between bg-primary text-white'>
+            <ListGroup className='p-2' variant={theme}>
+                <ListGroup.Item className='list-group-item d-flex justify-content-between' variant='primary'>
                     <span>Titles</span>
                     <span>Completed</span>
                 </ListGroup.Item>
                 {list.map((todo) => (
                     // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-                    <ListGroup.Item as={Card} key={todo.id} className=''>
-                        <Card.Header className='d-flex justify-content-between text-dark'  onClick={() => onSelect(todo.id)}>
+                    <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>
+                        <Card.Header className='d-flex justify-content-between' onClick={() => onSelect(todo.id)}>
                             <span>{todo.title}</span>
                             <input type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)}/>
                         </Card.Header>
-                        <Card.Body as={Alert} show={active == todo.id} className='text-dark'>
+                        <Card.Body as={Alert} show={active == todo.id} variant={themeContrast2}>
                             <Card.Text>{todo.description}</Card.Text>
                             <Card.Text>{todo.private ? 'Private' : 'Public'}</Card.Text>
                             <Container className='d-flex justify-content-between'>

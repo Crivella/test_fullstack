@@ -1,6 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import React, { useState } from 'react';
-import { Container } from 'react-bootstrap';
 import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import { LoginModal } from './components/Login';
@@ -13,16 +12,14 @@ export function App() {
     const [show, setShow] = useState(false);
 
     return (
-        <Container fluid>
-            <ThemeWrapper>
-                <APIAuthWrapper>
-                    <CustomNavbar login={() => setShow(true)} />
-                    <LoginModal show={show} setShow={setShow} />
-                    <APIListWrapper>
-                        <TodoList/>
-                    </APIListWrapper>
-                </APIAuthWrapper>
-            </ThemeWrapper>
-        </Container>
+        <ThemeWrapper theme='dark'>
+            <APIAuthWrapper>
+                <CustomNavbar login={() => setShow(true)} />
+                <LoginModal show={show} setShow={setShow} />
+                <APIListWrapper>
+                    <TodoList/>
+                </APIListWrapper>
+            </APIAuthWrapper>
+        </ThemeWrapper>
     );
 }

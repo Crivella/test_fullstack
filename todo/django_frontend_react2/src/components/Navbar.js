@@ -1,27 +1,30 @@
 import { Button, Container, Nav, Navbar } from "react-bootstrap";
 
-export default function CustomNavbar({ user, login, logout }) {
+export default function CustomNavbar(props) {
+    const {user, login, logout} = props;
+    const {theme, themeContrast1, themeContrast2} = props;
+
     const getLoginLogout = () => {
         if (user) {
             return (
                 <Nav>
-                    <Button className="mx-1" variant="outline-light" >{user}</Button>
-                    <Button className="mx-1" variant="outline-light" onClick={logout}>Logout</Button>
+                    <Button className="mx-1" variant={`outline-${themeContrast1}`} >{user}</Button>
+                    <Button className="mx-1" variant={`outline-${themeContrast1}`} onClick={logout}>Logout</Button>
                 </Nav>
             );
         } else {
             return (
                 <Nav>
-                    <Button className="mx-1" variant="outline-light" onClick={login}>Login</Button>
+                    <Button className="mx-1" variant={`outline-${themeContrast1}`} onClick={login}>Login</Button>
                 </Nav>
             );
         }
     };
             
     return (
-        <Navbar bg="dark" variant="dark" sticky="top">
+        <Navbar bg={theme} variant={theme} text={themeContrast1} sticky="top" className="border border-success">
             <Container fluid className="justify-content-between">
-                <Navbar.Brand href="#home">Todo</Navbar.Brand>
+                <Navbar.Brand className={`text-${themeContrast1}`} href="#home">Todo</Navbar.Brand>
                 {getLoginLogout()}
             </Container>
         </Navbar>
