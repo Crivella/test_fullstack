@@ -53,7 +53,9 @@ export default function LoginForm ({ theme, login }) {
     );
 }
 
-export function LoginModal({ theme, show, setShow, login }) {
+export function LoginModal({  show, setShow, login, ...rest }) {
+    const {theme, themeContrast1, themeContrast2} = rest;
+    
     const onLogin = (fdata) => {
         const user = login(fdata);
         setShow(!user);
@@ -62,12 +64,14 @@ export function LoginModal({ theme, show, setShow, login }) {
 
     return (
         <Modal show={show} onHide={() => setShow(false)}>
-            <Modal.Header closeButton>
-                <Modal.Title>Login</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <LoginForm theme={theme} login={onLogin} />
-            </Modal.Body>
+            <Container fluid className={`bg-${theme} text-${themeContrast1}`}>
+                <Modal.Header  closeButton>
+                    <Modal.Title>Login</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <LoginForm theme={theme} login={onLogin} />
+                </Modal.Body>
+            </Container>
         </Modal>
     )
 }
