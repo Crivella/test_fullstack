@@ -2,7 +2,7 @@ import { Alert, Button, Card, Container, ListGroup } from 'react-bootstrap';
 
 export default function TodoList({ active, setActive, list, updateItem, deleteItem, ...rest }) {
     const {theme, themeContrast1, themeContrast2} = rest;
-    const {setShowTodo, setFormHeader, setFormAction} = rest;
+    const {setShowTodo, setShowDelete, setFormHeader, setFormAction} = rest;
 
     const onCheck = (todo, e) => {
         const data = {...todo, completed: e.target.checked};
@@ -18,6 +18,11 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
         setFormHeader('Edit Item');
         setFormAction('edit');
     };
+
+    const onDelete = () => {
+        setShowDelete(true);
+        setFormAction('delete');
+    };      
 
     return (
         <Container className='py-2'>
@@ -38,7 +43,7 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
                             <Card.Text>{todo.private ? 'Private' : 'Public'}</Card.Text>
                             <Container className='d-flex justify-content-between'>
                                 <Button variant='primary' size='sm' onClick={onEdit}>Edit</Button>
-                                <Button variant='danger' size='sm' onClick={() => deleteItem(todo.id)}>Delete</Button>
+                                <Button variant='danger' size='sm' onClick={onDelete}>Delete</Button>
                             </Container>
                         </Card.Body>
                     </ListGroup.Item>

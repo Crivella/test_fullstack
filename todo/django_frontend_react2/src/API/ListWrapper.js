@@ -39,8 +39,10 @@ export default function APIListWrapper(props) {
     };
 
     const deleteItem = (id) => {
-        axios.delete(`${endpoint}/${id}/`, {}) 
-            .then(() => {setList(list.filter((e) => e.id !== id)); setActive(null); return true})
+        return axios.delete(`${endpoint}/${id}/`, {}) 
+            .then(() => setList(list.filter((e) => e.id !== id)))
+            .then(() => setActive(null))
+            .then(() => id)
             .catch((err) => console.log(err));
     };
 
@@ -56,7 +58,9 @@ export default function APIListWrapper(props) {
                 return addItem(data);
             case 'edit':
                 return updateItem(data.id, data);
-    
+            case 'delete':
+                const id = data.id || data;
+                return deleteItem(id);
             default:
                 throw new Error('Invalid form action');
         }
