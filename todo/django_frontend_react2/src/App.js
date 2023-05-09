@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
-import { LoginModal } from './components/Login';
+import { LoginModal, TodoFormModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
 import ThemeWrapper from './components/ThemeWrapper';
-import { TodoFormModal } from './components/TodoForm';
 import TodoList from './components/TodoList';
 
 export function App() {

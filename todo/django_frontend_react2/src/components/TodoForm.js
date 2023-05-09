@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
 
-function TodoForm({onSubmit, formAction, theme, list, active}) {
+export function TodoForm({onSubmit, formAction, theme, list, active}) {
     const [validated, setValidated] = useState(false);
     const [failed, setFailed] = useState(false);
     
@@ -71,27 +71,4 @@ function TodoForm({onSubmit, formAction, theme, list, active}) {
             </Form>
         </Container>
     );
-}
-
-export function TodoFormModal({show, setShow, formHeader, onSubmit, ...rest}) {
-    const {theme, themeContrast1, themeContrast2} = rest;
-
-    const handleSubmit = async (fdata) => {
-        const res = await onSubmit(fdata);
-        console.log('TODOFORMMODAL');
-        console.log(res);
-        setShow(!res);
-    }
-    return (
-        <Modal show={show} onHide={() => setShow(false)}>
-             <Container fluid className={`bg-${theme} text-${themeContrast1}`}>
-                <Modal.Header>
-                    <Modal.Title>{formHeader}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <TodoForm onSubmit={handleSubmit} {...rest}/>
-                </Modal.Body>
-             </Container>
-        </Modal>
-    )
 }

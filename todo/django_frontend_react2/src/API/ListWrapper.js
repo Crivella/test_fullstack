@@ -76,7 +76,7 @@ export default function APIListWrapper(props) {
         'setFormHeader': setFormHeader,
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
-        'onSubmit': onSubmit,
+        'todoAction': onSubmit,
     }
 
     return (

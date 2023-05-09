@@ -10,8 +10,6 @@ export function ModalFormWrapper({ children, show, setShow, onSubmit, header, ..
         const res = onSubmit(fdata);
         setShow(!res);
     };
-
-    Array.isArray(children) || (children = [children]);
     
     const newProps = {
         ...rest,

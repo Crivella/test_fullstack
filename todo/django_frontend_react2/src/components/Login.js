@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
-import { ModalFormWrapper } from '../commons/ModalWrapper';
 
 export default function LoginForm ({ theme, login }) {
     const [validated, setValidated] = useState(false);
@@ -9,7 +8,7 @@ export default function LoginForm ({ theme, login }) {
     const Username = useRef();
     const Password = useRef();
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
         setValidated(true);
         const form = e.currentTarget;
@@ -20,7 +19,7 @@ export default function LoginForm ({ theme, login }) {
         fdata.append('password', Password.current.value);
 
         setValidated(false);
-        const user = login(fdata);
+        const user = await login(fdata);
         if (!user) setFailed(true);
     };
     
@@ -54,18 +53,3 @@ export default function LoginForm ({ theme, login }) {
     );
 }
 
-export function LoginModal({  ...rest }) {
-    const {theme, themeContrast1, themeContrast2} = rest;
-    const {setShow, onSubmit: login } = rest;
-    
-    const onLogin = (fdata) => {
-        const user = login(fdata);
-        setShow(!user);
-    };
-
-    return (
-        <ModalFormWrapper header="Login" {...rest}>
-            <LoginForm theme={theme} login={onLogin} />
-        </ModalFormWrapper>
-    )
-}
