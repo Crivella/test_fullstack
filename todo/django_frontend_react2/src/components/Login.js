@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Alert, Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
+import { ModalFormWrapper } from '../commons/ModalWrapper';
 
 export default function LoginForm ({ theme, login }) {
     const [validated, setValidated] = useState(false);
@@ -53,25 +54,18 @@ export default function LoginForm ({ theme, login }) {
     );
 }
 
-export function LoginModal({  show, setShow, login, ...rest }) {
+export function LoginModal({  ...rest }) {
     const {theme, themeContrast1, themeContrast2} = rest;
+    const {setShow, onSubmit: login } = rest;
     
     const onLogin = (fdata) => {
         const user = login(fdata);
         setShow(!user);
     };
 
-
     return (
-        <Modal show={show} onHide={() => setShow(false)}>
-            <Container fluid className={`bg-${theme} text-${themeContrast1}`}>
-                <Modal.Header  closeButton>
-                    <Modal.Title>Login</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <LoginForm theme={theme} login={onLogin} />
-                </Modal.Body>
-            </Container>
-        </Modal>
+        <ModalFormWrapper header="Login" {...rest}>
+            <LoginForm theme={theme} login={onLogin} />
+        </ModalFormWrapper>
     )
 }
