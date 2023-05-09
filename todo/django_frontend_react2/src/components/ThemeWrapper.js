@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Container } from "react-bootstrap";
-import PassPropsWrapper from "./Wrapper";
+import PassPropsWrapper from "../commons/Wrapper";
 
 export default function ThemeWrapper(props) {
     const {children, theme: _theme, ...extras} = props;

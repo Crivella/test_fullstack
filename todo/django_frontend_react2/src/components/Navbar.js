@@ -28,7 +28,7 @@ export default function CustomNavbar(props) {
     };
 
     return (
-        <Navbar bg={theme === 'dark' ? 'black' : 'white'} variant={theme} text={themeContrast1} sticky="top" className={`border border-success`}>
+        <Navbar bg={theme === 'dark' ? 'black' : 'secondary'} variant={theme} text={themeContrast1} sticky="top" className={`border border-success`}>
             <Container fluid className="d-flex justify-content-between">
                 <Nav className="d-flex">
                     <Navbar.Brand className={`text-${themeContrast1}`} href="#home">Todo</Navbar.Brand>

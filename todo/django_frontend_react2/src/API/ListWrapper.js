@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import PassPropsWrapper from '../components/Wrapper';
+import PassPropsWrapper from '../commons/Wrapper';
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
