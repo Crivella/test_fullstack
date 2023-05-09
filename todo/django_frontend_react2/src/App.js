@@ -18,11 +18,11 @@ export function App() {
     return (
         <ThemeWrapper theme='dark'>
             <APIAuthWrapper>
+                <LoginModal show={showLogin} setShow={setShowLogin} />
                 <APIListWrapper>
-                    <CustomNavbar setShowLogin={setShowLogin}  setShowTodo={setShowTodo}/>
-                    <LoginModal show={showLogin} setShow={setShowLogin} />
                     <AddEditModal show={showTodo} setShow={setShowTodo} />
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
+                    <CustomNavbar setShowLogin={setShowLogin}  setShowTodo={setShowTodo}/>
                     <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
                 </APIListWrapper>
             </APIAuthWrapper>
