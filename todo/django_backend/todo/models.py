@@ -6,6 +6,8 @@ class TodoItem(models.Model):
     description = models.TextField(null=True, blank=True)
     completed = models.BooleanField(default=False)
 
+    priority = models.IntegerField(null=False, blank=False, default=1)
+
     private = models.BooleanField(default=False)
 
     owner = models.ForeignKey('auth.User', related_name='todo_items', on_delete=models.CASCADE)

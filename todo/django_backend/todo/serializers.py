@@ -6,6 +6,7 @@ from .models import TodoItem
 
 class TodoSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+    priority = serializers.IntegerField(required=False)
 
     class Meta:
         model = TodoItem

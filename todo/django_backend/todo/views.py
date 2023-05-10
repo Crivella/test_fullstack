@@ -29,7 +29,7 @@ class IndexView(generic.ListView):
 
 class TodoView(viewsets.ModelViewSet):
     serializer_class = TodoSerializer
-    queryset = TodoItem.objects.all()
+    queryset = TodoItem.objects.order_by('-priority')
 
     permission_classes = [IsOwnerOrReadOnly, permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend]
@@ -45,7 +45,12 @@ class TodoView(viewsets.ModelViewSet):
         return q.filter(Q(private=False) | Q(owner=self.request.user.id))
     
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        maxprio = TodoItem.objects.order_by('-priority').first().priority
+        if 'priority' in serializer.validated_data:
+            priority = serializer.validated_data['priority']
+        else:
+            priority = maxprio + 1
+        serializer.save(owner=self.request.user, priority=priority)
 
 class UserView(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
