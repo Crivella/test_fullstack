@@ -20,10 +20,10 @@ export function App() {
         <ThemeWrapper theme='dark'>
             <APIAuthWrapper>
                 <LoginModal show={showLogin} setShow={setShowLogin} />
+                <CustomNavbar setShowLogin={setShowLogin}  setShowTodo={setShowTodo}/>
                 <APIListWrapper>
                     <AddEditModal show={showTodo} setShow={setShowTodo} />
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
-                    <CustomNavbar setShowLogin={setShowLogin}  setShowTodo={setShowTodo}/>
                     <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
                     <AddButton setShow={setShowTodo} />
                 </APIListWrapper>
