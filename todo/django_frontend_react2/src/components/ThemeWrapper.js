@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import PassPropsWrapper from "../commons/Wrapper";
 
@@ -7,18 +7,25 @@ export default function ThemeWrapper(props) {
     const [theme, setTheme] = useState(_theme || "dark"); 
     // const [textTheme, setTheme] = useState(_theme || "dark"); 
 
+    useEffect(() => {
+        setTheme(localStorage.getItem('theme') || "dark");
+    }, []);
+
 
     const themeContrast1 = (theme === "light" ? "dark" : "light");
     const themeContrast2 = (theme === "primary" ? "white" : "primary");
-    // const themeText = theme === "dark" ? "light" : "dark";
-    // const themeContrastText = theme;
+    
+    const _setTheme = (theme) => {
+        localStorage.setItem('theme', theme);
+        setTheme(theme);
+    }
 
     const newProps = {
         ...extras,
         'theme': theme,
         'themeContrast1': themeContrast1,
         'themeContrast2': themeContrast2,
-        'setTheme': setTheme,
+        'setTheme': _setTheme,
     }
 
     return (
