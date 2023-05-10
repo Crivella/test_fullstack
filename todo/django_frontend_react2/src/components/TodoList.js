@@ -2,7 +2,7 @@ import { Alert, Button, Card, Container, ListGroup } from 'react-bootstrap';
 
 export default function TodoList({ active, setActive, list, updateItem, deleteItem, ...rest }) {
     const {theme, themeContrast1, themeContrast2} = rest;
-    const {setShowTodo, setShowDelete, setFormHeader, setFormAction} = rest;
+    const {setShowTodo, setShowDelete, setFormAction} = rest;
 
     const onCheck = (todo, e) => {
         const data = {...todo, completed: e.target.checked};
@@ -14,14 +14,13 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
     };
 
     const onEdit = () => {
-        setShowTodo(true);
-        setFormHeader('Edit Item');
         setFormAction('edit');
+        setShowTodo(true);
     };
 
     const onDelete = () => {
-        setShowDelete(true);
         setFormAction('delete');
+        setShowDelete(true);
     };      
 
     return (

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
+import { AddButton } from './components/AddButton';
 import { AddEditModal, DeleteModal, LoginModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
 import ThemeWrapper from './components/ThemeWrapper';
@@ -24,6 +25,7 @@ export function App() {
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
                     <CustomNavbar setShowLogin={setShowLogin}  setShowTodo={setShowTodo}/>
                     <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
+                    <AddButton setShow={setShowTodo} />
                 </APIListWrapper>
             </APIAuthWrapper>
         </ThemeWrapper>

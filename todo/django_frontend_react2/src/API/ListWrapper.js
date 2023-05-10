@@ -12,7 +12,7 @@ export default function APIListWrapper(props) {
     const [active, setActive] = useState(null);
     const [list, setList] = useState([]); // [{}
     const [formHeader, setFormHeader] = useState('Add Item'); 
-    const [formAction, setFormAction] = useState('add');
+    const [formAction, _setFormAction] = useState('add');
 
     useEffect(() => {getList()}, [props.user]);
 
@@ -52,12 +52,20 @@ export default function APIListWrapper(props) {
             .catch((err) => console.log(err));
     };
 
+    const setFormAction = (action) => {
+        _setFormAction(action);
+        switch (action) {
+            case 'add': return setFormHeader('Add Item');
+            case 'edit': return setFormHeader('Edit Item');
+            case 'delete': return setFormHeader('Delete Item');
+            default: throw new Error('Invalid form action');
+        }
+    };
+
     const onSubmit = (data) => {
         switch (formAction) {
-            case 'add':
-                return addItem(data);
-            case 'edit':
-                return updateItem(data.id, data);
+            case 'add': return addItem(data);
+            case 'edit': return updateItem(data.id, data);
             case 'delete':
                 const id = data.id || data;
                 return deleteItem(id);
@@ -77,7 +85,6 @@ export default function APIListWrapper(props) {
         'deleteItem': deleteItem,
         'addItem': addItem,
         'formHeader': formHeader,
-        'setFormHeader': setFormHeader,
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
         'todoAction': onSubmit,
