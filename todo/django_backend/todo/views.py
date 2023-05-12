@@ -29,7 +29,7 @@ class IndexView(generic.ListView):
 
 class TodoView(viewsets.ModelViewSet):
     serializer_class = TodoSerializer
-    queryset = TodoItem.objects.order_by('-priority')
+    queryset = TodoItem.objects.all()
 
     permission_classes = [IsOwnerOrReadOnly, permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend]

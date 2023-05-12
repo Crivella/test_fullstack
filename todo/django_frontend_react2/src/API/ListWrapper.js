@@ -10,18 +10,36 @@ axios.defaults.withCredentials = true
 
 export default function APIListWrapper(props) {
     const [active, setActive] = useState(null);
-    const [list, setList] = useState([]); // [{}
+    const [list, _setList] = useState([]); // [{}
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, _setFormAction] = useState('add');
+    const sortingDefault = [(a, b) => b.priority - a.priority, ];
+    const [sorting, _setSorting] = useState([])
 
     useEffect(() => {getList()}, [props.user]);
 
     const {children, ...rest} = props;
 
+    const setSorting = (lst) => {
+        _setSorting(lst);
+        setList(lst);
+    };
+
+    const setList = (lst) => {
+        _setList(applyOrdering(lst));
+    };
+
+    const applyOrdering = (lst) => {
+        const slist = sorting.length ? sorting : sortingDefault;
+        slist.reverse().forEach((e) => lst.sort(e));
+        return lst;
+    };
+
     const getList = () => {
         return axios.get(`${endpoint}/`, {
             headers: { 'Content-Type': 'application/json' }
         })
+        // .then((data) => data.sort((a, b) => b.priority - a.priority))
         .then(({data}) => {setList(data); return data})
         .catch((err) => console.log(err));
     };
@@ -29,10 +47,10 @@ export default function APIListWrapper(props) {
     const getItem = (id) => {
         return axios.get(`${endpoint}/${id}/`, {
             headers: { 'Content-Type': 'application/json' }
-        }).then(({data}) => {return data});
+        }).then(({data}) => data);
     };
 
-    const updateItem = (id, data) => {
+    const updateItem =(id, data) => {
         return axios.patch(`${endpoint}/${id}/`, data, {})
             .then(({data}) => {setList(list.map((e) => e.id === id ? data : e)); return data})
             .catch((err) => console.log(err));

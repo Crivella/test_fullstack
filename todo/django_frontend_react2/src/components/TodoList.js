@@ -5,8 +5,13 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
     const {setShowTodo, setShowDelete, setFormAction} = rest;
 
     const onCheck = (todo, e) => {
+        if (isNaN(e.currentTarget.value)) return false;
         const data = {...todo, completed: e.target.checked};
-        updateItem(todo.id, data);
+        return updateItem(todo.id, data);
+    };
+    const onPriority = (todo, e) => {
+        const data = {...todo, priority: e.currentTarget.value};
+        return updateItem(todo.id, data);
     };
 
     const onSelect = (id) => {
@@ -21,7 +26,8 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
     const onDelete = () => {
         setFormAction('delete');
         setShowDelete(true);
-    };      
+    };
+
 
     return (
         <Container className='py-2'>
@@ -32,11 +38,11 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
                 </ListGroup.Item>
                 {list.map((todo) => (
                     // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-                    <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>
+                    <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} active={todo.id === active} className='mt-1'>
                         <Card.Header as={Form} className='d-flex justify-content-between' >
                             <Form.Group as={Row} className='d-flex flex-grow-1' >
                                 <Col sm={3} md={2}>
-                                    <Form.Control type='number' value={todo.priority} />
+                                    <Form.Control type='number' value={todo.priority} onChange={(e) => onPriority(todo, e)} />
                                 </Col>
                                 <Form.Label as={Col} sm={9} md={10} onClick={() => onSelect(todo.id)}> {todo.title}</Form.Label>
                             </Form.Group>
