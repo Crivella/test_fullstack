@@ -37,9 +37,6 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
             <ListGroup.Item key={-1} className='d-flex justify-content-between' variant='primary'>
                 {Headers.map((head) => <FSHeader head={head} {...rest}/>)}
             </ListGroup.Item>
-            <ListGroup.Item key={-2} className='d-flex justify-content-between' variant='primary'>
-               <Button onClick={() => console.log(sorting)}>TEST</Button>
-            </ListGroup.Item>
             {list.map((todo) => (
                 // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
                 <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>

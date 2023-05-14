@@ -19,8 +19,6 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
 
     // Sorting change hook
     useEffect(() => {
-        // console.log('SORTING HOOK');
-        // console.log(sorting);
         localStorage.setItem('sorting', JSON.stringify([...sorting.entries()]));
         const res = [...raw];
         let sorters = Array.from(sorting.entries()).filter(([k,v]) => v !== 0).map(([k, v]) => (a,b) => {
@@ -32,7 +30,6 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
         });
         // If no active sorters, default to id
         if (sorters.length === 0) sorters = [(a,b) => a.id - b.id];
-        // console.log(sorters);
 
         sorters.reverse().forEach((f) => res.sort(f));
         setList(res);
@@ -55,11 +52,9 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
     )
 }
 
-export function FSHeader({head, sorting, setSorting, filters, setFIlters, keyMap, ...rest}) {
+export function FSHeader({head, sorting, setSorting, filters, setFilters, keyMap, ...rest}) {
     const [arrow, setArrow] = useState('')
     const [sortIdx, setSortIdx] = useState('')
-
-
 
     useEffect(() => {
         // Set sorting arrow symbol
@@ -103,8 +98,6 @@ export function FSHeader({head, sorting, setSorting, filters, setFIlters, keyMap
         res.delete(head)
         res.set(head, (app + 2)%3 - 1);
         setSorting(res);
-        console.log(res);
-        // setSorting({...sorting, ...app});
     };
 
     return (

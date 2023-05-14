@@ -39,13 +39,11 @@ export default function ThemeWrapper(props) {
         const res = new Map(keyMap);
         res.set(e.key, 1);
         setKeyMap(res);
-        console.log(res);
     };
     const onKeyUp = (e) => {
         const res = new Map(keyMap);
         res.delete(e.key);
         setKeyMap(res);
-        console.log(res);
     };
 
     return (
