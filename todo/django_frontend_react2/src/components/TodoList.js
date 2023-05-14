@@ -1,4 +1,5 @@
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
+import { FSHeader } from './FilterSortWrapper';
 import './TodoList.css';
 
 export default function TodoList({ active, setActive, list, updateItem, deleteItem, ...rest }) {
@@ -52,9 +53,7 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
     return (
         <ListGroup className='p-2 list-container' variant={theme}>
             <ListGroup.Item key={-1} className='d-flex justify-content-between' variant='primary'>
-                {Headers.map((head) => {return (
-                    <span onClick={() => onSort(head)}>{arrows[sorting.get(head) | 0]}{head}</span> 
-                )})}
+                {Headers.map((head) => <FSHeader head={head} {...rest}/>)}
             </ListGroup.Item>
             <ListGroup.Item key={-2} className='d-flex justify-content-between' variant='primary'>
                <Button onClick={() => console.log(sorting)}>TEST</Button>
@@ -84,20 +83,3 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
         </ListGroup>
     );
 }
-
-// function SortHeader ({children, onReset, ...rest}) {
-//     const [state, setState] = useState(0);
-
-//     useEffect(() => {
-
-
-//     const onSort = () => {
-//         setState((state + 1) % 3);
-//     };
-
-    
-    
-//     return (
-//         <span onClick={onSort}>{children}</span>
-//     )
-// }
