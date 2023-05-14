@@ -10,7 +10,6 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
     const Headers = ['priority', 'title', 'completed'];
 
     const onCheck = (todo, e) => {
-        if (isNaN(e.currentTarget.value)) return false;
         const data = {...todo, completed: e.target.checked};
         return updateItem(todo.id, data);
     };
@@ -32,23 +31,6 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
         setFormAction('delete');
         setShowDelete(true);
     };
-
-    // 0 - no sort, 1 - asc, 2 - desc
-    const onSort = (head) => {
-        const res = new Map(sorting)
-        const app = res.get(head) | 0;
-        res.delete(head)
-        res.set(head, (app + 2)%3 - 1);
-        setSorting(res);
-        // setSorting({...sorting, ...app});
-    };
-
-     const arrows = {
-        '-1': '↓ ',
-        0: '',
-        1: '↑ ',
-     }
-
 
     return (
         <ListGroup className='p-2 list-container' variant={theme}>
