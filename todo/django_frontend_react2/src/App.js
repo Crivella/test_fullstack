@@ -4,6 +4,7 @@ import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
 import { AddButton } from './components/AddButton';
+import FilterSortWrapper from './components/FilterSortWrapper';
 import { AddEditModal, DeleteModal, LoginModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
 import ThemeWrapper from './components/ThemeWrapper';
@@ -24,7 +25,9 @@ export function App() {
                 <APIListWrapper>
                     <AddEditModal show={showTodo} setShow={setShowTodo} />
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
-                    <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
+                    <FilterSortWrapper>
+                        <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
+                    </FilterSortWrapper>
                     <AddButton setShow={setShowTodo} />
                 </APIListWrapper>
             </APIAuthWrapper>

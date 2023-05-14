@@ -10,30 +10,14 @@ axios.defaults.withCredentials = true
 
 export default function APIListWrapper(props) {
     const [active, setActive] = useState(null);
-    const [list, _setList] = useState([]); // [{}
+    const [list, setList] = useState([]); // [{}
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, _setFormAction] = useState('add');
-    const sortingDefault = [(a, b) => b.priority - a.priority, ];
-    const [sorting, _setSorting] = useState([])
+    const [sorting, setSorting] = useState({})
 
     useEffect(() => {getList()}, [props.user]);
 
     const {children, ...rest} = props;
-
-    const setSorting = (lst) => {
-        _setSorting(lst);
-        setList(lst);
-    };
-
-    const setList = (lst) => {
-        _setList(applyOrdering(lst));
-    };
-
-    const applyOrdering = (lst) => {
-        const slist = sorting.length ? sorting : sortingDefault;
-        slist.reverse().forEach((e) => lst.sort(e));
-        return lst;
-    };
 
     const getList = () => {
         return axios.get(`${endpoint}/`, {
@@ -95,6 +79,7 @@ export default function APIListWrapper(props) {
     const newProps = {
         ...rest,
         'list': list, // [{}, {}, {}]
+        // 'setList': setList,
         'active': active,
         'setActive': setActive,
         // 'getList': getList,

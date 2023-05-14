@@ -4,6 +4,9 @@ import './TodoList.css';
 export default function TodoList({ active, setActive, list, updateItem, deleteItem, ...rest }) {
     const {theme, themeContrast1, themeContrast2} = rest;
     const {setShowTodo, setShowDelete, setFormAction} = rest;
+    const {sorting, setSorting} = rest;
+
+    const Headers = ['priority', 'title', 'completed'];
 
     const onCheck = (todo, e) => {
         if (isNaN(e.currentTarget.value)) return false;
@@ -29,16 +32,36 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
         setShowDelete(true);
     };
 
+    // 0 - no sort, 1 - asc, 2 - desc
+    const onSort = (head) => {
+        const res = new Map(sorting)
+        const app = res.get(head) | 0;
+        res.delete(head)
+        res.set(head, (app + 2)%3 - 1);
+        setSorting(res);
+        // setSorting({...sorting, ...app});
+    };
+
+     const arrows = {
+        '-1': '↓ ',
+        0: '',
+        1: '↑ ',
+     }
+
 
     return (
         <ListGroup className='p-2 list-container' variant={theme}>
-            <ListGroup.Item action className='d-flex justify-content-between' variant='primary'>
-                <span>Titles</span>
-                <span>Completed</span>
+            <ListGroup.Item key={-1} className='d-flex justify-content-between' variant='primary'>
+                {Headers.map((head) => {return (
+                    <span onClick={() => onSort(head)}>{arrows[sorting.get(head) | 0]}{head}</span> 
+                )})}
+            </ListGroup.Item>
+            <ListGroup.Item key={-2} className='d-flex justify-content-between' variant='primary'>
+               <Button onClick={() => console.log(sorting)}>TEST</Button>
             </ListGroup.Item>
             {list.map((todo) => (
                 // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-                <ListGroup.Item action as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>
+                <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>
                     <Card.Header as={Form} className='d-flex justify-content-between' >
                         <Form.Group as={Row} className='d-flex flex-grow-1' >
                             <Col sm={3} md={2}>
@@ -61,3 +84,20 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
         </ListGroup>
     );
 }
+
+// function SortHeader ({children, onReset, ...rest}) {
+//     const [state, setState] = useState(0);
+
+//     useEffect(() => {
+
+
+//     const onSort = () => {
+//         setState((state + 1) % 3);
+//     };
+
+    
+    
+//     return (
+//         <span onClick={onSort}>{children}</span>
+//     )
+// }
