@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
+import { Col } from 'react-bootstrap';
 import PassPropsWrapper from "../commons/Wrapper";
+
 
 const arrows = {
     '-1': '↓',
     0: '',
     1: '↑',
-    }
+    };
+
+const filterSymbol = '⧩';
 
 export default function FilterSortWrapper({children, list: raw, ...rest}) {
     const [list, setList] = useState(raw);
@@ -101,6 +105,16 @@ export function FSHeader({head, sorting, setSorting, filters, setFilters, keyMap
     };
 
     return (
-        <span onClick={() => onSort(head)}>{arrow}{sortIdx}{head}</span> 
+
+        <Col onClick={() => onSort(head)} className="d-flex justify-content-between flex-grow-1" {...rest}>
+            <span>{arrow}{sortIdx}{head}</span>
+            <FilterComponent />
+        </Col> 
+    )
+}
+
+export function FilterComponent({...rest}) {
+    return (
+        <span className="mx-4">{filterSymbol}</span>
     )
 }
