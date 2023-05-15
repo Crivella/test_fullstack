@@ -48,10 +48,8 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
                                 <Form.Control type='number' value={todo.priority} onChange={(e) => onPriority(todo, e)} />
                             </Col>
                             <Form.Label as={Col} {...ColLayout[1]} onClick={() => onSelect(todo.id)}> {todo.title}</Form.Label>
-                            <Col {...ColLayout[2]}>
-                                <Form.Check as={Col} type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)}/>
-                            </Col>
                         </Form.Group>
+                        <input style={{width: '2rem'}} type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)}/>
                     </Card.Header>
                     <Card.Body as={Alert} show={active == todo.id} variant={themeContrast2}>
                         <Card.Text>{todo.description}</Card.Text>
