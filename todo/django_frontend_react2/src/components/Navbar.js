@@ -1,4 +1,4 @@
-import { Button, Container, Form, Nav, Navbar } from "react-bootstrap";
+import { Button, Container, Dropdown, DropdownButton, Form, Nav, Navbar } from "react-bootstrap";
 
 export default function CustomNavbar(props) {
     const {user, logout} = props;
@@ -8,10 +8,13 @@ export default function CustomNavbar(props) {
     const getLoginLogout = () => {
         if (user) {
             return (
-                <>
-                    <Button className="mx-1" variant={`outline-${themeContrast1}`} >{user}</Button>
-                    <Button className="mx-1" variant={`outline-${themeContrast1}`} onClick={logout}>Logout</Button>
-                </>
+                <DropdownButton className="mx-1" id="navbar-dropdown" title={user} variant={theme}>
+                    <Dropdown.Menu variant={theme}>
+                        <Dropdown.Item variant={theme}>Edit Profile</Dropdown.Item>
+                        <Dropdown.Divider />
+                        <Dropdown.Item onClick={logout}>Logout</Dropdown.Item>
+                    </Dropdown.Menu>
+                </DropdownButton>
             );
         } else {
             return (
