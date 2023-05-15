@@ -105,9 +105,8 @@ export function FSHeader({head, sorting, setSorting, filters, setFilters, keyMap
     };
 
     return (
-
-        <Col onClick={() => onSort(head)} className="d-flex justify-content-between flex-grow-1" {...rest}>
-            <span>{arrow}{sortIdx}{head}</span>
+        <Col className="d-flex justify-content-between flex-grow-1" {...layout}>
+            <span onClick={() => onSort(head)}>{arrow}{sortIdx}{head}</span>
             <FilterComponent />
         </Col> 
     )
