@@ -1,7 +1,4 @@
 .round-button {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
     text-align: center;
     /* width: 149px;
     height: 149px; */
@@ -16,4 +13,16 @@
     font-weight: bold;
     text-decoration: none;
     opacity: 0.8;
+  }
+
+.pos-br {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+.pos-tr {
+    position: absolute;
+    top: 5rem;
+    right: 1rem;
   }

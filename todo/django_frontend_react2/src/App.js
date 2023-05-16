@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
-import { AddButton } from './components/AddButton';
+import { AddButton, OrderFilterResetButton } from './components/ExtraButtons';
 import FilterSortWrapper from './components/FilterSortWrapper';
 import { AddEditModal, DeleteModal, LoginModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
@@ -27,6 +27,7 @@ export function App() {
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
                     <FilterSortWrapper>
                         <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
+                        <OrderFilterResetButton />
                     </FilterSortWrapper>
                     <AddButton setShow={setShowTodo} />
                 </APIListWrapper>

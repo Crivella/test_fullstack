@@ -16,7 +16,7 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
     const [filters, setFilters] = useState(new Map(JSON.parse(localStorage.getItem('filters'))));
     const [sorting, setSorting] = useState(new Map(JSON.parse(localStorage.getItem('sorting'))));
 
-    // Sorting/Filters change hook
+    // Sorting/Filters change hook (merged togheter to avoid infinite loop)
     useEffect(() => {
         localStorage.setItem('filters', JSON.stringify([...filters.entries()]));
         localStorage.setItem('sorting', JSON.stringify([...sorting.entries()]));
@@ -35,9 +35,6 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
         sorters.reverse().forEach((f) => res.sort(f));
 
         // 1: contains, 2: not contains, 3: equals, 4: not equals, 5: starts with, 6: ends with, 7: blank, 8: not blank
-        // console.log(filters);
-        // console.log(Array.from(filters.entries()));
-        // console.log(Array.from(filters.entries()).filter(([k,[select,value]]) => value !== ''));
         const filterers = Array.from(filters.entries()).filter(([k,[select,value]]) => value !== '').map(([k, [select,value]]) => (e) => {
             console.log(select, value, e[k])
             switch (select) {
@@ -54,10 +51,13 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
                     throw new Error(`Invalid action ${select} for filter ${k}`);
             }
         });
-        console.log(filterers);
         setList(filterers.reduce((acc, f) => acc.filter(f), res));
-        // setList(res);
     }, [filters, sorting, raw]);
+
+    const onOrderFilterReset = () => {
+        setFilters(new Map());
+        setSorting(new Map());
+    };
 
 
     const newProps = {
@@ -67,6 +67,7 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
         'setFilters': setFilters,
         'sorting': sorting,
         'setSorting': setSorting,
+        'onOrderFilterReset': onOrderFilterReset,
     }
 
     return (
