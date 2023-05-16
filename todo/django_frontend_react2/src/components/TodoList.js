@@ -29,6 +29,7 @@ export function TodoItem({ todo, ...rest }) {
     const {theme, themeContrast1, themeContrast2} = rest;
     const {setShowTodo, setShowDelete, setFormAction} = rest;
     const {updateItem, active, setActive, list} = rest;
+    const {sorting} = rest;
 
     const [{ opacity }, dragRef] = useDrag(() => ({
         type: ItemTypes.CARD,
@@ -41,13 +42,11 @@ export function TodoItem({ todo, ...rest }) {
     const [{isOver}, dropRef] = useDrop(() => ({
         accept: ItemTypes.CARD,
         drop: (item, monitor) => {
-            console.log('DRAGGED', item);
-            console.log('DROPIN', todo);
             if (item.id === todo.id) return;
-            const new1 = {...todo, priority: item.priority};
-            const new2 = {...item, priority: todo.priority};
-            updateItem(todo.id, new1)
-            updateItem(item.id, new2)
+            let offset = sorting.get('priority');
+            if (offset === 0) return;
+            if (list.findIndex(e => e.id === item.id) > list.indexOf(todo)) offset *= -1;
+            updateItem(item.id, {...item, priority: todo.priority + offset});
         },
         collect: monitor => ({
             isOver: !!monitor.isOver(),
