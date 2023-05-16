@@ -28,7 +28,7 @@ export default function TodoList({ ...rest }) {
 export function TodoItem({ todo, ...rest }) {
     const {theme, themeContrast1, themeContrast2} = rest;
     const {setShowTodo, setShowDelete, setFormAction} = rest;
-    const {updateItem, active, setActive, setList, list} = rest;
+    const {updateItem, active, setActive, list} = rest;
 
     const [{ opacity }, dragRef] = useDrag(() => ({
         type: ItemTypes.CARD,
@@ -36,30 +36,23 @@ export function TodoItem({ todo, ...rest }) {
         collect: (monitor) => ({
             opacity: monitor.isDragging() ? 0.5 : 1,
         }),
-    }), []);
+    }), [list]);
 
     const [{isOver}, dropRef] = useDrop(() => ({
         accept: ItemTypes.CARD,
         drop: (item, monitor) => {
+            console.log('DRAGGED', item);
+            console.log('DROPIN', todo);
             if (item.id === todo.id) return;
             const new1 = {...todo, priority: item.priority};
             const new2 = {...item, priority: todo.priority};
             updateItem(todo.id, new1)
-                .then(() => updateItem(item.id, new2))
-                // .then(() => setList(list.map((e) => {
-                //     if (e.id === todo.id) {
-                //         return new1;
-                //     } else if (e.id === item.id) {
-                //         return new2;
-                //     } else {
-                //         return e;
-                //     }
-                // })));
+            updateItem(item.id, new2)
         },
         collect: monitor => ({
             isOver: !!monitor.isOver(),
         }),
-    }), []);
+    }), [list]);
 
     const onCheck = (todo, e) => {
         const data = {...todo, completed: e.target.checked};
