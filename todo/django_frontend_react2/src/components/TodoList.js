@@ -41,6 +41,8 @@ export function TodoItem({ todo, ...rest }) {
     const [{isOver}, dropRef] = useDrop(() => ({
         accept: ItemTypes.CARD,
         drop: (item, monitor) => {
+            console.log('DRAGGED', item);
+            console.log('DROPIN', todo);
             if (item.id === todo.id) return;
             const new1 = {...todo, priority: item.priority};
             const new2 = {...item, priority: todo.priority};
