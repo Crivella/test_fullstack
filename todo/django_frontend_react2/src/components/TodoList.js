@@ -41,7 +41,7 @@ export default function TodoList({ active, setActive, list, updateItem, deleteIt
             {list.map((todo) => (
                 // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
                 <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>
-                    <Card.Header as={Form} onSubmit={() => 1} className='d-flex justify-content-between' >
+                    <Card.Header as={Form} onSubmit={(e) => e.preventDefault()} className='d-flex justify-content-between' >
                         <Form.Group as={Row} className='d-flex flex-grow-1' >
                             <Col {...ColLayout[0]}>
                                 <Form.Control type='number' value={todo.priority} onChange={(e) => onPriority(todo, e)} />
