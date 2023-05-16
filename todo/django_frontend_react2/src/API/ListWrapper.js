@@ -13,9 +13,19 @@ export default function APIListWrapper(props) {
     const [list, setList] = useState([]); // [{}
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, _setFormAction] = useState('add');
-    const [sorting, setSorting] = useState({})
+
+    const [update, setUpdate] = useState([]); // [{}
 
     useEffect(() => {getList()}, [props.user]);
+
+    useEffect(() => {
+        if (update.length) {
+            console.log('UPDATE', update);
+            const app = update.shift();
+            console.log(app)
+            setList(list.map((e) => e.id === app.id ? app : e));
+        };
+    }, [update, list]);
 
     const {children, ...rest} = props;
 
@@ -36,7 +46,7 @@ export default function APIListWrapper(props) {
 
     const updateItem =(id, data) => {
         return axios.patch(`${endpoint}/${id}/`, data, {})
-            .then(({data}) => {setList(list.map((e) => e.id === id ? data : e)); return data})
+            .then(({data}) => {setUpdate([...update, data]); return data})
             .catch((err) => console.log(err));
     };
 
@@ -79,7 +89,7 @@ export default function APIListWrapper(props) {
     const newProps = {
         ...rest,
         'list': list, // [{}, {}, {}]
-        // 'setList': setList,
+        'setList': setList,
         'active': active,
         'setActive': setActive,
         // 'getList': getList,

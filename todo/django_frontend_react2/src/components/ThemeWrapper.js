@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Container } from "react-bootstrap";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import PassPropsWrapper from "../commons/Wrapper";
 
 export default function ThemeWrapper(props) {
@@ -48,9 +50,11 @@ export default function ThemeWrapper(props) {
 
     return (
         <Container fluid className={`vh-100 bg-${theme} overflow-auto`} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={-1} ref={ref}>
-            <PassPropsWrapper newProps={newProps}>
-                {children}
-            </PassPropsWrapper>
+            <DndProvider backend={HTML5Backend}>
+                <PassPropsWrapper newProps={newProps}>
+                    {children}
+                </PassPropsWrapper>
+            </ DndProvider>
         </Container>
     )
 }
