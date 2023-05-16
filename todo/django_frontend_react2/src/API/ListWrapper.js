@@ -7,7 +7,6 @@ axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
-
 export default function APIListWrapper(props) {
     const [active, setActive] = useState(null);
     const [list, setList] = useState([]); // [{}
@@ -20,9 +19,7 @@ export default function APIListWrapper(props) {
 
     useEffect(() => {
         if (update.length) {
-            console.log('UPDATE', update);
             const app = update.shift();
-            console.log(app)
             setList(list.map((e) => e.id === app.id ? app : e));
         };
     }, [update, list]);
@@ -46,6 +43,7 @@ export default function APIListWrapper(props) {
 
     const updateItem =(id, data) => {
         return axios.patch(`${endpoint}/${id}/`, data, {})
+            // .then(({data}) => {setList(list.map((e) => e.id === data.id ? data : e)); return data})
             .then(({data}) => {setUpdate([...update, data]); return data})
             .catch((err) => console.log(err));
     };
