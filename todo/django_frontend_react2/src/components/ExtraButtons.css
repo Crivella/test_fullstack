@@ -26,3 +26,9 @@
     top: 5rem;
     right: 1rem;
   }
+
+.pos-bl {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+}

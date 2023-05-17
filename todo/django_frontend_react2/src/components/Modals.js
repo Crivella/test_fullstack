@@ -37,7 +37,7 @@ export function AddEditModal({ formHeader, todoAction: onSubmit, ...rest }) {
     )
 }
 
-export function DeleteModal({ active, ...rest }) {
+export function DeleteModal({ list, active, ...rest }) {
     const {setShow, todoAction: onSubmit } = rest;
 
     const handleSubmit = async () => {
@@ -50,6 +50,7 @@ export function DeleteModal({ active, ...rest }) {
     return (
         <ModalFormWrapper header="Delete item?" {...rest}>
             <p>Are you sure you want to delete this item?</p>
+            <p>"{active > 0 ? list.find(e => e.id === active).title : ''}"</p>
             <Container fluid className="d-flex justify-content-between">
                 <Button variant="secondary" onClick={() => setShow(false)}>NO</Button>
                 <Button variant="danger" onClick={handleSubmit}>YES</Button>

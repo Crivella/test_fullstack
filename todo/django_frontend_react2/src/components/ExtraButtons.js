@@ -1,4 +1,6 @@
 import { Button } from "react-bootstrap";
+import { useDrop } from "react-dnd";
+import { ItemTypes } from '../Constants';
 import './ExtraButtons.css';
 
 export function AddButton({themeContrast1, setShow, setFormAction}) {
@@ -22,6 +24,25 @@ export function OrderFilterResetButton({themeContrast1, onOrderFilterReset}) {
     return (
         <Button className="round-button pos-tr" variant="primary" onClick={onClick}>
             <span style={{paddingBottom: 10}} className={`text-${themeContrast1}`}>⧩</span>
+        </Button>
+    );
+}
+
+export function TrashCan({themeContrast1, setShow, setActive}) {
+    const [{isOver}, dropRef] = useDrop(() => ({
+        accept: ItemTypes.CARD,
+        drop: (item, monitor) => {
+            setActive(item.id);
+            setShow(true);
+        },
+        collect: monitor => ({
+            isOver: !!monitor.isOver(),
+        }),
+    }), []);
+
+    return (
+        <Button ref={dropRef} className="round-button pos-bl" variant="primary">
+            <span style={{paddingBottom: 10}} className={`text-${themeContrast1}`}>🗑</span>
         </Button>
     );
 }
