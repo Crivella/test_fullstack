@@ -1,6 +1,8 @@
-import { Button, Container } from "react-bootstrap";
+import { useState } from "react";
+import { Alert, Button, Container } from "react-bootstrap";
 import { ModalFormWrapper } from "../commons/ModalWrapper";
 import LoginForm from "./Login";
+import { PasswordResetForm } from "./PasswordResetForm";
 import { TodoForm } from "./TodoForm";
 
 export function LoginModal({  login: onSubmit, ...rest }) {
@@ -55,3 +57,25 @@ export function DeleteModal({ active, ...rest }) {
         </ModalFormWrapper>
     )
 }
+
+export function UserProfileModal({ user, ...rest }) {
+    const { setShow } = rest;
+    const { passwordChange } = rest;
+
+    const [showPasswordReset, setShowPasswordReset] = useState(false);
+
+    return (
+        <ModalFormWrapper header="User Profile" {...rest}>
+            <p>Username: {user}</p>
+            <Container fluid className="d-flex justify-content-between">
+                <Button variant="secondary" onClick={() => setShow(false)}>Close</Button>
+                <Button variant="secondary" onClick={() => setShowPasswordReset(true)}>Password Reset</Button>
+            </Container>
+            <Alert variant="warning" show={showPasswordReset}  onClose={() => setShowPasswordReset(false)} dismissible>
+                <PasswordResetForm onSubmit={passwordChange} setShow={setShowPasswordReset} />
+            </ Alert>
+        </ModalFormWrapper>
+    )
+}
+
+

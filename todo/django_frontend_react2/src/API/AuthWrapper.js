@@ -34,6 +34,13 @@ export default function APIAuthWrapper(props) {
             .catch((err) => console.log(err));
     };
 
+    const passwordChange = async (data) => {
+        const res = await axios.post(`${endpoint}/password_change/`, data, {})
+            .catch((err) => console.log(err));
+
+        return res.data.includes('Password change successful');
+    };
+
     const login = async (data) => {
         await axios.post(`${endpoint}/login/`, data, {})
             .catch((err) => console.log(err));
@@ -51,6 +58,7 @@ export default function APIAuthWrapper(props) {
         'user': user,
         'login': login,
         'logout': logout,
+        'passwordChange': passwordChange,
     }
 
     return (

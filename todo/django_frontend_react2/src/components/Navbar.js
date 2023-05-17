@@ -3,14 +3,14 @@ import { Button, Container, Dropdown, DropdownButton, Form, Nav, Navbar } from "
 export default function CustomNavbar(props) {
     const {user, logout} = props;
     const {theme, themeContrast1, setTheme} = props;
-    const {setShowLogin} = props;
+    const {setShowLogin, setShowUserProfile} = props;
 
     const getLoginLogout = () => {
         if (user) {
             return (
                 <DropdownButton className="mx-1" id="navbar-dropdown" title={user} variant={theme}>
                     <Dropdown.Menu variant={theme}>
-                        <Dropdown.Item variant={theme}>Edit Profile</Dropdown.Item>
+                        <Dropdown.Item variant={theme} onClick={() => setShowUserProfile(true)}>Edit Profile</Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Item onClick={logout}>Logout</Dropdown.Item>
                     </Dropdown.Menu>

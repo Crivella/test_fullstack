@@ -35,7 +35,6 @@ export function TodoForm({onSubmit, formAction, theme, list, active}) {
         const res = await onSubmit(data);
         if (!res) {
             setFailed(true);
-            console.log('Failed');
             return false
         }
 
