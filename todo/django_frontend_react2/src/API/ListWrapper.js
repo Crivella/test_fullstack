@@ -14,7 +14,7 @@ export default function APIListWrapper(props) {
     const [formAction, _setFormAction] = useState('add');
 
     const [total, setTotal] = useState(0);
-    const [pageSize, setPageSize] = useState(100);
+    const [pageSize, setPageSize] = useState(16);
     const [page, setPage] = useState(1);
 
     const [update, setUpdate] = useState([]); // [{}

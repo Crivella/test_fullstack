@@ -35,12 +35,16 @@ export function App() {
                 <APIListWrapper>
                     <AddEditModal show={showTodo} setShow={setShowTodo} />
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
-                    <FrontEndPaginatorWrapper>
+                    <FrontEndPaginatorWrapper size={8}>
+                    <FrontEndPaginatorWrapper size={4}>
+                    <FrontEndPaginatorWrapper size={2}>
                         <FilterSortWrapper>
                             <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
                             <OrderFilterResetButton />
                         </FilterSortWrapper>
                         <PaginationToolbar />
+                    </FrontEndPaginatorWrapper>
+                    </FrontEndPaginatorWrapper>
                     </FrontEndPaginatorWrapper>
                     <AddButton setShow={setShowTodo} />
                     <TrashCan setShow={setShowDelete} />

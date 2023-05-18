@@ -3,8 +3,8 @@ import { Button, Container } from 'react-bootstrap';
 import PassPropsWrapper from '../commons/Wrapper';
 
 
-export function FrontEndPaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, ...rest}) {
-    const [FEpageSize, setFEpageSize] = useState(50); // [15]
+export function FrontEndPaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, size=10, ...rest}) {
+    const [FEpageSize, setFEpageSize] = useState(size); // [15]
     const [FEpage, setFEpage] = useState(1); // [1]
     const [FElist, setFElist] = useState([]); // [{}]
     const [ratio, setRatio] = useState(pageSize/FEpageSize); // [1]
@@ -24,9 +24,6 @@ export function FrontEndPaginatorWrapper({children, pageSize, setPageSize, page,
         setFElist(list.slice(start, end));
         // setFElist(list);
     }, [list, FEpage, FEpageSize]);
-
-
-
 
     const newProps = {
         ...rest,
