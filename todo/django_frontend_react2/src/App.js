@@ -7,6 +7,7 @@ import { AddButton, OrderFilterResetButton, TrashCan } from './components/ExtraB
 import FilterSortWrapper from './components/FilterSortWrapper';
 import { AddEditModal, DeleteModal, LoginModal, UserProfileModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
+import Paginator from './components/Paginator';
 import ThemeWrapper from './components/ThemeWrapper';
 import TodoList from './components/TodoList';
 
@@ -36,6 +37,7 @@ export function App() {
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
                     <FilterSortWrapper>
                         <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
+                        <Paginator />
                         <OrderFilterResetButton />
                     </FilterSortWrapper>
                     <AddButton setShow={setShowTodo} />

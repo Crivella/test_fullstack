@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { Button, Container } from 'react-bootstrap';
 import PassPropsWrapper from '../commons/Wrapper';
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
@@ -17,7 +16,6 @@ export default function APIListWrapper(props) {
     const [total, setTotal] = useState(0);
     const [pageSize, setPageSize] = useState(15);
     const [page, setPage] = useState(1);
-    const [pagination, setPagination] = useState([]); // [{}
 
     const [update, setUpdate] = useState([]); // [{}
 
@@ -35,11 +33,6 @@ export default function APIListWrapper(props) {
     useEffect(() => {
         getPage();
     }, [page]);
-
-    useEffect(() => {
-        const numPages = Math.ceil(total/pageSize);
-        setPagination([...Array(numPages).keys()].map((e) => e+1));
-    }, [total, pageSize]);
 
     const {children, ...rest} = props;
 
@@ -118,6 +111,13 @@ export default function APIListWrapper(props) {
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
         'todoAction': onSubmit,
+
+        'page': page,
+        'setPage': setPage,
+        'pageSize': pageSize,
+        'setPageSize': setPageSize,
+        'total': total,
+        'setTotal': setTotal,
     }
 
     return (
@@ -125,33 +125,6 @@ export default function APIListWrapper(props) {
         <PassPropsWrapper newProps={newProps}>
             {children}
         </PassPropsWrapper>
-        <APIPaginator active={page} pagination={pagination} setActive={setPage} />
         </>
-    )
-}
-
-function APIPaginator({active, setActive, pagination}) {
-    return (
-        <Container className='d-flex justify-content-end text-light'>
-            {pagination.map((e) => (
-                <PaginationNumber key={e} active={active} setActive={setActive} num={e} />
-            ))}
-        </Container>
-    )
-}
-
-function PaginationNumber({active, setActive, num}) {
-
-    const baseStyle = 'mx-1 text-light ';
-    const [style, setStyle] = useState('btn-outline-primary'); // ['btn-outline-primary'
-
-    useEffect(() => {
-        setStyle(baseStyle + `btn-${active === num ? '' : 'outline'}-primary`);
-    }, [active, num])
-
-    return (
-        <Button className={style} onClick={() => setActive(num)}>
-            {num}
-        </Button>
     )
 }
