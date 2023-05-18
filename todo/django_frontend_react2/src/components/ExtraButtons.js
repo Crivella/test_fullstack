@@ -28,11 +28,12 @@ export function OrderFilterResetButton({themeContrast1, onOrderFilterReset}) {
     );
 }
 
-export function TrashCan({themeContrast1, setShow, setActive}) {
+export function TrashCan({themeContrast1, setShow, setActive, setFormAction}) {
     const [{isOver}, dropRef] = useDrop(() => ({
         accept: ItemTypes.CARD,
         drop: (item, monitor) => {
             setActive(item.id);
+            setFormAction('delete');
             setShow(true);
         },
         collect: monitor => ({
