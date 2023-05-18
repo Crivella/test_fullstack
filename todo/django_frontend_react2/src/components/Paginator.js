@@ -20,16 +20,14 @@ export default function Paginator({pageSize, total, ...rest}) {
 }
 
 function PaginationNumber({page: active, setPage: setActive, num}) {
-
-    const baseStyle = 'mx-1 text-light ';
-    const [style, setStyle] = useState('btn-outline-primary'); // ['btn-outline-primary'
+    const [style, setStyle] = useState('outline-primary'); // ['btn-outline-primary'
 
     useEffect(() => {
-        setStyle(baseStyle + `btn-${active === num ? '' : 'outline'}-primary`);
+        setStyle(`${active === num ? '' : 'outline-'}primary`);
     }, [active, num])
 
     return (
-        <Button className={style} onClick={() => setActive(num)}>
+        <Button className='mx-1 text-light' variant={style} onClick={() => setActive(num)}>
             {num}
         </Button>
     )
