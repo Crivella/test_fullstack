@@ -1,8 +1,49 @@
 import { useEffect, useState } from 'react';
 import { Button, Container } from 'react-bootstrap';
+import PassPropsWrapper from '../commons/Wrapper';
 
 
-export default function Paginator({pageSize, total, ...rest}) {
+export function FrontEndPaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, ...rest}) {
+    const [FEpageSize, setFEpageSize] = useState(50); // [15]
+    const [FEpage, setFEpage] = useState(1); // [1]
+    const [FElist, setFElist] = useState([]); // [{}]
+    const [ratio, setRatio] = useState(pageSize/FEpageSize); // [1]
+    
+    useEffect(() => {
+        setRatio(pageSize/FEpageSize);
+    }, [pageSize, FEpageSize]);
+
+    useEffect(() => {
+        const requestLower = (FEpage-1)*FEpageSize;
+        const requestUpper = FEpage*FEpageSize;
+        if (requestUpper > page*pageSize) setPage(Math.ceil(requestUpper/pageSize));
+        if (requestLower < (page-1)*pageSize) setPage(Math.ceil(requestLower/pageSize));
+
+        const start = ((FEpage-1)%ratio)*FEpageSize;
+        const end = start + FEpageSize;
+        setFElist(list.slice(start, end));
+        // setFElist(list);
+    }, [list, FEpage, FEpageSize]);
+
+
+
+
+    const newProps = {
+        ...rest,
+        'list': FElist,
+        'pageSize': FEpageSize,
+        'page': FEpage,
+        'setPage': setFEpage,
+        'setPageSize': setFEpageSize,
+    }
+    return (
+        <PassPropsWrapper newProps={newProps}>
+            {children}
+        </PassPropsWrapper>
+    )
+}
+
+export function PaginationToolbar({pageSize, total, ...rest}) {
     const [pagination, setPagination] = useState([]); // [{}
 
     useEffect(() => {
@@ -11,7 +52,7 @@ export default function Paginator({pageSize, total, ...rest}) {
     }, [total, pageSize]);
 
     return (
-        <Container className='d-flex justify-content-end text-light'>
+        <Container className='d-flex justify-content-end text-light mt-2'>
             {pagination.map((e) => (
                 <PaginationNumber key={e} {...rest} num={e} />
             ))}

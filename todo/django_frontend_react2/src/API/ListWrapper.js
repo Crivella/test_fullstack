@@ -14,14 +14,21 @@ export default function APIListWrapper(props) {
     const [formAction, _setFormAction] = useState('add');
 
     const [total, setTotal] = useState(0);
-    const [pageSize, setPageSize] = useState(15);
+    const [pageSize, setPageSize] = useState(100);
     const [page, setPage] = useState(1);
 
     const [update, setUpdate] = useState([]); // [{}
 
     useEffect(() => {
-        getPage();
-    }, [props.user]);
+        const offset = page > 1? `&offset=${(page-1)*pageSize}` : '';
+        axios.get(`${endpoint}/?limit=${pageSize}${offset}`, {
+            headers: { 'Content-Type': 'application/json' }
+        }).then(({data}) => {
+            setList(data.results); 
+            setTotal(data.count);
+        })
+        .catch((err) => console.log(err));
+    }, [page, pageSize, props.user]);
 
     useEffect(() => {
         if (update.length) {
@@ -30,22 +37,7 @@ export default function APIListWrapper(props) {
         };
     }, [update, list]);
 
-    useEffect(() => {
-        getPage();
-    }, [page]);
-
     const {children, ...rest} = props;
-
-    const getPage = () => {
-        return axios.get(`${endpoint}/?limit=${pageSize}&offset=${(page-1)*pageSize}`, {
-            headers: { 'Content-Type': 'application/json' }
-        }).then(({data}) => {
-            setList(data.results); 
-            setTotal(data.count);
-            return data;
-        })
-        .catch((err) => console.log(err));
-    };
 
     const getItem = (id) => {
         return axios.get(`${endpoint}/${id}/`, {
@@ -121,10 +113,8 @@ export default function APIListWrapper(props) {
     }
 
     return (
-        <>
         <PassPropsWrapper newProps={newProps}>
             {children}
         </PassPropsWrapper>
-        </>
     )
 }
