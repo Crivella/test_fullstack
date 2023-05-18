@@ -16,7 +16,7 @@ export function PaginatorWrapper({children, pageSize, setPageSize, page, setPage
             if (requestLower < (page-1)*pageSize) setPage(Math.ceil(requestLower/pageSize));
         }
 
-        const start = ((FEpage-1)*FEpageSize)%(pageSize| 1000000000);
+        const start = ((FEpage-1)*FEpageSize)%(pageSize || 1000000000);
         const end = start + FEpageSize;
         setFElist(list.slice(start, end));
         // setFElist(list);
