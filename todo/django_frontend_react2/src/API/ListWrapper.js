@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { Button, Container } from 'react-bootstrap';
 import PassPropsWrapper from '../commons/Wrapper';
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
@@ -13,9 +14,16 @@ export default function APIListWrapper(props) {
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, _setFormAction] = useState('add');
 
+    const [total, setTotal] = useState(0);
+    const [pageSize, setPageSize] = useState(15);
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState([]); // [{}
+
     const [update, setUpdate] = useState([]); // [{}
 
-    useEffect(() => {getList()}, [props.user]);
+    useEffect(() => {
+        getPage();
+    }, [props.user]);
 
     useEffect(() => {
         if (update.length) {
@@ -24,14 +32,25 @@ export default function APIListWrapper(props) {
         };
     }, [update, list]);
 
+    useEffect(() => {
+        getPage();
+    }, [page]);
+
+    useEffect(() => {
+        const numPages = Math.ceil(total/pageSize);
+        setPagination([...Array(numPages).keys()].map((e) => e+1));
+    }, [total, pageSize]);
+
     const {children, ...rest} = props;
 
-    const getList = () => {
-        return axios.get(`${endpoint}/`, {
+    const getPage = () => {
+        return axios.get(`${endpoint}/?limit=${pageSize}&offset=${(page-1)*pageSize}`, {
             headers: { 'Content-Type': 'application/json' }
+        }).then(({data}) => {
+            setList(data.results); 
+            setTotal(data.count);
+            return data;
         })
-        // .then((data) => data.sort((a, b) => b.priority - a.priority))
-        .then(({data}) => {setList(data); return data})
         .catch((err) => console.log(err));
     };
 
@@ -102,8 +121,37 @@ export default function APIListWrapper(props) {
     }
 
     return (
+        <>
         <PassPropsWrapper newProps={newProps}>
             {children}
         </PassPropsWrapper>
+        <APIPaginator active={page} pagination={pagination} setActive={setPage} />
+        </>
+    )
+}
+
+function APIPaginator({active, setActive, pagination}) {
+    return (
+        <Container className='d-flex justify-content-end text-light'>
+            {pagination.map((e) => (
+                <PaginationNumber key={e} active={active} setActive={setActive} num={e} />
+            ))}
+        </Container>
+    )
+}
+
+function PaginationNumber({active, setActive, num}) {
+
+    const baseStyle = 'mx-1 text-light ';
+    const [style, setStyle] = useState('btn-outline-primary'); // ['btn-outline-primary'
+
+    useEffect(() => {
+        setStyle(baseStyle + `btn-${active === num ? '' : 'outline'}-primary`);
+    }, [active, num])
+
+    return (
+        <Button className={style} onClick={() => setActive(num)}>
+            {num}
+        </Button>
     )
 }
