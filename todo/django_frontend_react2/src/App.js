@@ -7,7 +7,7 @@ import { AddButton, OrderFilterResetButton, TrashCan } from './components/ExtraB
 import FilterSortWrapper from './components/FilterSortWrapper';
 import { AddEditModal, DeleteModal, LoginModal, UserProfileModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
-import { FrontEndPaginatorWrapper, PaginationToolbar } from './components/Paginator';
+import { PaginationToolbar, PaginatorWrapper } from './components/Paginator';
 import ThemeWrapper from './components/ThemeWrapper';
 import TodoList from './components/TodoList';
 
@@ -32,20 +32,20 @@ export function App() {
                 <LoginModal show={showLogin} setShow={setShowLogin} />
                 <UserProfileModal show={showUserProfile} setShow={setShowUserProfile} />
                 <CustomNavbar {...setShowModals} />
-                <APIListWrapper>
+                <APIListWrapper size={16}>
                     <AddEditModal show={showTodo} setShow={setShowTodo} />
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
-                    <FrontEndPaginatorWrapper size={8}>
-                    <FrontEndPaginatorWrapper size={4}>
-                    <FrontEndPaginatorWrapper size={2}>
+                    <PaginatorWrapper size={8}>
+                    <PaginatorWrapper size={4}>
+                    <PaginatorWrapper size={2}>
                         <FilterSortWrapper>
                             <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
                             <OrderFilterResetButton />
                         </FilterSortWrapper>
                         <PaginationToolbar />
-                    </FrontEndPaginatorWrapper>
-                    </FrontEndPaginatorWrapper>
-                    </FrontEndPaginatorWrapper>
+                    </PaginatorWrapper>
+                    </PaginatorWrapper>
+                    </PaginatorWrapper>
                     <AddButton setShow={setShowTodo} />
                     <TrashCan setShow={setShowDelete} />
                 </APIListWrapper>

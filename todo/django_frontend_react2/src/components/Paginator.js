@@ -3,23 +3,20 @@ import { Button, Container } from 'react-bootstrap';
 import PassPropsWrapper from '../commons/Wrapper';
 
 
-export function FrontEndPaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, size=10, ...rest}) {
+export function PaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, size=10, ...rest}) {
     const [FEpageSize, setFEpageSize] = useState(size); // [15]
     const [FEpage, setFEpage] = useState(1); // [1]
     const [FElist, setFElist] = useState([]); // [{}]
-    const [ratio, setRatio] = useState(pageSize/FEpageSize); // [1]
-    
-    useEffect(() => {
-        setRatio(pageSize/FEpageSize);
-    }, [pageSize, FEpageSize]);
 
     useEffect(() => {
-        const requestLower = (FEpage-1)*FEpageSize;
-        const requestUpper = FEpage*FEpageSize;
-        if (requestUpper > page*pageSize) setPage(Math.ceil(requestUpper/pageSize));
-        if (requestLower < (page-1)*pageSize) setPage(Math.ceil(requestLower/pageSize));
+        if (pageSize !== undefined) {
+            const requestLower = (FEpage-1)*FEpageSize;
+            const requestUpper = FEpage*FEpageSize;
+            if (requestUpper > page*pageSize) setPage(Math.ceil(requestUpper/pageSize));
+            if (requestLower < (page-1)*pageSize) setPage(Math.ceil(requestLower/pageSize));
+        }
 
-        const start = ((FEpage-1)%ratio)*FEpageSize;
+        const start = ((FEpage-1)*FEpageSize)%(pageSize| 1000000000);
         const end = start + FEpageSize;
         setFElist(list.slice(start, end));
         // setFElist(list);

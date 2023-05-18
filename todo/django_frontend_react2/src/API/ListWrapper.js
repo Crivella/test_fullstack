@@ -7,14 +7,14 @@ axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
-export default function APIListWrapper(props) {
+export default function APIListWrapper({children, size=10, ...rest}) {
     const [active, setActive] = useState(null);
     const [list, setList] = useState([]); // [{}
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, _setFormAction] = useState('add');
 
     const [total, setTotal] = useState(0);
-    const [pageSize, setPageSize] = useState(16);
+    const [pageSize, setPageSize] = useState(size);
     const [page, setPage] = useState(1);
 
     const [update, setUpdate] = useState([]); // [{}
@@ -28,7 +28,7 @@ export default function APIListWrapper(props) {
             setTotal(data.count);
         })
         .catch((err) => console.log(err));
-    }, [page, pageSize, props.user]);
+    }, [page, pageSize, rest.user]);
 
     useEffect(() => {
         if (update.length) {
@@ -36,8 +36,6 @@ export default function APIListWrapper(props) {
             setList(list.map((e) => e.id === app.id ? app : e));
         };
     }, [update, list]);
-
-    const {children, ...rest} = props;
 
     const getItem = (id) => {
         return axios.get(`${endpoint}/${id}/`, {
