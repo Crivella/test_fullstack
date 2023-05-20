@@ -32,20 +32,20 @@ export function App() {
                 <LoginModal show={showLogin} setShow={setShowLogin} />
                 <UserProfileModal show={showUserProfile} setShow={setShowUserProfile} />
                 <CustomNavbar {...setShowModals} />
-                <APIListWrapper size={16}>
+                <APIListWrapper size={64}>
                     <AddEditModal show={showTodo} setShow={setShowTodo} />
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
-                    <PaginatorWrapper size={8}>
+                    <FilterSortWrapper>
+                    {/* <PaginatorWrapper size={32}> */}
                     <PaginatorWrapper size={4}>
-                    <PaginatorWrapper size={2}>
-                        <FilterSortWrapper>
+                    {/* <PaginatorWrapper size={2}> */}
                             <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
                             <OrderFilterResetButton />
-                        </FilterSortWrapper>
                         <PaginationToolbar />
+                    {/* </PaginatorWrapper> */}
                     </PaginatorWrapper>
-                    </PaginatorWrapper>
-                    </PaginatorWrapper>
+                    {/* </PaginatorWrapper> */}
+                    </FilterSortWrapper>
                     <AddButton setShow={setShowTodo} />
                     <TrashCan setShow={setShowDelete} />
                 </APIListWrapper>
