@@ -29,7 +29,7 @@ export default function APIListWrapper({children, size=10, getParams={}, ...rest
             setTotal(data.count);
         })
         .catch((err) => console.log(err));
-    }, [page, pageSize, rest.user]);
+    }, [page, pageSize, getParams, rest.user]);
 
     useEffect(() => {
         if (update.length) {

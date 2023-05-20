@@ -4,19 +4,12 @@ import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
 import FilterSortWrapper from './commons/FilterSortWrapper';
-<<<<<<< HEAD
 import { PaginatorWrapper } from './commons/PaginationWrapper';
-=======
-import { PaginationToolbar, PaginatorWrapper } from './commons/Pagination';
->>>>>>> 204d51dab8b37f5ab92e3989d4e94cbb10e4bf37
 import ThemeWrapper from './commons/ThemeWrapper';
 import { AddButton, OrderFilterResetButton, TrashCan } from './components/ExtraButtons';
 import { AddEditModal, DeleteModal, LoginModal, UserProfileModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
-<<<<<<< HEAD
 import { PaginationToolbar } from './components/PaginationToolbar';
-=======
->>>>>>> 204d51dab8b37f5ab92e3989d4e94cbb10e4bf37
 import TodoList from './components/TodoList';
 
 export function App() {

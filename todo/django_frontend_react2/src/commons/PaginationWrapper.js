@@ -1,8 +1,4 @@
 import { useEffect, useState } from 'react';
-<<<<<<<< HEAD:todo/django_frontend_react2/src/commons/PaginationWrapper.js
-========
-import { Button, Container } from 'react-bootstrap';
->>>>>>>> 204d51dab8b37f5ab92e3989d4e94cbb10e4bf37:todo/django_frontend_react2/src/commons/Pagination.js
 import PassPropsWrapper from './Wrapper';
 
 
