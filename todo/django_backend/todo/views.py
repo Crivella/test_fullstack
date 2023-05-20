@@ -10,6 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 
+from .filters import MyFilterBackend, TodoFilter
 from .models import TodoItem
 from .permissions import IsOwnerOrReadOnly
 from .serializers import TodoSerializer, UserSerializer
@@ -32,8 +33,10 @@ class TodoView(viewsets.ModelViewSet):
     queryset = TodoItem.objects.all()
 
     permission_classes = [IsOwnerOrReadOnly, permissions.IsAuthenticatedOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['completed', 'private']
+    # filter_backends = [DjangoFilterBackend]
+    filterset_class = TodoFilter
+    filter_backends = [MyFilterBackend]
+    # filterset_fields = ['completed', 'private']
 
     # @method_decorator(cache_page(60*2))
     # @method_decorator(vary_on_headers("Authorization", "Cookie"))
