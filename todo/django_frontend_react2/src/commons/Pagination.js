@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Container } from 'react-bootstrap';
-import PassPropsWrapper from '../commons/Wrapper';
+import PassPropsWrapper from './Wrapper';
 
 
 export function PaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, size=10, ...rest}) {

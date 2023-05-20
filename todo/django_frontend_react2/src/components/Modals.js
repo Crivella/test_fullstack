@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Alert, Button, Container } from "react-bootstrap";
 import { ModalFormWrapper } from "../commons/ModalWrapper";
-import LoginForm from "./Login";
-import { PasswordResetForm } from "./PasswordResetForm";
-import { TodoForm } from "./TodoForm";
+import { LoginForm, PasswordResetForm, TodoForm } from "./Forms";
 
 export function LoginModal({  login: onSubmit, ...rest }) {
     const {setShow } = rest;

@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
+import FilterSortWrapper from './commons/FilterSortWrapper';
+import { PaginationToolbar, PaginatorWrapper } from './commons/Pagination';
+import ThemeWrapper from './commons/ThemeWrapper';
 import { AddButton, OrderFilterResetButton, TrashCan } from './components/ExtraButtons';
-import FilterSortWrapper from './components/FilterSortWrapper';
 import { AddEditModal, DeleteModal, LoginModal, UserProfileModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
-import { PaginationToolbar, PaginatorWrapper } from './components/Paginator';
-import ThemeWrapper from './components/ThemeWrapper';
 import TodoList from './components/TodoList';
 
 export function App() {

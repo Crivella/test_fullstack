@@ -1,7 +1,7 @@
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { ItemTypes } from '../Constants';
-import { FSHeader } from './FilterSortWrapper';
+import { FSHeader } from '../commons/FilterSortWrapper';
 import './TodoList.css';
 
 const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]

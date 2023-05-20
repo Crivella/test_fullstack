@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Container } from "react-bootstrap";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import PassPropsWrapper from "../commons/Wrapper";
+import PassPropsWrapper from "./Wrapper";
 
 export default function ThemeWrapper(props) {
     const {children, theme: _theme, ...extras} = props;

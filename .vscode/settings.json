@@ -2,5 +2,13 @@
     "emmet.triggerExpansionOnTab": true,
     "emmet.showSuggestionsAsSnippets": true,
     "editor.snippetSuggestions": "top",
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "spellright.language": [
+        "en"
+    ],
+    "spellright.documentTypes": [
+        "latex",
+        "markdown",
+        "plaintext"
+    ]
 }
