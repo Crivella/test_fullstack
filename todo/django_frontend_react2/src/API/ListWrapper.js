@@ -29,14 +29,16 @@ export default function APIListWrapper({children, size=10, getParams={}, ...rest
             setTotal(data.count);
         })
         .catch((err) => console.log(err));
-    }, [page, pageSize, getParams, rest.user]);
+    }, [page, pageSize, getParams, rest.user, update]);
 
-    useEffect(() => {
-        if (update.length) {
-            const app = update.shift();
-            setList(list.map((e) => e.id === app.id ? app : e));
-        };
-    }, [update, list]);
+    // useEffect(() => {
+    //     if (update.length) {
+    //         const app = update.shift();
+    //         setList(list.map((e) => e.id === app.id ? app : e));
+    //         setPage(page);
+    //         // setUpdate([]);
+    //     };
+    // }, [update, list]);
 
     const getItem = (id) => {
         return axios.get(`${endpoint}/${id}/`, {

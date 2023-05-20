@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
-import FilterSortWrapper from './commons/FilterSortWrapper';
-import { PaginatorWrapper } from './commons/PaginationWrapper';
+// import FilterSortWrapper from './commons/FilterSortWrapper';
+import FilterSortWrapper from './API/FilterSortWrapper';
+import PaginatorWrapper from './commons/PaginationWrapper';
 import ThemeWrapper from './commons/ThemeWrapper';
 import { AddButton, OrderFilterResetButton, TrashCan } from './components/ExtraButtons';
 import { AddEditModal, DeleteModal, LoginModal, UserProfileModal } from './components/Modals';
@@ -33,12 +34,15 @@ export function App() {
                 <LoginModal show={showLogin} setShow={setShowLogin} />
                 <UserProfileModal show={showUserProfile} setShow={setShowUserProfile} />
                 <CustomNavbar {...setShowModals} />
+                <FilterSortWrapper>
+                    
                 <APIListWrapper size={64}>
                     <AddEditModal show={showTodo} setShow={setShowTodo} />
                     <DeleteModal show={showDelete} setShow={setShowDelete} />
-                    <FilterSortWrapper>
+                    {/* <FilterSortWrapper> */}
                     {/* <PaginatorWrapper size={32}> */}
-                    <PaginatorWrapper size={4}>
+                    <PaginatorWrapper size={16}>
+                    {/* <PaginatorWrapper size={4}> */}
                     {/* <PaginatorWrapper size={2}> */}
                             <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
                             <OrderFilterResetButton />
@@ -46,10 +50,12 @@ export function App() {
                     {/* </PaginatorWrapper> */}
                     </PaginatorWrapper>
                     {/* </PaginatorWrapper> */}
-                    </FilterSortWrapper>
+                    {/* </PaginatorWrapper> */}
+                    {/* </FilterSortWrapper> */}
                     <AddButton setShow={setShowTodo} />
                     <TrashCan setShow={setShowDelete} />
                 </APIListWrapper>
+                </FilterSortWrapper>
             </APIAuthWrapper>
         </ThemeWrapper>
     );

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import PassPropsWrapper from './Wrapper';
 
 
-export function PaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, size=10, ...rest}) {
+export default function PaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, size=10, ...rest}) {
     const [FEpageSize, setFEpageSize] = useState(size); // [15]
     const [FEpage, setFEpage] = useState(1); // [1]
     const [FElist, setFElist] = useState([]); // [{}]
