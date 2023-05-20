@@ -1,10 +1,17 @@
-from django_filters import FilterSet
+from django_filters import FilterSet, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import TodoItem
 
 
 class TodoFilter(FilterSet):
+    order = OrderingFilter(
+        fields=(
+            ('priority', 'priority'),
+            ('title', 'title'),
+            ('completed', 'completed'),
+        )
+    )
 
     class Meta:
         model = TodoItem
