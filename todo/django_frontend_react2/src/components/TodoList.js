@@ -1,7 +1,7 @@
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { ItemTypes } from '../Constants';
-import { FSHeader } from './FilterSortWrapper';
+import { FilterSortHeader } from '../commons/FilterSortWrapper';
 import './TodoList.css';
 
 const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]
@@ -15,7 +15,7 @@ export default function TodoList({ ...rest }) {
     return (
         <ListGroup className='p-2 list-container' variant={theme}>
             <ListGroup.Item as={Row} key={-1} className='d-flex justify-content-between' variant='primary'>
-                {Headers.map((head, idx) => <FSHeader head={head} {...rest} layout={ColLayout[idx]}/>)}
+                {Headers.map((head, idx) => <FilterSortHeader head={head} {...rest} layout={ColLayout[idx]}/>)}
             </ListGroup.Item>
             {list.map((todo) => (
                 // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
