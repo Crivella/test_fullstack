@@ -1,12 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
-import APIAuthWrapper from './API/AuthWrapper';
-import APIListWrapper from './API/ListWrapper';
+import AuthWrapper from './API/AuthWrapper';
+import TodoListWrapper from './API/TodoListWrapper';
 import './App.css';
 // import FilterSortWrapper from './commons/FilterSortWrapper';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import FilterSortWrapper from './API/FilterSortWrapper';
 import KeyMapWrapper from './commons/KeyMapWrapper';
 import PaginatorWrapper from './commons/PaginationWrapper';
 import ThemeWrapper from './commons/ThemeWrapper';
@@ -23,13 +22,13 @@ export function App() {
         <DndProvider backend={HTML5Backend}>
         <KeyMapWrapper>
         <ModalWrapper>
-        <APIAuthWrapper>
+        <AuthWrapper>
             <LoginModal />
             <UserProfileModal />
             <CustomNavbar />
 
-            <FilterSortWrapper>
-            <APIListWrapper size={64}>
+            {/* <FilterSortWrapper> */}
+            <TodoListWrapper size={64}>
                 <AddEditModal />
                 <DeleteModal />
                 {/* <FilterSortWrapper> */}
@@ -47,9 +46,9 @@ export function App() {
                 {/* </FilterSortWrapper> */}
                 <AddButton />
                 <TrashCan />
-            </APIListWrapper>
-            </FilterSortWrapper>
-        </APIAuthWrapper>
+            </TodoListWrapper>
+            {/* </FilterSortWrapper> */}
+        </AuthWrapper>
         </ModalWrapper>
         </KeyMapWrapper>
         </DndProvider>

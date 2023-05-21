@@ -2,11 +2,12 @@ import { useContext } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { FilterSortContext } from '../API/FilterSortWrapper';
-import { ListContext } from '../API/ListWrapper';
+import { ListContext } from '../API/TodoListWrapper';
 import { ItemTypes } from '../Constants';
 import { PaginationContext } from '../commons/PaginationWrapper';
 import { ThemeContext } from '../commons/ThemeWrapper';
 import { FilterSortHeader } from './FilterSort';
+import { ModalContext } from './Modals';
 import './TodoList.css';
 
 const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]
@@ -30,10 +31,11 @@ export default function TodoList({ ...rest }) {
     );
 }
 
-export function TodoItem({ todo, ...rest }) {
+export function TodoItem({ todo }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
-    const {setShowTodo, setShowDelete, setFormAction} = useContext(ListContext);
-    const {updateItem, active, setActive, list} = useContext(ListContext);
+    const {setShowTodo, setShowDelete} = useContext(ModalContext);
+    const {updateItem, active, setActive, setFormAction} = useContext(ListContext);
+    const { list } = useContext(PaginationContext);
     const {sorting} = useContext(FilterSortContext);
 
     const [{ opacity }, dragRef] = useDrag(() => ({

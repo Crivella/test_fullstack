@@ -8,7 +8,7 @@ axios.defaults.withCredentials = true
 
 export const AuthContext = createContext({});
 
-export default function APIAuthWrapper({children}) {
+export default function AuthWrapper({children}) {
     const [user, setUser] = useState("");
 
     useEffect(() => {

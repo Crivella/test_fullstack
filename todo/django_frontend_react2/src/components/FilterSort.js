@@ -13,13 +13,11 @@ const arrows = {
 
 const filterSymbol = '⧩';
 
-export function FilterSortHeader({layout = {}, ...rest}) {
-    const {sorting, setSorting} = useContext(FilterSortContext);
+export function FilterSortHeader({head, layout = {}}) {
+    const {sorting = new Map(), setSorting = () => 1} = useContext(FilterSortContext);
     
     const [arrow, setArrow] = useState('')
     const [sortIdx, setSortIdx] = useState('')
-
-    const {head} = rest;
 
     const keyMap = useContext(KeyMapContext);
 
@@ -70,12 +68,12 @@ export function FilterSortHeader({layout = {}, ...rest}) {
     return (
         <Col className="d-flex justify-content-between flex-grow-1" {...layout}>
             <span onClick={() => onSort(head)}>{arrow}{sortIdx}{head}</span>
-            <FilterComponent {...rest}/>
+            <FilterComponent head={head} />
         </Col> 
     )
 }
 
-export function FilterComponent({...rest}) {
+export function FilterComponent({ head }) {
     const [show, setShow] = useState(false);
     const [target, setTarget] = useState(null);
 
@@ -92,7 +90,7 @@ export function FilterComponent({...rest}) {
             <Overlay target={target} container={ref} show={show} placement="bottom">
                 <Popover id="popover-contained">
                     <Popover.Body>
-                        <FilterForm setShow={setShow} {...rest} />
+                        <FilterForm setShow={setShow} head={head} />
                     </Popover.Body>
                 </Popover>
             </Overlay>
@@ -100,8 +98,8 @@ export function FilterComponent({...rest}) {
     )
 }
 
-export function FilterForm({head, setShow, ...rest}) {
-    const {filters, setFilters} = useContext(FilterSortContext);
+export function FilterForm({head, setShow}) {
+    const {filters = new Map(), setFilters = () => 1} = useContext(FilterSortContext);
 
     const def = [1, ''];
     const [select, setSelect] = useState((filters.get(head) || def)[0]); // [1,2,3,4,5,6,7,8]
@@ -121,11 +119,6 @@ export function FilterForm({head, setShow, ...rest}) {
         res.set(head, [select, value]);
         setFilters(res);
         setShow(false);
-    };
-
-    const onTest = (e) => {
-        console.log(select, value)
-        console.log(filters)
     };
 
     const onSelect = (e) => {
@@ -148,10 +141,13 @@ export function FilterForm({head, setShow, ...rest}) {
                 <option value="7">Blank</option>
                 <option value="8">Not Blank</option>
             </Form.Select>
-            {select < 7 ? <Form.Control type="text" placeholder="Filter value" value={value} onChange={onValue} /> : null}
+            {
+            select < 7 
+            ? <Form.Control type="text" placeholder="Filter value" value={value} onChange={onValue} /> 
+            : null
+            }
             <Container className="d-flex justify-content-between">
-                <Button variant="primary" onClick={onReset}>Rest</Button>
-                <Button variant="primary" onClick={onTest}>TEST</Button>
+                <Button variant="primary" onClick={onReset}>Reset</Button>
                 <Button variant="primary" onClick={onApply}>Apply</Button>
             </Container>
         </Form>

@@ -22,7 +22,6 @@ export default function FilterSortWrapper({children}) {
         if (ord.length > 0) res['order'] = ord.join(',');
 
         Array.from(filters.entries()).forEach(([k, [select,value]]) => {
-            console.log(k, select, value, typeof(select));
             let f;
             let v = value;
             switch (Number(select)) {

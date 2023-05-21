@@ -29,7 +29,6 @@ export default function FilterSortWrapper({children}) {
 
         // 1: contains, 2: not contains, 3: equals, 4: not equals, 5: starts with, 6: ends with, 7: blank, 8: not blank
         const filterers = Array.from(filters.entries()).filter(([k,[select,value]]) => value !== '').map(([k, [select,value]]) => (e) => {
-            console.log(select, value, e[k])
             switch (select) {
                 case 1: return e[k].includes(value);
                 case 2: return !e[k].includes(value);

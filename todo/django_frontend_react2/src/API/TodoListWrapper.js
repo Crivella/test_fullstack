@@ -10,8 +10,7 @@ axios.defaults.withCredentials = true
 
 export const ListContext = createContext({});
 
-
-export default function APIListWrapper({children, size=10, ...rest}) {
+export default function TodoListWrapper({children, size=10, ...rest}) {
     const { user } = useContext(AuthContext);
     const { getParams = {} } = useContext(FilterSortContext);
 

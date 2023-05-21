@@ -4,7 +4,8 @@ import { ItemTypes } from '../Constants';
 import './ExtraButtons.css';
 
 import { useContext } from "react";
-import { ListContext } from "../API/ListWrapper";
+import { FilterSortContext } from "../API/FilterSortWrapper";
+import { ListContext } from "../API/TodoListWrapper";
 import { ThemeContext } from "../commons/ThemeWrapper";
 import { ModalContext } from "./Modals";
 
@@ -25,8 +26,9 @@ export function AddButton() {
     );
 }
 
-export function OrderFilterResetButton({onOrderFilterReset}) {
+export function OrderFilterResetButton() {
     const {themeContrast1} = useContext(ThemeContext);
+    const { onOrderFilterReset } = useContext(FilterSortContext);
     
     return (
         <Button className="round-button pos-tr" variant="primary" onClick={onOrderFilterReset}>
