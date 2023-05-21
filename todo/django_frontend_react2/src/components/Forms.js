@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
+import { ThemeContext } from "../commons/ThemeWrapper";
 
-export function TodoForm({onSubmit, formAction, theme, list, active}) {
+
+export function TodoForm({onSubmit, formAction, list, active}) {
+    const {theme} = useContext(ThemeContext);
+    
     const [validated, setValidated] = useState(false);
     const [failed, setFailed] = useState(false);
     
@@ -72,7 +76,9 @@ export function TodoForm({onSubmit, formAction, theme, list, active}) {
     );
 }
 
-export function LoginForm ({ theme, login }) {
+export function LoginForm ({ login }) {
+    const {theme} = useContext(ThemeContext);
+
     const [validated, setValidated] = useState(false);
     const [failed, setFailed] = useState(false);
 
@@ -124,7 +130,9 @@ export function LoginForm ({ theme, login }) {
     );
 }
 
-export function PasswordResetForm({onSubmit, setShow, theme}) {
+export function PasswordResetForm({onSubmit, setShow}) {
+    const {theme} = useContext(ThemeContext);
+
     const [validated, setValidated] = useState(false);
     const [failed, setFailed] = useState(false);
     

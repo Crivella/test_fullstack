@@ -3,7 +3,11 @@ import { useDrop } from "react-dnd";
 import { ItemTypes } from '../Constants';
 import './ExtraButtons.css';
 
-export function AddButton({themeContrast1, setShow, setFormAction}) {
+import { useContext } from "react";
+import { ThemeContext } from "../commons/ThemeWrapper";
+
+export function AddButton({setShow, setFormAction}) {
+    const {themeContrast1} = useContext(ThemeContext);
     const onClick = () => {
         setFormAction('add');
         setShow(true);
@@ -16,7 +20,8 @@ export function AddButton({themeContrast1, setShow, setFormAction}) {
     );
 }
 
-export function OrderFilterResetButton({themeContrast1, onOrderFilterReset}) {
+export function OrderFilterResetButton({onOrderFilterReset}) {
+    const {themeContrast1} = useContext(ThemeContext);
     const onClick = () => {
         onOrderFilterReset();
     }
@@ -28,7 +33,8 @@ export function OrderFilterResetButton({themeContrast1, onOrderFilterReset}) {
     );
 }
 
-export function TrashCan({themeContrast1, setShow, setActive, setFormAction}) {
+export function TrashCan({setShow, setActive, setFormAction}) {
+    const {themeContrast1} = useContext(ThemeContext);
     const [{isOver}, dropRef] = useDrop(() => ({
         accept: ItemTypes.CARD,
         drop: (item, monitor) => {

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Container, Modal } from "react-bootstrap";
 import PassPropsWrapper from './Wrapper';
 
+import { ThemeContext } from './ThemeWrapper';
+
 
 export function ModalFormWrapper({ children, show, setShow, onSubmit, header, ...rest }) {
-    const {theme, themeContrast1, themeContrast2} = rest;
+    const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     
     const handleSubmit = (fdata) => {
         const res = onSubmit(fdata);

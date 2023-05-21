@@ -4,7 +4,11 @@ import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
 // import FilterSortWrapper from './commons/FilterSortWrapper';
+import { Container } from 'react-bootstrap';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import FilterSortWrapper from './API/FilterSortWrapper';
+import KeyMapWrapper from './commons/KeyMapWrapper';
 import PaginatorWrapper from './commons/PaginationWrapper';
 import ThemeWrapper from './commons/ThemeWrapper';
 import { AddButton, OrderFilterResetButton, TrashCan } from './components/ExtraButtons';
@@ -29,7 +33,10 @@ export function App() {
 
 
     return (
+        <Container fluid className="vh-100 overflow-auto">
+        <DndProvider backend={HTML5Backend}>
         <ThemeWrapper theme='dark'>
+        <KeyMapWrapper>
             <APIAuthWrapper>
                 <LoginModal show={showLogin} setShow={setShowLogin} />
                 <UserProfileModal show={showUserProfile} setShow={setShowUserProfile} />
@@ -57,6 +64,9 @@ export function App() {
                 </APIListWrapper>
                 </FilterSortWrapper>
             </APIAuthWrapper>
+        </KeyMapWrapper>
         </ThemeWrapper>
+        </DndProvider>
+        </Container>
     );
 }
