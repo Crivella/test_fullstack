@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
-import PassPropsWrapper from "./Wrapper";
+import { createContext, useContext, useEffect, useState } from "react";
+import { ListContext } from "../API/ListWrapper";
 
+export const FilterSortContext = createContext({});
 
-export default function FilterSortWrapper({children, list: raw, ...rest}) {
+export default function FilterSortWrapper({children}) {
+    const { list: raw } = useContext(ListContext);
     const [list, setList] = useState(raw);
     const [filters, setFilters] = useState(new Map(JSON.parse(localStorage.getItem('filters'))));
     const [sorting, setSorting] = useState(new Map(JSON.parse(localStorage.getItem('sorting'))));
@@ -52,7 +54,6 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
 
 
     const newProps = {
-        ...rest,
         'list': list,
         'filters': filters,
         'setFilters': setFilters,
@@ -62,8 +63,8 @@ export default function FilterSortWrapper({children, list: raw, ...rest}) {
     }
 
     return (
-        <PassPropsWrapper newProps={newProps}>
+        <FilterSortContext.Provider value={newProps}>
             {children}
-        </PassPropsWrapper>
+        </FilterSortContext.Provider>
     )
 }

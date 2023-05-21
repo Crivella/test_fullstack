@@ -4,6 +4,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { FilterSortContext } from '../API/FilterSortWrapper';
 import { ListContext } from '../API/ListWrapper';
 import { ItemTypes } from '../Constants';
+import { PaginationContext } from '../commons/PaginationWrapper';
 import { ThemeContext } from '../commons/ThemeWrapper';
 import { FilterSortHeader } from './FilterSort';
 import './TodoList.css';
@@ -12,7 +13,7 @@ const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]
 
 export default function TodoList({ ...rest }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
-    const { list} = useContext(ListContext);
+    const { list } = useContext(PaginationContext);
 
     const Headers = ['priority', 'title', 'completed'];
 

@@ -1,10 +1,8 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
-import { ThemeContext } from "../commons/ThemeWrapper";
-
 import { ListContext } from "../API/ListWrapper";
-
+import { ThemeContext } from "../commons/ThemeWrapper";
 
 export function TodoForm({onSubmit}) {
     const {list, formAction, active} = useContext(ListContext);
@@ -23,7 +21,7 @@ export function TodoForm({onSubmit}) {
         title.current.value = data.title;
         desc.current.value = data.description;
         priv.current.checked = data.private;
-    }, [list, active]);
+    }, [list, active, formAction]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

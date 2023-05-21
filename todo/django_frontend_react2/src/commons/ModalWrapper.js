@@ -1,22 +1,22 @@
 import React, { useContext } from 'react';
 import { Container, Modal } from "react-bootstrap";
-import PassPropsWrapper from './Wrapper';
 
 import { ThemeContext } from './ThemeWrapper';
 
 
-export function ModalFormWrapper({ children, show, setShow, onSubmit, header, ...rest }) {
-    const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
+
+
+export function ModalFormWrapper({ children, show, setShow, onSubmit, header }) {
+    const {theme, themeContrast1} = useContext(ThemeContext);
     
-    const handleSubmit = (fdata) => {
-        const res = onSubmit(fdata);
+    const handleSubmit = async (fdata) => {
+        const res = await onSubmit(fdata);
         setShow(!res);
+        return res;
     };
-    
-    const newProps = {
-        ...rest,
-        onSubmit: handleSubmit,
-    }
+
+    let form = {...children};
+    form.props = {...form.props, onSubmit: handleSubmit}; 
 
     return (
         <Modal show={show} onHide={() => setShow(false)}>
@@ -25,9 +25,7 @@ export function ModalFormWrapper({ children, show, setShow, onSubmit, header, ..
                     <Modal.Title>{header}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <PassPropsWrapper newProps={newProps}>
-                        {children}
-                    </PassPropsWrapper>
+                    {form}
                 </Modal.Body>
             </Container>
         </Modal>

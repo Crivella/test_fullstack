@@ -26,11 +26,9 @@ export default function KeyMapWrapper({children, ...rest}) {
 
     return (
         <Container fluid onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={-1} ref={ref}>
-        {/* <PassPropsWrapper newProps={newProps}> */}
         <KeyMapContext.Provider value={keyMap}>
             {children}
         </KeyMapContext.Provider>
-        {/* </PassPropsWrapper> */}
         </Container>
     )
 }

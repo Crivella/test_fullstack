@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
 import { Button, Container } from 'react-bootstrap';
 
-import { ListContext } from '../API/ListWrapper';
+import { PaginationContext } from '../commons/PaginationWrapper';
 
 
 export function PaginationToolbar({...rest}) {
-    const {pageSize, total} = useContext(ListContext);
+    const {page, setPage, pageSize, total} = useContext(PaginationContext);
     const [pagination, setPagination] = useState([]); // [{}
 
     useEffect(() => {
@@ -16,7 +16,7 @@ export function PaginationToolbar({...rest}) {
     return (
         <Container className='d-flex justify-content-end text-light mt-2'>
             {pagination.map((e) => (
-                <PaginationNumber key={e} {...rest} num={e} />
+                <PaginationNumber key={e} page={page} setPage={setPage} num={e} />
             ))}
         </Container>
     )

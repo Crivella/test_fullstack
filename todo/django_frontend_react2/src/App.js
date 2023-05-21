@@ -1,10 +1,9 @@
 import 'bootstrap/dist/css/bootstrap.css';
-import React, { useState } from 'react';
+import React from 'react';
 import APIAuthWrapper from './API/AuthWrapper';
 import APIListWrapper from './API/ListWrapper';
 import './App.css';
 // import FilterSortWrapper from './commons/FilterSortWrapper';
-import { Container } from 'react-bootstrap';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import FilterSortWrapper from './API/FilterSortWrapper';
@@ -12,61 +11,48 @@ import KeyMapWrapper from './commons/KeyMapWrapper';
 import PaginatorWrapper from './commons/PaginationWrapper';
 import ThemeWrapper from './commons/ThemeWrapper';
 import { AddButton, OrderFilterResetButton, TrashCan } from './components/ExtraButtons';
-import { AddEditModal, DeleteModal, LoginModal, UserProfileModal } from './components/Modals';
+import { AddEditModal, DeleteModal, LoginModal, ModalWrapper, UserProfileModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
 import { PaginationToolbar } from './components/PaginationToolbar';
 import TodoList from './components/TodoList';
 
 export function App() {
-    // State
-    const [showLogin, setShowLogin] = useState(false);
-    const [showTodo, setShowTodo] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
-    const [showUserProfile, setShowUserProfile] = useState(false);
-
-    const setShowModals = {
-        'setShowLogin': setShowLogin,
-        'setShowTodo': setShowTodo,
-        'setShowDelete': setShowDelete,
-        'setShowUserProfile': setShowUserProfile,
-    }
-
 
     return (
-        <Container fluid className="vh-100 overflow-auto">
-        <DndProvider backend={HTML5Backend}>
         <ThemeWrapper theme='dark'>
+        <DndProvider backend={HTML5Backend}>
         <KeyMapWrapper>
-            <APIAuthWrapper>
-                <LoginModal show={showLogin} setShow={setShowLogin} />
-                <UserProfileModal show={showUserProfile} setShow={setShowUserProfile} />
-                <CustomNavbar {...setShowModals} />
-                <FilterSortWrapper>
-                    
-                <APIListWrapper size={64}>
-                    <AddEditModal show={showTodo} setShow={setShowTodo} />
-                    <DeleteModal show={showDelete} setShow={setShowDelete} />
-                    {/* <FilterSortWrapper> */}
-                    {/* <PaginatorWrapper size={32}> */}
-                    <PaginatorWrapper size={16}>
-                    {/* <PaginatorWrapper size={4}> */}
-                    {/* <PaginatorWrapper size={2}> */}
-                            <TodoList setShowTodo={setShowTodo} setShowDelete={setShowDelete} />
-                            <OrderFilterResetButton />
-                        <PaginationToolbar />
-                    {/* </PaginatorWrapper> */}
-                    </PaginatorWrapper>
-                    {/* </PaginatorWrapper> */}
-                    {/* </PaginatorWrapper> */}
-                    {/* </FilterSortWrapper> */}
-                    <AddButton setShow={setShowTodo} />
-                    <TrashCan setShow={setShowDelete} />
-                </APIListWrapper>
-                </FilterSortWrapper>
-            </APIAuthWrapper>
+        <ModalWrapper>
+        <APIAuthWrapper>
+            <LoginModal />
+            <UserProfileModal />
+            <CustomNavbar />
+
+            <FilterSortWrapper>
+            <APIListWrapper size={64}>
+                <AddEditModal />
+                <DeleteModal />
+                {/* <FilterSortWrapper> */}
+                {/* <PaginatorWrapper size={32}> */}
+                <PaginatorWrapper size={16}>
+                {/* <PaginatorWrapper size={4}> */}
+                {/* <PaginatorWrapper size={2}> */}
+                        <TodoList />
+                        <OrderFilterResetButton />
+                    <PaginationToolbar />
+                {/* </PaginatorWrapper> */}
+                </PaginatorWrapper>
+                {/* </PaginatorWrapper> */}
+                {/* </PaginatorWrapper> */}
+                {/* </FilterSortWrapper> */}
+                <AddButton />
+                <TrashCan />
+            </APIListWrapper>
+            </FilterSortWrapper>
+        </APIAuthWrapper>
+        </ModalWrapper>
         </KeyMapWrapper>
-        </ThemeWrapper>
         </DndProvider>
-        </Container>
+        </ThemeWrapper>
     );
 }
