@@ -17,7 +17,8 @@ export default function APIListWrapper({children, size=10, getParams={}, ...rest
     const [pageSize, setPageSize] = useState(size);
     const [page, setPage] = useState(1);
 
-    const [update, setUpdate] = useState([]); // [{}
+    // const [update, setUpdate] = useState([]); // [{}
+    const [update, setUpdate] = useState(0); // [{}
 
     useEffect(() => {
         const offset = page > 1? `&offset=${(page-1)*pageSize}` : '';
@@ -49,7 +50,8 @@ export default function APIListWrapper({children, size=10, getParams={}, ...rest
     const updateItem =(id, data) => {
         return axios.patch(`${endpoint}/${id}/`, data, {})
             // .then(({data}) => {setList(list.map((e) => e.id === data.id ? data : e)); return data})
-            .then(({data}) => {setUpdate([...update, data]); return data})
+            // .then(({data}) => {setUpdate([...update, data]); return data})
+            .then(({data}) => {setUpdate(update+1); return data})
             .catch((err) => console.log(err));
     };
 
@@ -63,7 +65,8 @@ export default function APIListWrapper({children, size=10, getParams={}, ...rest
 
     const addItem = (data) => {
         return axios.post(`${endpoint}/`, data, {})
-            .then(({data}) => {setList([...list, data]); return data})
+            // .then(({data}) => {setList([...list, data]); return data})
+            .then(({data}) => {setUpdate(update+1); return data})
             .catch((err) => console.log(err));
     };
 
