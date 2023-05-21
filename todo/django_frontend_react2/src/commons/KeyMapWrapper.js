@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import { Container } from "react-bootstrap";
-import PassPropsWrapper from "./Wrapper";
+
+const KeyMapContext = createContext(new Map());
+
+export { KeyMapContext };
 
 export default function KeyMapWrapper({children, ...rest}) {
     const [keyMap, setKeyMap] = useState(new Map());
@@ -22,17 +25,14 @@ export default function KeyMapWrapper({children, ...rest}) {
         res.delete(e.key);
         setKeyMap(res);
     };
-    
-    const newProps = {
-        ...rest,
-        'keyMap': keyMap,
-    }
 
     return (
         <Container fluid onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={-1} ref={ref}>
-        <PassPropsWrapper newProps={newProps}>
+        {/* <PassPropsWrapper newProps={newProps}> */}
+        <KeyMapContext.Provider value={keyMap}>
             {children}
-        </PassPropsWrapper>
+        </KeyMapContext.Provider>
+        {/* </PassPropsWrapper> */}
         </Container>
     )
 }

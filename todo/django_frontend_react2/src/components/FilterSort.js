@@ -1,6 +1,8 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Overlay, Popover } from 'react-bootstrap';
+
+import { KeyMapContext } from "../commons/KeyMapWrapper";
 
 const arrows = {
     '-1': '↓',
@@ -14,7 +16,9 @@ export function FilterSortHeader({layout = {}, ...rest}) {
     const [arrow, setArrow] = useState('')
     const [sortIdx, setSortIdx] = useState('')
 
-    const {head, sorting, setSorting, keyMap} = rest;
+    const {head, sorting, setSorting} = rest;
+
+    const keyMap = useContext(KeyMapContext);
 
     useEffect(() => {
         // Set sorting arrow symbol
