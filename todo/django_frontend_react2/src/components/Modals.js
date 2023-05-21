@@ -52,7 +52,7 @@ export function LoginModal() {
 }
 
 export function AddEditModal({ formHeader }) {
-    const { todoAction } = useContext(TodoAPIContext);
+    const { todoAction, formAction } = useContext(TodoAPIContext);
     const { showTodo: show, setShowTodo: setShow } = useContext(ModalContext);
 
     const newProps = {
@@ -62,7 +62,7 @@ export function AddEditModal({ formHeader }) {
     }
 
     return (
-        <ModalFormWrapper header={formHeader} {...newProps} >
+        <ModalFormWrapper header={formAction} {...newProps} >
             <TodoForm />
         </ModalFormWrapper>
     )
@@ -73,7 +73,7 @@ export function DeleteModal() {
     const { showDelete: show, setShowDelete: setShow } = useContext(ModalContext);
 
     const handleSubmit = async () => {
-        if (active<=0) return false;
+        if (!active) return false;
         const res = await todoAction(active);
         setShow(!res);
         return res;
@@ -83,7 +83,7 @@ export function DeleteModal() {
         <ModalFormWrapper header="Delete item?" show={show} setShow={setShow} >
             <Container>
                 <p>Are you sure you want to delete this item?</p>
-                <p>"{active > 0 ? list.find(e => e.id === active).title : ''}"</p>
+                <p>"{active ? active.title : ''}"</p>
                 <Container fluid className="d-flex justify-content-between">
                     <Button variant="secondary" onClick={() => setShow(false)}>NO</Button>
                     <Button variant="danger" onClick={handleSubmit}>YES</Button>

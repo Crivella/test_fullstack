@@ -4,7 +4,7 @@ import { Button, Container } from 'react-bootstrap';
 import { PaginationContext } from '../commons/PaginationWrapper';
 
 
-export function PaginationToolbar({...rest}) {
+export function PaginationToolbar() {
     const {page, setPage, pageSize, count} = useContext(PaginationContext);
     const [pagination, setPagination] = useState([]); // [{}
 
