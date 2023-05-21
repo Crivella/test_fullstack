@@ -48,11 +48,10 @@ class TodoView(viewsets.ModelViewSet):
         return q.filter(Q(private=False) | Q(owner=self.request.user.id))
     
     def perform_create(self, serializer):
-        maxprio = TodoItem.objects.order_by('-priority').first().priority
         if 'priority' in serializer.validated_data:
             priority = serializer.validated_data['priority']
         else:
-            priority = maxprio + 1
+            priority = TodoItem.objects.order_by('-priority').first().priority + 1
         serializer.save(owner=self.request.user, priority=priority)
 
 class UserView(viewsets.ReadOnlyModelViewSet):

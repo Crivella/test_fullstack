@@ -1,7 +1,6 @@
 import { useContext } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
-import { FilterSortContext } from '../API/FilterSortWrapper';
 import { TodoAPIContext } from '../API/TodoListWrapper';
 import { ItemTypes } from '../Constants';
 import { PaginationContext } from '../commons/PaginationWrapper';
@@ -34,13 +33,12 @@ export default function TodoList({ ...rest }) {
 export function TodoItem({ todo }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
-    const {updateItem, active, setActive, setFormAction} = useContext(TodoAPIContext);
+    const {moveItemTo, updateItem, active, setActive, setFormAction} = useContext(TodoAPIContext);
     const { list } = useContext(PaginationContext);
-    const {sorting} = useContext(FilterSortContext);
 
     const [{ opacity }, dragRef] = useDrag(() => ({
         type: ItemTypes.CARD,
-        item: { ...todo },
+        item: todo,
         collect: (monitor) => ({
             opacity: monitor.isDragging() ? 0.5 : 1,
         }),
@@ -50,10 +48,7 @@ export function TodoItem({ todo }) {
         accept: ItemTypes.CARD,
         drop: (item, monitor) => {
             if (item.id === todo.id) return;
-            let offset = sorting.get('priority');
-            if (offset === 0) return;
-            if (list.findIndex(e => e.id === item.id) > list.indexOf(todo)) offset *= -1;
-            updateItem(item.id, {...item, priority: todo.priority + offset});
+            moveItemTo(item, todo);
         },
         collect: monitor => ({
             isOver: !!monitor.isOver(),
@@ -69,8 +64,8 @@ export function TodoItem({ todo }) {
         return updateItem(todo.id, data);
     };
 
-    const onSelect = (id) => {
-        active === id ? setActive(null) : setActive(id);
+    const onSelect = (todo) => {
+        active === todo  ? setActive(null) : setActive(todo);
     };
 
     const onEdit = () => {
@@ -90,11 +85,11 @@ export function TodoItem({ todo }) {
                     <Col {...ColLayout[0]}>
                         <Form.Control type='number' value={todo.priority} onChange={(e) => onPriority(todo, e)} />
                     </Col>
-                    <Form.Label as={Col} {...ColLayout[1]} onClick={() => onSelect(todo.id)}> {todo.title}</Form.Label>
+                    <Form.Label as={Col} {...ColLayout[1]} onClick={() => onSelect(todo)}> {todo.title}</Form.Label>
                 </Form.Group>
                 <input style={{width: '2rem'}} type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)}/>
             </Card.Header>
-            <Card.Body as={Alert} show={active === todo.id} variant={themeContrast2}>
+            <Card.Body as={Alert} show={active === todo} variant={themeContrast2}>
                 <Card.Text>{todo.description}</Card.Text>
                 <Card.Text>{todo.private ? 'Private' : 'Public'}</Card.Text>
                 <Container className='d-flex justify-content-between'>

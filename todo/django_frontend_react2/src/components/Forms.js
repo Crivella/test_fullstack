@@ -17,7 +17,7 @@ export function TodoForm({onSubmit}) {
 
     useEffect(() => {
         if (!active || formAction === 'add') return;
-        const data = list.find((item) => item.id === active);
+        const data = active;
         title.current.value = data.title;
         desc.current.value = data.description;
         priv.current.checked = data.private;
@@ -28,9 +28,11 @@ export function TodoForm({onSubmit}) {
         setValidated(true);
         const form = e.currentTarget;
         if (form.checkValidity() === false) return false;
+
+        const app = formAction === 'add' ? {} : active;
         
         const data = {
-            id: active,
+            ...app,
             title: title.current.value,
             description: desc.current.value,
             private: priv.current.checked,

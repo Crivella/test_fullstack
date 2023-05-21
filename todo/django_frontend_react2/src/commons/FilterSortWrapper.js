@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 export const FilterSortContext = createContext({});
 
@@ -28,9 +28,9 @@ export default function FilterSortWrapper({children}) {
 }
 
 export function useSort() {
-    const { sorting = new Map(new Map([['completed',1], ['priority',-1]])) } = useContext(FilterSortContext);
+    const { sorting = new Map([['completed',1], ['priority',-1]]) } = useContext(FilterSortContext);
 
-    const applySorting = (lst) => {
+    const applySorting = useCallback((lst) => {
         let sorters = Array.from(sorting.entries())
         .filter(([k,v]) => v !== 0)
         .map(([k, v]) => (a,b) => {
@@ -42,9 +42,9 @@ export function useSort() {
         });
         // If no active sorters, default to id
         if (sorters.length === 0) sorters = [(a,b) => a.id - b.id];
-
-        return sorters.reverse().reduce((acc, f) => acc.sort(f), lst);
-    };
+        sorters.reverse().forEach((f) => lst.sort(f));
+        return lst;
+    }, [sorting]);
 
     return applySorting;
 }
@@ -52,7 +52,8 @@ export function useSort() {
 export function useFilter() {
     const { filters = new Map()} = useContext(FilterSortContext);
 
-    const applyFilters = (lst) => {
+    // 1: contains, 2: not contains, 3: equals, 4: not equals, 5: starts with, 6: ends with, 7: blank, 8: not blank
+    const applyFilters = useCallback((lst) => {
         const filterers = Array.from(filters.entries())
         .filter(([k,[select,value]]) => value !== '')
         .map(([k, [select,value]]) => (e) => {
@@ -71,7 +72,7 @@ export function useFilter() {
             }
         });
         return filterers.reduce((acc, f) => acc.filter(f), lst);
-    }
+    }, [filters]);
 
     return applyFilters;
 }

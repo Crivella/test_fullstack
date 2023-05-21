@@ -44,7 +44,7 @@ export function TrashCan() {
     const [{isOver}, dropRef] = useDrop(() => ({
         accept: ItemTypes.CARD,
         drop: (item, monitor) => {
-            setActive(item.id);
+            setActive(item);
             setFormAction('delete');
             setShowDelete(true);
         },
