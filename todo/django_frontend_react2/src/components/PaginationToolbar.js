@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button, Container } from 'react-bootstrap';
 
+import { ListContext } from '../API/ListWrapper';
 
-export function PaginationToolbar({pageSize, total, ...rest}) {
+
+export function PaginationToolbar({...rest}) {
+    const {pageSize, total} = useContext(ListContext);
     const [pagination, setPagination] = useState([]); // [{}
 
     useEffect(() => {

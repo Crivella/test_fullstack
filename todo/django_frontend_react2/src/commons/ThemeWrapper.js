@@ -1,9 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 
-const ThemeContext = createContext('dark');
-
-export { ThemeContext };
+export const ThemeContext = createContext('dark');
 
 export default function ThemeWrapper(props) {
     const {children, theme: _theme, ...extras} = props;

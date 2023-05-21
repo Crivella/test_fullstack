@@ -3,8 +3,11 @@ import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
 import { ThemeContext } from "../commons/ThemeWrapper";
 
+import { ListContext } from "../API/ListWrapper";
 
-export function TodoForm({onSubmit, formAction, list, active}) {
+
+export function TodoForm({onSubmit}) {
+    const {list, formAction, active} = useContext(ListContext);
     const {theme} = useContext(ThemeContext);
     
     const [validated, setValidated] = useState(false);
@@ -76,7 +79,7 @@ export function TodoForm({onSubmit, formAction, list, active}) {
     );
 }
 
-export function LoginForm ({ login }) {
+export function LoginForm ({ onSubmit }) {
     const {theme} = useContext(ThemeContext);
 
     const [validated, setValidated] = useState(false);
@@ -85,7 +88,7 @@ export function LoginForm ({ login }) {
     const Username = useRef();
     const Password = useRef();
 
-    const onSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setValidated(true);
         const form = e.currentTarget;
@@ -96,7 +99,7 @@ export function LoginForm ({ login }) {
         fdata.append('password', Password.current.value);
 
         setValidated(false);
-        const user = await login(fdata);
+        const user = await onSubmit(fdata);
         if (!user) setFailed(true);
     };
     
@@ -105,7 +108,7 @@ export function LoginForm ({ login }) {
             <Alert variant="danger" show={failed}  onClose={() => setFailed(false)} dismissible>
                 Wrong username or password
             </Alert>
-            <Form validated={validated} onSubmit={onSubmit} noValidate>
+            <Form validated={validated} onSubmit={handleSubmit} noValidate>
                 <Row className="g-3">
                     <Form.Group as={Col} className="col-md-4" controlId="formBasicUsername">
                         <Form.Label>Username</Form.Label>
@@ -130,7 +133,7 @@ export function LoginForm ({ login }) {
     );
 }
 
-export function PasswordResetForm({onSubmit, setShow}) {
+export function PasswordResetForm({ onSubmit }) {
     const {theme} = useContext(ThemeContext);
 
     const [validated, setValidated] = useState(false);
@@ -153,13 +156,9 @@ export function PasswordResetForm({onSubmit, setShow}) {
 
         setValidated(false);
         const res = await onSubmit(fdata);
-        if (!res) {
-            setFailed(true);
-            return false;
-        }
+        setFailed(!res);
 
-        setShow(false);
-        return true;
+        return Boolean(res);
     };
 
     return (

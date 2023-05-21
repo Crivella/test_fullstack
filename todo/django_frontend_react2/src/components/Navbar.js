@@ -1,9 +1,10 @@
 import { useContext } from "react";
 import { Button, Container, Dropdown, DropdownButton, Form, Nav, Navbar } from "react-bootstrap";
+import { AuthContext } from "../API/AuthWrapper";
 import { ThemeContext } from "../commons/ThemeWrapper";
 
 export default function CustomNavbar(props) {
-    const {user, logout} = props;
+    const {user, logout} = useContext(AuthContext);
     const {theme, themeContrast1, setTheme} = useContext(ThemeContext);
     const {setShowLogin, setShowUserProfile} = props;
 

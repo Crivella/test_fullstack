@@ -2,6 +2,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Overlay, Popover } from 'react-bootstrap';
 
+import { FilterSortContext } from "../API/FilterSortWrapper";
 import { KeyMapContext } from "../commons/KeyMapWrapper";
 
 const arrows = {
@@ -13,10 +14,12 @@ const arrows = {
 const filterSymbol = '⧩';
 
 export function FilterSortHeader({layout = {}, ...rest}) {
+    const {sorting, setSorting} = useContext(FilterSortContext);
+    
     const [arrow, setArrow] = useState('')
     const [sortIdx, setSortIdx] = useState('')
 
-    const {head, sorting, setSorting} = rest;
+    const {head} = rest;
 
     const keyMap = useContext(KeyMapContext);
 
@@ -97,7 +100,9 @@ export function FilterComponent({...rest}) {
     )
 }
 
-export function FilterForm({head, setShow, filters, setFilters, ...rest}) {
+export function FilterForm({head, setShow, ...rest}) {
+    const {filters, setFilters} = useContext(FilterSortContext);
+
     const def = [1, ''];
     const [select, setSelect] = useState((filters.get(head) || def)[0]); // [1,2,3,4,5,6,7,8]
     const [value, setValue] = useState((filters.get(head) || def)[1]);

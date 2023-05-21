@@ -4,9 +4,11 @@ import { ItemTypes } from '../Constants';
 import './ExtraButtons.css';
 
 import { useContext } from "react";
+import { ListContext } from "../API/ListWrapper";
 import { ThemeContext } from "../commons/ThemeWrapper";
 
-export function AddButton({setShow, setFormAction}) {
+export function AddButton({setShow}) {
+    const {setFormAction} = useContext(ListContext);
     const {themeContrast1} = useContext(ThemeContext);
     const onClick = () => {
         setFormAction('add');
@@ -33,8 +35,9 @@ export function OrderFilterResetButton({onOrderFilterReset}) {
     );
 }
 
-export function TrashCan({setShow, setActive, setFormAction}) {
+export function TrashCan({setShow}) {
     const {themeContrast1} = useContext(ThemeContext);
+    const { setActive, setFormAction } = useContext(ListContext);
     const [{isOver}, dropRef] = useDrop(() => ({
         accept: ItemTypes.CARD,
         drop: (item, monitor) => {

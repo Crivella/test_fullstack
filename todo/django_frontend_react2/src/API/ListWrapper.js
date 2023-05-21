@@ -1,13 +1,20 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import PassPropsWrapper from '../commons/Wrapper';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { AuthContext } from './AuthWrapper';
+import { FilterSortContext } from './FilterSortWrapper';
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
-export default function APIListWrapper({children, size=10, getParams={}, ...rest}) {
+export const ListContext = createContext({});
+
+
+export default function APIListWrapper({children, size=10, ...rest}) {
+    const { user } = useContext(AuthContext);
+    const { getParams = {} } = useContext(FilterSortContext);
+
     const [active, setActive] = useState(null);
     const [list, setList] = useState([]); // [{}
     const [formHeader, setFormHeader] = useState('Add Item'); 
@@ -30,7 +37,7 @@ export default function APIListWrapper({children, size=10, getParams={}, ...rest
             setTotal(data.count);
         })
         .catch((err) => console.log(err));
-    }, [page, pageSize, getParams, rest.user, update]);
+    }, [page, pageSize, getParams, user, update]);
 
     // useEffect(() => {
     //     if (update.length) {
@@ -93,7 +100,6 @@ export default function APIListWrapper({children, size=10, getParams={}, ...rest
     };
 
     const newProps = {
-        ...rest,
         'list': list, // [{}, {}, {}]
         'setList': setList,
         'active': active,
@@ -117,8 +123,8 @@ export default function APIListWrapper({children, size=10, getParams={}, ...rest
     }
 
     return (
-        <PassPropsWrapper newProps={newProps}>
+        <ListContext.Provider value={newProps}>
             {children}
-        </PassPropsWrapper>
+        </ListContext.Provider>
     )
 }

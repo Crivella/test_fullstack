@@ -1,25 +1,30 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Alert, Button, Container } from "react-bootstrap";
 import { ModalFormWrapper } from "../commons/ModalWrapper";
 import { LoginForm, PasswordResetForm, TodoForm } from "./Forms";
 
-export function LoginModal({  login: onSubmit, ...rest }) {
-    const {setShow } = rest;
+// import { useAuth } from "../hooks/useAuth";
+import { AuthContext } from "../API/AuthWrapper";
+import { ListContext } from '../API/ListWrapper';
+
+export function LoginModal({ setShow, ...rest }) {
+    const {login} = useContext(AuthContext);
     
     const handleSubmit = async (fdata) => {
-        const res = await onSubmit(fdata);
+        const res = await login(fdata);
         setShow(!res);
         return res;
     };
 
     return (
         <ModalFormWrapper header="Login" {...rest}>
-            <LoginForm login={handleSubmit} />
+            <LoginForm onSubmit={handleSubmit} />
         </ModalFormWrapper>
     )
 }
 
-export function AddEditModal({ formHeader, todoAction: onSubmit, ...rest }) {
+export function AddEditModal({ formHeader, ...rest }) {
+    const { todoAction: onSubmit } = useContext(ListContext);
     const { setShow } = rest;
     
     const handleSubmit = async (fdata) => {
@@ -35,12 +40,12 @@ export function AddEditModal({ formHeader, todoAction: onSubmit, ...rest }) {
     )
 }
 
-export function DeleteModal({ list, active, ...rest }) {
-    const {setShow, todoAction: onSubmit } = rest;
+export function DeleteModal({ setShow, ...rest }) {
+    const {list, active, todoAction } = useContext(ListContext);
 
     const handleSubmit = async () => {
         if (active<=0) return false;
-        const res = await onSubmit(active);
+        const res = await todoAction(active);
         setShow(!res);
         return res;
     } 
@@ -57,11 +62,17 @@ export function DeleteModal({ list, active, ...rest }) {
     )
 }
 
-export function UserProfileModal({ user, ...rest }) {
-    const { setShow } = rest;
-    const { passwordChange } = rest;
+export function UserProfileModal({ setShow, ...rest }) {
+    const { user } = useContext(AuthContext);
+    const { passwordChange } = useContext(AuthContext);
 
     const [showPasswordReset, setShowPasswordReset] = useState(false);
+
+    const handleSubmit = async (fdata) => {
+        const res = await passwordChange(fdata);
+        setShow(!res);
+        return res;
+    };
 
     return (
         <ModalFormWrapper header="User Profile" {...rest}>
@@ -71,7 +82,7 @@ export function UserProfileModal({ user, ...rest }) {
                 <Button variant="secondary" onClick={() => setShowPasswordReset(true)}>Password Reset</Button>
             </Container>
             <Alert variant="warning" show={showPasswordReset}  onClose={() => setShowPasswordReset(false)} dismissible>
-                <PasswordResetForm onSubmit={passwordChange} setShow={setShowPasswordReset} />
+                <PasswordResetForm onSubmit={handleSubmit} />
             </ Alert>
         </ModalFormWrapper>
     )

@@ -1,9 +1,7 @@
 import { createContext, useEffect, useRef, useState } from "react";
 import { Container } from "react-bootstrap";
 
-const KeyMapContext = createContext(new Map());
-
-export { KeyMapContext };
+export const KeyMapContext = createContext(new Map());
 
 export default function KeyMapWrapper({children, ...rest}) {
     const [keyMap, setKeyMap] = useState(new Map());

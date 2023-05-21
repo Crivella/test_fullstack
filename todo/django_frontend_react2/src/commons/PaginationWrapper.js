@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import PassPropsWrapper from './Wrapper';
 
+// import { useListContext } from './ListWrapper';
+import { ListContext } from '../API/ListWrapper';
 
-export default function PaginatorWrapper({children, pageSize, setPageSize, page, setPage, list, size=10, ...rest}) {
+
+export default function PaginatorWrapper({children, size=10, ...rest}) {
+    const { pageSize, page, setPage, list} = useContext(ListContext);
     const [FEpageSize, setFEpageSize] = useState(size); // [15]
     const [FEpage, setFEpage] = useState(1); // [1]
     const [FElist, setFElist] = useState([]); // [{}]

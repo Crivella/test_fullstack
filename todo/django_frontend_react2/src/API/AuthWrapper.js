@@ -1,22 +1,20 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import PassPropsWrapper from '../commons/Wrapper';
+import { createContext, useEffect, useState } from 'react';
 
 const endpoint = process.env.REACT_APP_AUTH_ENDPOINT;
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
+export const AuthContext = createContext({});
 
-export default function APIAuthWrapper(props) {
+export default function APIAuthWrapper({children}) {
     const [user, setUser] = useState("");
 
     useEffect(() => {
-        updateUser()
         getCSRFToken() //Needed to get CSRF token first time app is run
+        updateUser()
     }, []);
-
-    const {children, ...extras} = props;
 
     // GET request to a valide rendered page by Django to get CSRF token
     // https://stackoverflow.com/a/75014511/7604434
@@ -54,7 +52,6 @@ export default function APIAuthWrapper(props) {
     };
 
     const newProps = {
-        ...extras,
         'user': user,
         'login': login,
         'logout': logout,
@@ -62,8 +59,8 @@ export default function APIAuthWrapper(props) {
     }
 
     return (
-        <PassPropsWrapper newProps={newProps}>
+        <AuthContext.Provider value={newProps}>
             {children}
-        </PassPropsWrapper>
+        </AuthContext.Provider>
     )
 }
