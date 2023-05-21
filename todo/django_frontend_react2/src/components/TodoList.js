@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { FilterSortContext } from '../API/FilterSortWrapper';
-import { ListContext } from '../API/TodoListWrapper';
+import { TodoAPIContext } from '../API/TodoListWrapper';
 import { ItemTypes } from '../Constants';
 import { PaginationContext } from '../commons/PaginationWrapper';
 import { ThemeContext } from '../commons/ThemeWrapper';
@@ -34,7 +34,7 @@ export default function TodoList({ ...rest }) {
 export function TodoItem({ todo }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
-    const {updateItem, active, setActive, setFormAction} = useContext(ListContext);
+    const {updateItem, active, setActive, setFormAction} = useContext(TodoAPIContext);
     const { list } = useContext(PaginationContext);
     const {sorting} = useContext(FilterSortContext);
 

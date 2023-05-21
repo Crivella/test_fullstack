@@ -5,13 +5,13 @@ import { PaginationContext } from '../commons/PaginationWrapper';
 
 
 export function PaginationToolbar({...rest}) {
-    const {page, setPage, pageSize, total} = useContext(PaginationContext);
+    const {page, setPage, pageSize, count} = useContext(PaginationContext);
     const [pagination, setPagination] = useState([]); // [{}
 
     useEffect(() => {
-        const numPages = Math.ceil(total/pageSize);
+        const numPages = Math.ceil(count/pageSize);
         setPagination([...Array(numPages).keys()].map((e) => e+1));
-    }, [total, pageSize]);
+    }, [count, pageSize]);
 
     return (
         <Container className='d-flex justify-content-end text-light mt-2'>

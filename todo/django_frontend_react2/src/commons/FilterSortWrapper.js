@@ -1,21 +1,39 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { ListContext } from "../API/ListWrapper";
+import { createContext, useContext, useState } from "react";
 
 export const FilterSortContext = createContext({});
 
 export default function FilterSortWrapper({children}) {
-    const { list: raw } = useContext(ListContext);
-    const [list, setList] = useState(raw);
     const [filters, setFilters] = useState(new Map(JSON.parse(localStorage.getItem('filters'))));
-    const [sorting, setSorting] = useState(new Map(JSON.parse(localStorage.getItem('sorting'))));
+    const [sorting, setSorting] = useState(new Map([['completed',1], ['priority',-1]]));
 
-    // Sorting/Filters change hook (merged togheter to avoid infinite loop)
-    useEffect(() => {
-        localStorage.setItem('filters', JSON.stringify([...filters.entries()]));
-        localStorage.setItem('sorting', JSON.stringify([...sorting.entries()]));
+    const onOrderFilterReset = () => {
+        setFilters(new Map());
+        setSorting(new Map());
+    };
 
-        const res = [...raw];
-        let sorters = Array.from(sorting.entries()).filter(([k,v]) => v !== 0).map(([k, v]) => (a,b) => {
+
+    const newProps = {
+        'filters': filters,
+        'setFilters': setFilters,
+        'sorting': sorting,
+        'setSorting': () => 1,
+        'onOrderFilterReset': onOrderFilterReset,
+    }
+
+    return (
+        <FilterSortContext.Provider value={newProps}>
+            {children}
+        </FilterSortContext.Provider>
+    )
+}
+
+export function useSort() {
+    const { sorting = new Map(new Map([['completed',1], ['priority',-1]])) } = useContext(FilterSortContext);
+
+    const applySorting = (lst) => {
+        let sorters = Array.from(sorting.entries())
+        .filter(([k,v]) => v !== 0)
+        .map(([k, v]) => (a,b) => {
             // Add type specific comparison
             // eg strings.toUpper to sort case insensitive
             if (a[k] < b[k]) return -v;
@@ -25,10 +43,19 @@ export default function FilterSortWrapper({children}) {
         // If no active sorters, default to id
         if (sorters.length === 0) sorters = [(a,b) => a.id - b.id];
 
-        sorters.reverse().forEach((f) => res.sort(f));
+        return sorters.reverse().reduce((acc, f) => acc.sort(f), lst);
+    };
 
-        // 1: contains, 2: not contains, 3: equals, 4: not equals, 5: starts with, 6: ends with, 7: blank, 8: not blank
-        const filterers = Array.from(filters.entries()).filter(([k,[select,value]]) => value !== '').map(([k, [select,value]]) => (e) => {
+    return applySorting;
+}
+
+export function useFilter() {
+    const { filters = new Map()} = useContext(FilterSortContext);
+
+    const applyFilters = (lst) => {
+        const filterers = Array.from(filters.entries())
+        .filter(([k,[select,value]]) => value !== '')
+        .map(([k, [select,value]]) => (e) => {
             switch (select) {
                 case 1: return e[k].includes(value);
                 case 2: return !e[k].includes(value);
@@ -43,27 +70,8 @@ export default function FilterSortWrapper({children}) {
                     throw new Error(`Invalid action ${select} for filter ${k}`);
             }
         });
-        setList(filterers.reduce((acc, f) => acc.filter(f), res));
-    }, [filters, sorting, raw]);
-
-    const onOrderFilterReset = () => {
-        setFilters(new Map());
-        setSorting(new Map());
-    };
-
-
-    const newProps = {
-        'list': list,
-        'filters': filters,
-        'setFilters': setFilters,
-        'sorting': sorting,
-        'setSorting': setSorting,
-        'onOrderFilterReset': onOrderFilterReset,
+        return filterers.reduce((acc, f) => acc.filter(f), lst);
     }
 
-    return (
-        <FilterSortContext.Provider value={newProps}>
-            {children}
-        </FilterSortContext.Provider>
-    )
+    return applyFilters;
 }

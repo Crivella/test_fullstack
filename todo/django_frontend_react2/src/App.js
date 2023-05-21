@@ -1,11 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
 import AuthWrapper from './API/AuthWrapper';
-import TodoListWrapper from './API/TodoListWrapper';
 import './App.css';
 // import FilterSortWrapper from './commons/FilterSortWrapper';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import TodosWrapper from './API/TodoListWrapper';
 import KeyMapWrapper from './commons/KeyMapWrapper';
 import PaginatorWrapper from './commons/PaginationWrapper';
 import ThemeWrapper from './commons/ThemeWrapper';
@@ -28,7 +28,7 @@ export function App() {
             <CustomNavbar />
 
             {/* <FilterSortWrapper> */}
-            <TodoListWrapper size={64}>
+            <TodosWrapper size={1024}>
                 <AddEditModal />
                 <DeleteModal />
                 {/* <FilterSortWrapper> */}
@@ -46,7 +46,7 @@ export function App() {
                 {/* </FilterSortWrapper> */}
                 <AddButton />
                 <TrashCan />
-            </TodoListWrapper>
+            </TodosWrapper>
             {/* </FilterSortWrapper> */}
         </AuthWrapper>
         </ModalWrapper>

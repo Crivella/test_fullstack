@@ -5,12 +5,12 @@ import './ExtraButtons.css';
 
 import { useContext } from "react";
 import { FilterSortContext } from "../API/FilterSortWrapper";
-import { ListContext } from "../API/TodoListWrapper";
+import { TodoAPIContext } from "../API/TodoListWrapper";
 import { ThemeContext } from "../commons/ThemeWrapper";
 import { ModalContext } from "./Modals";
 
 export function AddButton() {
-    const {setFormAction} = useContext(ListContext);
+    const {setFormAction} = useContext(TodoAPIContext);
     const {themeContrast1} = useContext(ThemeContext);
     const {setShowTodo} = useContext(ModalContext);
     
@@ -39,7 +39,7 @@ export function OrderFilterResetButton() {
 
 export function TrashCan() {
     const {themeContrast1} = useContext(ThemeContext);
-    const { setActive, setFormAction } = useContext(ListContext);
+    const { setActive, setFormAction } = useContext(TodoAPIContext);
     const { setShowDelete } = useContext(ModalContext);
     const [{isOver}, dropRef] = useDrop(() => ({
         accept: ItemTypes.CARD,

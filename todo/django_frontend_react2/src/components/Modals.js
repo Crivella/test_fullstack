@@ -5,7 +5,7 @@ import { LoginForm, PasswordResetForm, TodoForm } from "./Forms";
 
 // import { useAuth } from "../hooks/useAuth";
 import { AuthContext } from "../API/AuthWrapper";
-import { ListContext } from '../API/TodoListWrapper';
+import { TodoAPIContext } from '../API/TodoListWrapper';
 
 export const ModalContext = createContext({});
 
@@ -52,7 +52,7 @@ export function LoginModal() {
 }
 
 export function AddEditModal({ formHeader }) {
-    const { todoAction } = useContext(ListContext);
+    const { todoAction } = useContext(TodoAPIContext);
     const { showTodo: show, setShowTodo: setShow } = useContext(ModalContext);
 
     const newProps = {
@@ -69,7 +69,7 @@ export function AddEditModal({ formHeader }) {
 }
 
 export function DeleteModal() {
-    const {list, active, todoAction } = useContext(ListContext);
+    const {list, active, todoAction } = useContext(TodoAPIContext);
     const { showDelete: show, setShowDelete: setShow } = useContext(ModalContext);
 
     const handleSubmit = async () => {

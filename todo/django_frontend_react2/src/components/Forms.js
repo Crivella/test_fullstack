@@ -1,11 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
-import { ListContext } from "../API/TodoListWrapper";
+import { TodoAPIContext } from "../API/TodoListWrapper";
 import { ThemeContext } from "../commons/ThemeWrapper";
 
 export function TodoForm({onSubmit}) {
-    const {list, formAction, active} = useContext(ListContext);
+    const {list, formAction, active} = useContext(TodoAPIContext);
     const {theme} = useContext(ThemeContext);
     
     const [validated, setValidated] = useState(false);

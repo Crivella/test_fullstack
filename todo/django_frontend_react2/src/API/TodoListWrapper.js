@@ -1,80 +1,36 @@
 import axios from 'axios';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useFilter, useSort } from '../commons/FilterSortWrapper';
 import { AuthContext } from './AuthWrapper';
-import { FilterSortContext } from './FilterSortWrapper';
 
 const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
-export const ListContext = createContext({});
+export const TodoAPIContext = createContext({});
 
-export default function TodoListWrapper({children, size=10, ...rest}) {
+export default function TodosClientWrapper({children}) {
     const { user } = useContext(AuthContext);
-    const { getParams = {} } = useContext(FilterSortContext);
+    const { getList, addItem, updateItem, deleteItem } = useTodoAPI();
 
-    const [active, setActive] = useState(null);
+    const applyFilters = useFilter();
+    const applySort = useSort();
+
+    // const [active, setActive] = useState(null);
     const [list, setList] = useState([]); // [{}
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, _setFormAction] = useState('add');
-
-    const [total, setTotal] = useState(0);
-    const [pageSize, setPageSize] = useState(size);
-    const [page, setPage] = useState(1);
 
     // const [update, setUpdate] = useState([]); // [{}
     const [update, setUpdate] = useState(0); // [{}
 
     useEffect(() => {
-        const offset = page > 1? `&offset=${(page-1)*pageSize}` : '';
-        axios.get(`${endpoint}/?limit=${pageSize}${offset}`, {
-            headers: { 'Content-Type': 'application/json' },
-            params: getParams,
-        }).then(({data}) => {
-            setList(data.results); 
-            setTotal(data.count);
-        })
-        .catch((err) => console.log(err));
-    }, [page, pageSize, getParams, user, update]);
-
-    // useEffect(() => {
-    //     if (update.length) {
-    //         const app = update.shift();
-    //         setList(list.map((e) => e.id === app.id ? app : e));
-    //         setPage(page);
-    //         // setUpdate([]);
-    //     };
-    // }, [update, list]);
-
-    const getItem = (id) => {
-        return axios.get(`${endpoint}/${id}/`, {
-            headers: { 'Content-Type': 'application/json' }
-        }).then(({data}) => data);
-    };
-
-    const updateItem =(id, data) => {
-        return axios.patch(`${endpoint}/${id}/`, data, {})
-            // .then(({data}) => {setList(list.map((e) => e.id === data.id ? data : e)); return data})
-            // .then(({data}) => {setUpdate([...update, data]); return data})
-            .then(({data}) => {setUpdate(update+1); return data})
-            .catch((err) => console.log(err));
-    };
-
-    const deleteItem = (id) => {
-        return axios.delete(`${endpoint}/${id}/`, {}) 
-            .then(() => setList(list.filter((e) => e.id !== id)))
-            .then(() => setActive(null))
-            .then(() => id)
-            .catch((err) => console.log(err));
-    };
-
-    const addItem = (data) => {
-        return axios.post(`${endpoint}/`, data, {})
-            // .then(({data}) => {setList([...list, data]); return data})
-            .then(({data}) => {setUpdate(update+1); return data})
-            .catch((err) => console.log(err));
-    };
+        getList()
+            .then(data => applyFilters(data))
+            .then(data => applySort(data))
+            .then(data => setList(data));
+    }, [user]);
 
     const setFormAction = (action) => {
         _setFormAction(action);
@@ -101,29 +57,51 @@ export default function TodoListWrapper({children, size=10, ...rest}) {
     const newProps = {
         'list': list, // [{}, {}, {}]
         'setList': setList,
-        'active': active,
-        'setActive': setActive,
-        // 'getList': getList,
-        'getItem': getItem,
-        'updateItem': updateItem,
-        'deleteItem': deleteItem,
-        'addItem': addItem,
+        // 'active': active,
+        // 'setActive': setActive,
         'formHeader': formHeader,
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
         'todoAction': onSubmit,
-
-        'page': page,
-        'setPage': setPage,
-        'pageSize': pageSize,
-        'setPageSize': setPageSize,
-        'total': total,
-        'setTotal': setTotal,
     }
 
     return (
-        <ListContext.Provider value={newProps}>
+        <TodoAPIContext.Provider value={newProps}>
             {children}
-        </ListContext.Provider>
+        </TodoAPIContext.Provider>
     )
+}
+
+
+export function useTodoAPI() {
+    const getList = () => {
+        return axios.get(`${endpoint}/`, {
+            headers: { 'Content-Type': 'application/json' },
+        })
+        .catch((err) => console.log(err))
+        .then(({data}) => data);
+    };
+
+    const getItem = (id) => {
+        return axios.get(`${endpoint}/${id}/`, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    };
+
+    const updateItem =(id, data) => {
+        return axios.patch(`${endpoint}/${id}/`, data, {})
+            .catch((err) => console.log(err));
+    };
+
+    const deleteItem = (id) => {
+        return axios.delete(`${endpoint}/${id}/`, {}) 
+            .catch((err) => console.log(err));
+    };
+
+    const addItem = (data) => {
+        return axios.post(`${endpoint}/`, data, {})
+            .catch((err) => console.log(err));
+    };
+
+    return { getList, getItem, updateItem, deleteItem, addItem};
 }
