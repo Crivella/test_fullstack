@@ -6,3 +6,8 @@
     padding: 6px;
     display: flex;
 }
+
+.todo-check > .form-check-input {
+    width: 1.8rem;
+    height: 1.8rem;
+}

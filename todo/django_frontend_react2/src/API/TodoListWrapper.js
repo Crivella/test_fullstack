@@ -87,7 +87,7 @@ export default function TodosClientWrapper({children}) {
     }, [fullList, deleteList]);
 
     const moveItemTo = useCallback((itm1, itm2) => { // itm1: dragged, itm2: inplace
-        const app = [...fullList];
+        const app = [...list];
         const idx1 = app.findIndex(e => e.id === itm1.id);
         const idx2 = app.findIndex(e => e.id === itm2.id);
 
@@ -100,9 +100,8 @@ export default function TodosClientWrapper({children}) {
             slice3 = app.slice(idx1);
             slice3.shift()
             slice2.forEach(e => e.priority -= 1);
-            slice2.forEach(e => updateItem(e));
 
-            setList([...slice1, itm1, ...slice2, ...slice3])
+            // setList([...slice1, itm1, ...slice2, ...slice3])
         } else {
             itm1.priority = itm2.priority;
             slice1 = app.slice(0, idx1);
@@ -111,14 +110,14 @@ export default function TodosClientWrapper({children}) {
             slice2.shift()
             slice2.forEach(e => e.priority += 1);
             
-            setList([...slice1, ...slice2, itm1, ...slice3])
+            // setList([...slice1, ...slice2, itm1, ...slice3])
         }
         
         slice2.forEach(e => updateItem(e));
         updateItem(itm1);
         
         return true;
-    }, [fullList]);
+    }, [list, updateItem]);
 
     const onSubmit = (data) => {
         switch (formAction) {
