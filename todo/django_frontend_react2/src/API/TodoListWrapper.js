@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useFilter, useSort } from '../commons/FilterSortWrapper';
+import { usePagination } from '../commons/PaginationWrapper';
 import { AuthContext } from './AuthWrapper';
 
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -15,6 +16,7 @@ export default function TodosClientWrapper({children}) {
 
     const applyFilters = useFilter();
     const applySort = useSort();
+    const {paginateList} = usePagination();
 
     const [active, setActive] = useState(null);
     const [maxID, setMacID] = useState(0); // [{}
@@ -37,8 +39,8 @@ export default function TodosClientWrapper({children}) {
     }, [user, getList]);
 
     useEffect(() => {
-        setList(applySort(applyFilters(fullList)));
-    }, [fullList, applyFilters, applySort]);
+        setList(paginateList(applySort(applyFilters(fullList))));
+    }, [fullList, paginateList, applyFilters, applySort]);
 
     useEffect(() => {
         setFullList(serverList);

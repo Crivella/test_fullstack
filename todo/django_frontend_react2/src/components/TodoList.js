@@ -1,21 +1,22 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { TodoAPIContext } from '../API/TodoListWrapper';
 import { ItemTypes } from '../Constants';
-import { PaginationContext } from '../commons/PaginationWrapper';
 import { ThemeContext } from '../commons/ThemeWrapper';
 import { FilterSortHeader } from './FilterSort';
 import { ModalContext } from './Modals';
 import './TodoList.css';
 
-const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]
+// const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]
+const ColLayout = [{'sm': 10}, {'sm': 2}]
 
 export default function TodoList({ ...rest }) {
-    const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
-    const { list } = useContext(PaginationContext);
+    const {theme} = useContext(ThemeContext);
+    const { list } = useContext(TodoAPIContext);
 
-    const Headers = ['priority', 'title', 'completed'];
+    // const Headers = ['priority', 'title', 'completed'];
+    const Headers = ['title', 'completed'];
 
     return (
         <ListGroup className='p-2 list-container' variant={theme}>
@@ -33,8 +34,7 @@ export default function TodoList({ ...rest }) {
 export function TodoItem({ todo }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
-    const {moveItemTo, updateItem, active, setActive, setFormAction} = useContext(TodoAPIContext);
-    const { list } = useContext(PaginationContext);
+    const {list, moveItemTo, updateItem, active, setActive, setFormAction} = useContext(TodoAPIContext);
 
     const [{ isDragging, opacity }, dragRef] = useDrag(() => ({
         type: ItemTypes.CARD,
@@ -56,14 +56,18 @@ export function TodoItem({ todo }) {
         }),
     }), [list]);
 
+    useEffect(() => {
+        if (isOver) console.log(todo);
+    }, [isOver]);
+
     const onCheck = (todo, e) => {
         const data = {...todo, completed: e.target.checked};
-        return updateItem(todo.id, data);
+        return updateItem(data);
     };
-    const onPriority = (todo, e) => {
-        const data = {...todo, priority: e.currentTarget.value};
-        return updateItem(todo.id, data);
-    };
+    // const onPriority = (todo, e) => {
+    //     const data = {...todo, priority: e.currentTarget.value};
+    //     return updateItem(todo.id, data);
+    // };
 
     const onSelect = (todo) => {
         active === todo  ? setActive(null) : setActive(todo);
@@ -83,12 +87,12 @@ export function TodoItem({ todo }) {
     return (
         <>
         <ListGroup.Item ref={dragRef} style={{ opacity }} as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>
-            <Card.Header ref={dropRef} variant={isOver ? 'success' : 'dark'} as={Form} onSubmit={(e) => e.preventDefault()} className='d-flex justify-content-between' >
+            <Card.Header ref={dropRef} as={Form} onSubmit={(e) => e.preventDefault()} className='d-flex justify-content-between' >
                 <Form.Group as={Row} className='d-flex flex-grow-1' >
-                    <Col {...ColLayout[0]}>
+                    {/* <Col {...ColLayout[0]}>
                         <Form.Control type='number' value={todo.priority} onChange={(e) => onPriority(todo, e)} />
-                    </Col>
-                    <Form.Label as={Col} {...ColLayout[1]} onClick={() => onSelect(todo)}> {todo.title}</Form.Label>
+                    </Col> */}
+                    <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(todo)}> {`${todo.priority})  ${todo.title}`}</Form.Label>
                 </Form.Group>
                 <input style={{width: '2rem'}} type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)}/>
             </Card.Header>

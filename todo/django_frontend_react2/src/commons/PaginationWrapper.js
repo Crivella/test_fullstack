@@ -1,29 +1,21 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 
 // import { useListContext } from './ListWrapper';
-import { TodoAPIContext } from '../API/TodoListWrapper';
 
 export const PaginationContext = createContext();
 
 export default function PaginatorWrapper({children, size=16}) {
-    const { list } = useContext(TodoAPIContext);
-    const [FEpageSize, setFEpageSize] = useState(size); // [15]
-    const [FEpage, setFEpage] = useState(1); // [1]
-    const [FElist, setFElist] = useState([]); // [{}]
-
-    useEffect(() => {
-        const start = (FEpage-1)*FEpageSize;
-        const end = start + FEpageSize;
-        setFElist(list.slice(start, end));
-    }, [list, FEpage, FEpageSize]);
+    const [count, setCount] = useState(0); // [0
+    const [pageSize, setpageSize] = useState(size); // [15]
+    const [page, setPage] = useState(1); // [1]
 
     const newProps = {
-        'list': FElist,
-        'count': list.length,
-        'pageSize': FEpageSize,
-        'page': FEpage,
-        'setPage': setFEpage,
-        'setPageSize': setFEpageSize,
+        'count': count,
+        'setCount': setCount,
+        'pageSize': pageSize,
+        'page': page,
+        'setPage': setPage,
+        'setPageSize': setpageSize,
     }
     return (
         <PaginationContext.Provider value={newProps}>
@@ -32,3 +24,15 @@ export default function PaginatorWrapper({children, size=16}) {
     )
 }
 
+export function usePagination() {
+    const { pageSize, page, setCount } = useContext(PaginationContext);
+
+    const paginateList = useCallback((lst) => {
+        setCount(lst.length);
+        const start = (page-1)*pageSize;
+        const end = start + pageSize;
+        return lst.slice(start, end);
+    }, [page, pageSize, setCount]);
+
+    return { paginateList }
+}

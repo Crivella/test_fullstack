@@ -22,6 +22,7 @@ export function App() {
         <DndProvider backend={HTML5Backend}>
         <KeyMapWrapper>
         <ModalWrapper>
+        <PaginatorWrapper size={16}>
         <AuthWrapper>
             <LoginModal />
             <UserProfileModal />
@@ -33,14 +34,12 @@ export function App() {
                 <DeleteModal />
                 {/* <FilterSortWrapper> */}
                 {/* <PaginatorWrapper size={32}> */}
-                <PaginatorWrapper size={16}>
                 {/* <PaginatorWrapper size={4}> */}
                 {/* <PaginatorWrapper size={2}> */}
                         <TodoList />
                         <OrderFilterResetButton />
                     <PaginationToolbar />
                 {/* </PaginatorWrapper> */}
-                </PaginatorWrapper>
                 {/* </PaginatorWrapper> */}
                 {/* </PaginatorWrapper> */}
                 {/* </FilterSortWrapper> */}
@@ -49,6 +48,7 @@ export function App() {
             </TodosWrapper>
             </FilterSortWrapper>
         </AuthWrapper>
+        </PaginatorWrapper>
         </ModalWrapper>
         </KeyMapWrapper>
         </DndProvider>
