@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
-import { useDrag, useDrop } from 'react-dnd';
 import { TodoAPIContext } from '../API/TodoListWrapper';
 import { ItemTypes } from '../Constants';
 import { ThemeContext } from '../commons/ThemeWrapper';
+import { DragDropFrame } from './DragDrop';
 import { FilterSortHeader } from './FilterSort';
 import { ModalContext } from './Modals';
 import './TodoList.css';
@@ -34,39 +34,7 @@ export default function TodoList({ ...rest }) {
 export function TodoItem({ todo }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
-    const {list, moveItemTo, updateItem, active, setActive, setFormAction} = useContext(TodoAPIContext);
-
-    // const [{ isDragging, opacity }, dragRef] = useDrag(() => ({
-    //     type: ItemTypes.CARD,
-    //     item: todo,
-    //     collect: (monitor) => ({
-    //         isDragging: monitor.isDragging(),
-    //         opacity: monitor.isDragging() ? 0.5 : 1,
-    //     }),
-    // }), [list]);
-
-    // const [isOverTop, setIsOverTop] = useState(false);
-    // const [isOverBot, setIsOverBot] = useState(false);
-
-    // const [{isOver}, dropRef] = useDrop(() => ({
-    //     accept: ItemTypes.CARD,
-    //     drop: (item, monitor) => {
-    //         if (item.id === todo.id) return;
-    //         moveItemTo(item, todo);
-    //     },
-    //     hover: (item, monitor) => {
-    //         if (item.id === todo.id) return;
-    //         if (! monitor.isOver({ shallow: true })) return;
-    //         const idx1 = list.findIndex(e => e.id === item.id);
-    //         const idx2 = list.findIndex(e => e.id === todo.id);
-
-    //         if (idx1 > idx2) setIsOverTop(true);
-    //         else setIsOverBot(true);
-    //     },
-    //     collect: monitor => ({
-    //         isOver: !!monitor.isOver(),
-    //     }),
-    // }), [list]);
+    const {moveItemTo, active, setActive, setFormAction} = useContext(TodoAPIContext);
 
     const onDrop = (item, data) => {
         if (item.id === data.id) return;
@@ -87,9 +55,12 @@ export function TodoItem({ todo }) {
         setShowDelete(true);
     };
     
-    // if (isDragging) return <EmptyTodoItem />;
     return (
-        <DragDropFrame type={ItemTypes.CARD} data={todo} onDrop={onDrop}>
+        <DragDropFrame 
+        type={ItemTypes.CARD} data={todo} 
+        onDrop={onDrop}
+        placeHolder={<EmptyTodoItem />}
+        >
         <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className={`mt-1 p-0 bg-${theme}`}>
 
             <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-flex justify-content-between' >
@@ -108,53 +79,11 @@ export function TodoItem({ todo }) {
             </Card.Body>
 
         </ListGroup.Item>
-        {/* <EmptyTodoItem /> */}
-        {/* // </Container> */}
         </DragDropFrame>
     )
 };
 
-function DragDropFrame({children, type, data, onHover = () => 1, onDrop = () => 1}) {
-    const { theme } = useContext(ThemeContext);
-    const [{ isDragging }, dragRef, dragPreviewRef] = useDrag(() => ({
-        type: type,
-        item: data,
-        collect: (monitor) => ({
-            isDragging: monitor.isDragging(),
-        }),
-    }), [data]);
 
-    const [{isOver}, dropRef] = useDrop(() => ({
-        accept: type,
-        drop: (item, monitor) => {
-            if (item.id === data.id) return;
-            onDrop(item, data);
-        },
-        hover: (item, monitor) => {
-            onHover(item, data);
-            // if (item.id === data.id) return;
-            // if (! monitor.isOver({ shallow: true })) return;
-            // const idx1 = list.findIndex(e => e.id === item.id);
-            // const idx2 = list.findIndex(e => e.id === data.id);
-
-            // if (idx1 > idx2) setIsOverTop(true);
-            // else setIsOverBot(true);
-        },
-        collect: monitor => ({
-            isOver: !!monitor.isOver(),
-        }),
-    }), [data]);
-
-    if (isDragging) return (<EmptyTodoItem ref={dragPreviewRef} />);
-    
-    return (
-        <Container bg={theme} ref={dragRef} fluid className='m-0 p-0' >
-            <Container bg={theme} ref={dropRef} fluid className='m-0 p-0' >
-                {children}
-            </Container>
-        </Container>
-    )
-}
 
 function CompletedCheckbox({ todo }) {
     const {updateItem} = useContext(TodoAPIContext);
