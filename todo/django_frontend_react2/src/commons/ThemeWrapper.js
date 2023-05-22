@@ -23,7 +23,7 @@ export default function ThemeWrapper(props) {
     }
 
     return (
-        <Container fluid className={`vh-100 overflow-auto bg-${theme}`}>
+        <Container fluid className={`vh-100 overflow-auto bg-${theme}`} data-bs-theme={theme}>
             <ThemeContext.Provider value={newProps}>
                 {children}
             </ThemeContext.Provider>
