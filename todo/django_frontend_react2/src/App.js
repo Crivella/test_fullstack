@@ -6,7 +6,6 @@ import AuthWrapper from './API/AuthWrapper';
 import TodosWrapper from './API/TodoListWrapper';
 import './App.css';
 import FilterSortWrapper from './commons/FilterSortWrapper';
-import KeyMapWrapper from './commons/KeyMapWrapper';
 import PaginatorWrapper from './commons/PaginationWrapper';
 import ThemeWrapper from './commons/ThemeWrapper';
 import { AddButton, OrderFilterResetButton, TrashCan } from './components/ExtraButtons';
@@ -20,7 +19,7 @@ export function App() {
     return (
         <ThemeWrapper theme='dark'>
         <DndProvider backend={HTML5Backend}>
-        <KeyMapWrapper>
+        {/* <KeyMapWrapper> */}
         <ModalWrapper>
         <PaginatorWrapper size={16}>
         <AuthWrapper>
@@ -50,7 +49,7 @@ export function App() {
         </AuthWrapper>
         </PaginatorWrapper>
         </ModalWrapper>
-        </KeyMapWrapper>
+        {/* </KeyMapWrapper> */}
         </DndProvider>
         </ThemeWrapper>
     );
