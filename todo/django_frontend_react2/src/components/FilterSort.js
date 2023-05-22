@@ -1,9 +1,8 @@
 
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Button, Col, Container, Form, Overlay, Popover } from 'react-bootstrap';
 
-import { FilterSortContext } from "../API/FilterSortWrapper";
-import { KeyMapContext } from "../commons/KeyMapWrapper";
+import { FilterSortContext } from "../commons/FilterSortWrapper";
 
 const arrows = {
     '-1': '↓',
@@ -14,66 +13,68 @@ const arrows = {
 const filterSymbol = '⧩';
 
 export function FilterSortHeader({head, layout = {}}) {
-    const {sorting = new Map(), setSorting = () => 1} = useContext(FilterSortContext);
+    // const { sorting, setSorting } = useContext(FilterSortContext);
     
-    const [arrow, setArrow] = useState('')
-    const [sortIdx, setSortIdx] = useState('')
+    // const [arrow, setArrow] = useState('')
+    // const [sortIdx, setSortIdx] = useState('')
 
-    const keyMap = useContext(KeyMapContext);
+    // const keyMap = useContext(KeyMapContext);
 
-    useEffect(() => {
-        // Set sorting arrow symbol
-        setArrow(arrows[sorting.get(head) | 0]);
+    // useEffect(() => {
+    //     // Set sorting arrow symbol
+    //     setArrow(arrows[sorting.get(head) | 0]);
 
-        // Set sorting index for multisort
-        const getIdx = (head) => {
-            let idx = 0;
-            for (const [k,v] of sorting) {
-                if (v !== 0) idx++;
-                if (k === head) {
-                    if (v === 0) idx = '';
-                    return idx;
-                }
-            }
-            return '';
-        };
+    //     // Set sorting index for multisort
+    //     const getIdx = (head) => {
+    //         let idx = 0;
+    //         for (const [k,v] of sorting) {
+    //             if (v !== 0) idx++;
+    //             if (k === head) {
+    //                 if (v === 0) idx = '';
+    //                 return idx;
+    //             }
+    //         }
+    //         return '';
+    //     };
 
-        const nsort = [...sorting.values()].filter((e) => e !== 0).length;
-        const idx = getIdx(head);
+    //     const nsort = [...sorting.values()].filter((e) => e !== 0).length;
+    //     const idx = getIdx(head);
 
-        if (nsort > 1){
-            setSortIdx(`${idx} `)
-        } else {
-            setSortIdx(' ');
-        }
+    //     if (nsort > 1){
+    //         setSortIdx(`${idx} `)
+    //     } else {
+    //         setSortIdx(' ');
+    //     }
 
-    }, [sorting, head]);
+    // }, [sorting, head]);
 
 
     // 0 - no sort, 1 - asc, 2 - desc
-    const onSort = (head) => {
-        let res;
-        const app = sorting.get(head) | 0;
-        if (keyMap.get('Shift', 0)) {
-            res = new Map(sorting);
-        } else {
-            res = new Map();
-            res.set(head, app);
-        };
-        res.delete(head)
-        res.set(head, (app + 2)%3 - 1);
-        setSorting(res);
-    };
+    // const onSort = (head) => {
+    //     let res;
+    //     const app = sorting.get(head) | 0;
+    //     if (keyMap.get('Shift', 0)) {
+    //         res = new Map(sorting);
+    //     } else {
+    //         res = new Map();
+    //         res.set(head, app);
+    //     };
+    //     res.delete(head)
+    //     res.set(head, (app + 2)%3 - 1);
+    //     setSorting(res);
+    // };
 
     return (
         <Col className="d-flex justify-content-between flex-grow-1" {...layout}>
-            <span onClick={() => onSort(head)}>{arrow}{sortIdx}{head}</span>
+            {/* <span onClick={() => onSort(head)}>{arrow}{sortIdx}{head}</span> */}
+            <span>{head}</span>
             <FilterComponent head={head} />
         </Col> 
     )
 }
 
 export function FilterComponent({ head }) {
+    const { filters } = useContext(FilterSortContext);
     const [show, setShow] = useState(false);
     const [target, setTarget] = useState(null);
 
@@ -86,8 +87,11 @@ export function FilterComponent({ head }) {
     
     return (
         <Container ref={ref}>
-            <span className="px-1" onClick={onFilter}>{filterSymbol}</span>
-            <Overlay target={target} container={ref} show={show} placement="bottom">
+            <Button variant={`${filters.has(head) ? '' : 'outline-'}primary`} className="px-1" onClick={onFilter}>{filterSymbol}</Button>
+            <Overlay 
+                target={target} container={ref} show={show} placement="bottom"
+                onHide={() => setShow(false)} rootClose
+                >
                 <Popover id="popover-contained">
                     <Popover.Body>
                         <FilterForm setShow={setShow} head={head} />
@@ -99,7 +103,7 @@ export function FilterComponent({ head }) {
 }
 
 export function FilterForm({head, setShow}) {
-    const {filters = new Map(), setFilters = () => 1} = useContext(FilterSortContext);
+    const { filters, setFilters } = useContext(FilterSortContext);
 
     const def = [1, ''];
     const [select, setSelect] = useState((filters.get(head) || def)[0]); // [1,2,3,4,5,6,7,8]
@@ -114,7 +118,8 @@ export function FilterForm({head, setShow}) {
         setShow(false);
     };
     
-    const onApply = () => {
+    const onApply = (e) => {
+        e.preventDefault();
         const res = new Map(filters);
         res.set(head, [select, value]);
         setFilters(res);
@@ -130,7 +135,7 @@ export function FilterForm({head, setShow}) {
     };
 
     return (
-        <Form ref={form}>
+        <Form ref={form} onSubmit={onApply}>
             <Form.Select aria-label="Select filter" value={select} onChange={onSelect}>
                 <option value="1">Contains</option>
                 <option value="2">Not contains</option>
@@ -148,7 +153,7 @@ export function FilterForm({head, setShow}) {
             }
             <Container className="d-flex justify-content-between">
                 <Button variant="primary" onClick={onReset}>Reset</Button>
-                <Button variant="primary" onClick={onApply}>Apply</Button>
+                <Button variant="primary" type="submit" onClick={onApply}>Apply</Button>
             </Container>
         </Form>
     )

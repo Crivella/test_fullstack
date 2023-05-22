@@ -3,14 +3,13 @@ import { createContext, useCallback, useContext, useState } from "react";
 export const FilterSortContext = createContext({});
 
 export default function FilterSortWrapper({children}) {
-    const [filters, setFilters] = useState(new Map(JSON.parse(localStorage.getItem('filters'))));
+    const [filters, setFilters] = useState(new Map());
     const [sorting, setSorting] = useState(new Map([['completed',1], ['priority',-1]]));
 
     const onOrderFilterReset = () => {
         setFilters(new Map());
-        setSorting(new Map());
+        // setSorting(new Map());
     };
-
 
     const newProps = {
         'filters': filters,
@@ -28,7 +27,7 @@ export default function FilterSortWrapper({children}) {
 }
 
 export function useSort() {
-    const { sorting = new Map([['completed',1], ['priority',-1]]) } = useContext(FilterSortContext);
+    const { sorting  } = useContext(FilterSortContext);
 
     const applySorting = useCallback((lst) => {
         let sorters = Array.from(sorting.entries())
@@ -50,8 +49,8 @@ export function useSort() {
 }
 
 export function useFilter() {
-    const { filters = new Map()} = useContext(FilterSortContext);
-
+    const { filters } = useContext(FilterSortContext);
+    
     // 1: contains, 2: not contains, 3: equals, 4: not equals, 5: starts with, 6: ends with, 7: blank, 8: not blank
     const applyFilters = useCallback((lst) => {
         const filterers = Array.from(filters.entries())

@@ -36,10 +36,11 @@ export function TodoItem({ todo }) {
     const {moveItemTo, updateItem, active, setActive, setFormAction} = useContext(TodoAPIContext);
     const { list } = useContext(PaginationContext);
 
-    const [{ opacity }, dragRef] = useDrag(() => ({
+    const [{ isDragging, opacity }, dragRef] = useDrag(() => ({
         type: ItemTypes.CARD,
         item: todo,
         collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
             opacity: monitor.isDragging() ? 0.5 : 1,
         }),
     }), [list]);
@@ -78,7 +79,9 @@ export function TodoItem({ todo }) {
         setShowDelete(true);
     };
     
+    if (isDragging) return null;
     return (
+        <>
         <ListGroup.Item ref={dragRef} style={{ opacity }} as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className='mt-1'>
             <Card.Header ref={dropRef} variant={isOver ? 'success' : 'dark'} as={Form} onSubmit={(e) => e.preventDefault()} className='d-flex justify-content-between' >
                 <Form.Group as={Row} className='d-flex flex-grow-1' >
@@ -98,5 +101,6 @@ export function TodoItem({ todo }) {
                 </Container>
             </Card.Body>
         </ListGroup.Item>
+        </>
     )
 };

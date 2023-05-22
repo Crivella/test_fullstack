@@ -4,8 +4,8 @@ import { ItemTypes } from '../Constants';
 import './ExtraButtons.css';
 
 import { useContext } from "react";
-import { FilterSortContext } from "../API/FilterSortWrapper";
 import { TodoAPIContext } from "../API/TodoListWrapper";
+import { FilterSortContext } from "../commons/FilterSortWrapper";
 import { ThemeContext } from "../commons/ThemeWrapper";
 import { ModalContext } from "./Modals";
 

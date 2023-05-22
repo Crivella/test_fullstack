@@ -19,7 +19,8 @@ export default function TodosClientWrapper({children}) {
     const [active, setActive] = useState(null);
     const [maxID, setMacID] = useState(0); // [{}
     const [maxPrio, setMaxPrio] = useState(0); // [{}
-    const [list, _setList] = useState([]); // [{}
+    const [list, setList] = useState([]); // [{}
+    const [fullList, setFullList] = useState([]); // [{}
     const [serverList, setServerList] = useState([]); // [{}
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, setFormAction] = useState('add');
@@ -35,17 +36,16 @@ export default function TodosClientWrapper({children}) {
             .then(data => setServerList(data));
     }, [user, getList]);
 
-    const setList = useCallback((data) => {
-        _setList(applySort(applyFilters(data)));
-    }, [applyFilters, applySort]);
+    useEffect(() => {
+        setList(applySort(applyFilters(fullList)));
+    }, [fullList, applyFilters, applySort]);
 
     useEffect(() => {
-        setList(serverList);
+        setFullList(serverList);
     }, [serverList]);
 
     useEffect(() => {
         let max;
-        console.log(list);
         max = list.reduce((acc, e) => Math.max(acc, e.priority), 0);
         setMaxPrio(max);
         max = list.reduce((acc, e) => Math.max(acc, e.id), 0);
@@ -65,27 +65,27 @@ export default function TodosClientWrapper({children}) {
     const addItem = useCallback((data) => {
         const app = {priority: maxPrio + 1, id: maxID + 1, ...data};
         setAddList([...addList, app]);
-        setList([app, ...list]);
+        setFullList([app, ...fullList]);
         return true;
-    }, [list, addList, maxPrio, setList]);
+    }, [fullList, addList, maxPrio, maxID]);
 
     const updateItem = useCallback((data) => {
         const app = {...updateList};
         app[data.id] = data;
         setUpdateList(app);
-        setList(list.map(e => e.id === data.id ? data : e));
+        setFullList(fullList.map(e => e.id === data.id ? data : e));
         return true;
-    }, [list, updateList]);
+    }, [fullList, updateList]);
 
     const deleteItem = useCallback((id) => {
         setDeleteList([...deleteList, id]);
-        setList(list.filter(e => e.id !== id));
+        setFullList(fullList.filter(e => e.id !== id));
         setActive(null);
         return true;
-    }, [list, deleteList]);
+    }, [fullList, deleteList]);
 
     const moveItemTo = useCallback((itm1, itm2) => { // itm1: dragged, itm2: inplace
-        const app = [...list];
+        const app = [...fullList];
         const idx1 = app.findIndex(e => e.id === itm1.id);
         const idx2 = app.findIndex(e => e.id === itm2.id);
 
@@ -102,7 +102,6 @@ export default function TodosClientWrapper({children}) {
 
             setList([...slice1, itm1, ...slice2, ...slice3])
         } else {
-            console.log('idx1 < idx2');
             itm1.priority = itm2.priority;
             slice1 = app.slice(0, idx1);
             slice2 = app.slice(idx1, idx2+1);
@@ -117,10 +116,9 @@ export default function TodosClientWrapper({children}) {
         updateItem(itm1);
         
         return true;
-    }, [list]);
+    }, [fullList]);
 
     const onSubmit = (data) => {
-        console.log('onSubmit', data, formAction);
         switch (formAction) {
             case 'add': return addItem(data);
             case 'edit': return updateItem(data.id, data);
