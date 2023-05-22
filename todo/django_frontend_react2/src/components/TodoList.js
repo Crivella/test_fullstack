@@ -3,7 +3,7 @@ import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react
 import { TodoAPIContext } from '../API/TodoListWrapper';
 import { ItemTypes } from '../Constants';
 import { ThemeContext } from '../commons/ThemeWrapper';
-import { DragDropFrame } from './DragDrop';
+import { ListItemDragDropFrame } from './DragDrop';
 import { FilterSortHeader } from './FilterSort';
 import { ModalContext } from './Modals';
 import './TodoList.css';
@@ -31,15 +31,15 @@ export default function TodoList({ ...rest }) {
     );
 }
 
+function lock(ms) {
+    // console.log('locking');
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function TodoItem({ todo }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
     const {moveItemTo, active, setActive, setFormAction} = useContext(TodoAPIContext);
-
-    const onDrop = (item, data) => {
-        if (item.id === data.id) return;
-        moveItemTo(item, data);
-    };
 
     const onSelect = (todo) => {
         active === todo  ? setActive(null) : setActive(todo);
@@ -56,13 +56,12 @@ export function TodoItem({ todo }) {
     };
     
     return (
-        <DragDropFrame 
-        type={ItemTypes.CARD} data={todo} 
-        onDrop={onDrop}
-        placeHolder={<EmptyTodoItem />}
+        <ListItemDragDropFrame 
+            type={ItemTypes.CARD} data={todo} 
+            onDrop={moveItemTo}
+            placeHolder={<EmptyTodoItem />}
         >
         <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className={`mt-1 p-0 bg-${theme}`}>
-
             <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-flex justify-content-between' >
                 <Form.Group as={Row} className='d-flex flex-grow-1' >
                     <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(todo)}> {`${todo.priority})  ${todo.title}`}</Form.Label>
@@ -79,7 +78,7 @@ export function TodoItem({ todo }) {
             </Card.Body>
 
         </ListGroup.Item>
-        </DragDropFrame>
+        </ListItemDragDropFrame>
     )
 };
 
@@ -103,8 +102,6 @@ function EmptyTodoItem(props) {
     return (
         <ListGroup.Item as={Card} bg={theme} key={-1} className='mt-1' {...props}>
             <p> </p>
-            <p> </p>
-            <p></p>
         </ListGroup.Item>
     )
 }

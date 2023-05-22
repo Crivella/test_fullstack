@@ -1,15 +1,20 @@
-import { useContext } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
-import { ThemeContext } from '../commons/ThemeWrapper';
+import './DragDrop.css';
 
-export function DragDropFrame({
+export function ListItemDragDropFrame({
     children, 
     type, data, 
-    onHover = () => 1, onDrop = () => 1,
+    onHover, onDrop, onCollect,
     placeHolder = <></>
 }) {
-    const { theme } = useContext(ThemeContext);
+    const [draggedDir, setDraggedDir] = useState(0);
+    // const [dragged, setDragged] = useState(false);
+    const [dropped, setDropped] = useState(false);
+
+    const swipeRef = useRef(null);
+    
     const [{ isDragging }, dragRef, dragPreviewRef] = useDrag(() => ({
         type: type,
         item: data,
@@ -18,35 +23,56 @@ export function DragDropFrame({
         }),
     }), [data]);
 
-    const [{isOver}, dropRef] = useDrop(() => ({
+    const [{}, dropRef] = useDrop(() => ({
         accept: type,
         drop: (item, monitor) => {
             if (item.id === data.id) return;
-            onDrop(item, data);
+            if (onDrop) onDrop(item, data, monitor);
+            setDropped(true);
         },
         hover: (item, monitor) => {
-            onHover(item, data);
-            // if (item.id === data.id) return;
-            // if (! monitor.isOver({ shallow: true })) return;
-            // const idx1 = list.findIndex(e => e.id === item.id);
-            // const idx2 = list.findIndex(e => e.id === data.id);
-
-            // if (idx1 > idx2) setIsOverTop(true);
-            // else setIsOverBot(true);
+            if (item.id === data.id) return;
+            if (onHover) onHover(item, data, monitor);
+            const {x,y} = monitor.getDifferenceFromInitialOffset();
+            setDraggedDir(Math.sign(y));
         },
-        collect: monitor => ({
-            isOver: !!monitor.isOver(),
-        }),
+        collect: monitor => {
+            if (onCollect) onCollect(monitor);
+            if (!!monitor.isOver()) return {};
+            setDraggedDir(0);
+            return {}
+        },
     }), [data]);
+
+    useEffect(() => {
+        if (dropped) {
+            swipeRef.current.className = 'swipein'
+            setDropped(false);
+        }
+    }, [dropped, swipeRef]);
+
+    // useEffect(() => {
+    //     if (isDragging && !dragged) {
+    //         swipeRef.current.className = 'swipeout'
+    //     }
+    //     if (!isDragging && !dragged) {
+    //         swipeRef.current.className = 'swipein'
+    //     }
+    //     setDragged(isDragging);
+    // }, [isDragging, swipeRef]);
 
     // if (isDragging) return (<EmptyTodoItem ref={dragPreviewRef} />);
     if (isDragging) return (placeHolder);
     
     return (
-        <Container bg={theme} ref={dragRef} fluid className='m-0 p-0' >
-            <Container bg={theme} ref={dropRef} fluid className='m-0 p-0' >
+        <Container ref={dropRef} fluid className='m-0 p-0' >
+        <Container ref={swipeRef} fluid className='m-0 p-0' >
+            {draggedDir === -1 ? placeHolder : null}
+            <Container  ref={dragRef} fluid className='m-0 p-0' >
                 {children}
             </Container>
+            {draggedDir === 1 ? placeHolder : null}
+        </Container>
         </Container>
     )
 }

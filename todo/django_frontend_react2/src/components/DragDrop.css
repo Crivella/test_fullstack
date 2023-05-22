@@ -1,0 +1,26 @@
+@keyframes swipein {
+    0% {
+        transform: translateX(30%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes swipeout {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.swipein {
+    animation: swipein 0.3s ease-in-out;
+}
+
+.swipeout {
+    animation: swipeout 0.3s;
+    animation-fill-mode: forwards;
+}
