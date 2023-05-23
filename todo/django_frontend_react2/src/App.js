@@ -19,37 +19,26 @@ export function App() {
     return (
         <ThemeWrapper theme='dark'>
         <DndProvider backend={HTML5Backend}>
-        {/* <KeyMapWrapper> */}
         <ModalWrapper>
         <PaginatorWrapper size={16}>
         <AuthWrapper>
             <LoginModal />
             <UserProfileModal />
             <CustomNavbar />
-
             <FilterSortWrapper>
-            <TodosWrapper size={1024}>
-                <AddEditModal />
-                <DeleteModal />
-                {/* <FilterSortWrapper> */}
-                {/* <PaginatorWrapper size={32}> */}
-                {/* <PaginatorWrapper size={4}> */}
-                {/* <PaginatorWrapper size={2}> */}
-                        <TodoList />
-                        <OrderFilterResetButton />
+                <TodosWrapper size={1024}>
+                    <AddEditModal />
+                    <DeleteModal />
+                    <TodoList />
                     <PaginationToolbar />
-                {/* </PaginatorWrapper> */}
-                {/* </PaginatorWrapper> */}
-                {/* </PaginatorWrapper> */}
-                {/* </FilterSortWrapper> */}
-                <AddButton />
-                <TrashCan />
-            </TodosWrapper>
+                    <AddButton />
+                    <TrashCan />
+                </TodosWrapper>
+                <OrderFilterResetButton />
             </FilterSortWrapper>
         </AuthWrapper>
         </PaginatorWrapper>
         </ModalWrapper>
-        {/* </KeyMapWrapper> */}
         </DndProvider>
         </ThemeWrapper>
     );

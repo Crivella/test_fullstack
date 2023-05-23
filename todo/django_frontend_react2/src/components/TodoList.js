@@ -51,7 +51,7 @@ export function TodoItem({ todo, active, setActive, ...rest }) {
         setFormAction('delete');
         setShowDelete(true);
     };
-    
+
     return (
         <ListItemDragDropFrame 
             type={ItemTypes.CARD} data={todo} 

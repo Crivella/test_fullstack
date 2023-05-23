@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import './DragDrop.css';
+
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export function ListItemDragDropFrame({
     children, 
@@ -10,11 +14,8 @@ export function ListItemDragDropFrame({
     placeHolder = <></>
 }) {
     const [draggedDir, setDraggedDir] = useState(0);
-    // const [dragged, setDragged] = useState(false);
     const [dropped, setDropped] = useState(false);
 
-    const swipeRef = useRef(null);
-    
     const [{ isDragging }, dragRef, dragPreviewRef] = useDrag(() => ({
         type: type,
         item: data,
@@ -44,35 +45,40 @@ export function ListItemDragDropFrame({
         },
     }), [data]);
 
+    const [extraClass, setExtraClass] = useState('');
+
     useEffect(() => {
         if (dropped) {
-            swipeRef.current.className = 'swipein'
+            setExtraClass('swipein')
             setDropped(false);
+            timeout(350).then(() => {setExtraClass('')});
         }
-    }, [dropped, swipeRef]);
+    }, [dropped]);
 
-    // useEffect(() => {
-    //     if (isDragging && !dragged) {
-    //         swipeRef.current.className = 'swipeout'
-    //     }
-    //     if (!isDragging && !dragged) {
-    //         swipeRef.current.className = 'swipein'
-    //     }
-    //     setDragged(isDragging);
-    // }, [isDragging, swipeRef]);
+    const placeHolderExp = {
+        ...placeHolder, 
+        'props': {
+            ...placeHolder.props, 
+            'className': `${placeHolder.props.className} expand`
+        }};
 
-    // if (isDragging) return (<EmptyTodoItem ref={dragPreviewRef} />);
-    if (isDragging) return (placeHolder);
+    const placeHolderComp = {
+        ...placeHolder, 
+        'props': {
+            ...placeHolder.props, 
+            'className': `${placeHolder.props.className} compress`
+        }};
+
+
+    if (isDragging) return (placeHolderComp);
     
     return (
-        <Container ref={dropRef} fluid className='m-0 p-0' >
-        {draggedDir === -1 ? placeHolder : null}
-        <Container ref={swipeRef} fluid className='m-0 p-0' >
+        <Container ref={dropRef} fluid className={`m-0 p-0 ${extraClass}`} >
+        {draggedDir === -1 ? placeHolderExp : null}
         <Container  ref={dragRef} fluid className='m-0 p-0' >
             {children}
         </Container>
-        </Container>
-        {draggedDir === 1 ? placeHolder : null}
+        {draggedDir === 1 ? placeHolderExp : null}
         </Container>
     )
 }

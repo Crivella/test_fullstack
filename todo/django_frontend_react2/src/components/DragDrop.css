@@ -16,11 +16,41 @@
     }
 }
 
+@keyframes expand {
+    0% {
+        max-height: 0;
+    }
+    100% {
+        max-height: 100%;
+    }
+}
+
+@keyframes compress {
+    0% {
+        max-height: 100%;
+        filter: brightness(100%);
+    }
+    100% {
+        max-height: 0;
+        filter: brightness(85%);
+    }
+}
+
 .swipein {
     animation: swipein 0.3s ease-in-out;
 }
 
 .swipeout {
     animation: swipeout 0.3s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+.expand {
+    animation: expand 0.3s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+.compress {
+    animation: compress 0.3s ease-in-out;
     animation-fill-mode: forwards;
 }

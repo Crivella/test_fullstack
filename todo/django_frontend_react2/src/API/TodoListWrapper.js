@@ -39,7 +39,9 @@ export default function TodosClientWrapper({children}) {
     }, [user, getList]);
 
     useEffect(() => {
-        setList(paginateList(applySort(applyFilters(fullList))));
+        const app = paginateList(applySort(applyFilters(fullList)));
+        app.forEach((e, idx) => e.idx = idx);
+        setList(app);
     }, [fullList, paginateList, applyFilters, applySort]);
 
     useEffect(() => {
@@ -87,33 +89,21 @@ export default function TodosClientWrapper({children}) {
     }, [fullList, deleteList]);
 
     const moveItemTo = useCallback((itm1, itm2) => { // itm1: dragged, itm2: inplace
-        const app = [...list];
-        const idx1 = app.findIndex(e => e.id === itm1.id);
-        const idx2 = app.findIndex(e => e.id === itm2.id);
+        const idx1 = itm1.idx;
+        const idx2 = itm2.idx;
 
-        let slice1, slice2, slice3;
+        let  slice;
 
+        itm1.priority = itm2.priority;
         if (idx1 > idx2) {
-            itm1.priority = itm2.priority;
-            slice1 = app.slice(0, idx2);
-            slice2 = app.slice(idx2, idx1);
-            slice3 = app.slice(idx1);
-            slice3.shift()
-            slice2.forEach(e => e.priority -= 1);
-
-            // setList([...slice1, itm1, ...slice2, ...slice3])
+            slice = list.slice(idx2, idx1);
+            slice.forEach(e => e.priority -= 1);
         } else {
-            itm1.priority = itm2.priority;
-            slice1 = app.slice(0, idx1);
-            slice2 = app.slice(idx1, idx2+1);
-            slice3 = app.slice(idx2+1);
-            slice2.shift()
-            slice2.forEach(e => e.priority += 1);
-            
-            // setList([...slice1, ...slice2, itm1, ...slice3])
+            slice = list.slice(idx1+1, idx2+1);
+            slice.forEach(e => e.priority += 1);
         }
         
-        slice2.forEach(e => updateItem(e));
+        slice.forEach(e => updateItem(e));
         updateItem(itm1);
         
         return true;
@@ -133,9 +123,6 @@ export default function TodosClientWrapper({children}) {
 
     const newProps = {
         'list': list, // [{}, {}, {}]
-        'setList': setList,
-        // 'active': active,
-        // 'setActive': setActive,
         'formHeader': formHeader,
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
