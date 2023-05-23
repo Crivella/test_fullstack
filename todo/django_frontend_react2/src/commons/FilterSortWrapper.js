@@ -56,15 +56,15 @@ export function useFilter() {
         const filterers = Array.from(filters.entries())
         .filter(([k,[select,value]]) => value !== '')
         .map(([k, [select,value]]) => (e) => {
-            switch (select) {
-                case 1: return e[k].includes(value);
-                case 2: return !e[k].includes(value);
-                case 3: return e[k] === value;
-                case 4: return e[k] !== value;
-                case 5: return e[k].startsWith(value);
-                case 6: return e[k].endsWith(value);
-                case 7: return e[k] === '';
-                case 8: return e[k] !== '';
+            switch (Number(select)) {
+                case 1: return String(e[k]).includes(value);
+                case 2: return String(!e[k]).includes(value);
+                case 3: return String(e[k]) === value;
+                case 4: return String(e[k]) !== value;
+                case 5: return String(e[k]).startsWith(value);
+                case 6: return String(e[k]).endsWith(value);
+                case 7: return String(e[k]) === '';
+                case 8: return String(e[k]) !== '';
     
                 default:
                     throw new Error(`Invalid action ${select} for filter ${k}`);
