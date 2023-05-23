@@ -39,7 +39,7 @@ export function ListItemDragDropFrame({
         collect: monitor => {
             if (onCollect) onCollect(monitor);
             if (!!monitor.isOver()) return {};
-            if (draggedDir) setDraggedDir(0);
+            setDraggedDir(0);
             return {}
         },
     }), [data]);
@@ -66,13 +66,13 @@ export function ListItemDragDropFrame({
     
     return (
         <Container ref={dropRef} fluid className='m-0 p-0' >
+        {draggedDir === -1 ? placeHolder : null}
         <Container ref={swipeRef} fluid className='m-0 p-0' >
-            {draggedDir === -1 ? placeHolder : null}
-            <Container  ref={dragRef} fluid className='m-0 p-0' >
-                {children}
-            </Container>
-            {draggedDir === 1 ? placeHolder : null}
+        <Container  ref={dragRef} fluid className='m-0 p-0' >
+            {children}
         </Container>
+        </Container>
+        {draggedDir === 1 ? placeHolder : null}
         </Container>
     )
 }
