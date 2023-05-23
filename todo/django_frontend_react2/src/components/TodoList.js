@@ -22,9 +22,11 @@ export default function TodoList() {
     // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
     return (
         <ListGroup className='px-3 py-1 list-container' variant={theme}>
+            <Container fluid className='m-0 p-0' >
             <ListGroup.Item as={Row} key={-1} className='d-flex justify-content-between' variant='primary'>
                 {Headers.map((head, idx) => <FilterSortHeader head={head} layout={ColLayout[idx]}/>)}
             </ListGroup.Item>
+            </Container>
             {list.map((todo,idx) => (
                 // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
                 <TodoItem todo={todo} idx={idx} active={active} setActive={setActive} />
@@ -59,7 +61,7 @@ export function TodoItem({ todo, active, setActive, ...rest }) {
             placeHolder={<EmptyTodoItem />}
         >
         <ListGroup.Item as={Card} {...rest} bg={theme} text={themeContrast1} border={themeContrast2} className={`mt-1 p-0`}>
-            <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-flex justify-content-between' >
+            <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-md-flex justify-content-between' >
                 <Form.Group as={Row} className='d-flex flex-grow-1' >
                     <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(todo)}> {`${todo.priority})  ${todo.title}`}</Form.Label>
                 </Form.Group>

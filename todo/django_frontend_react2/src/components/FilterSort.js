@@ -13,62 +13,13 @@ const arrows = {
 const filterSymbol = '⧩';
 
 export function FilterSortHeader({head, layout = {}}) {
-    // const { sorting, setSorting } = useContext(FilterSortContext);
-    
-    // const [arrow, setArrow] = useState('')
-    // const [sortIdx, setSortIdx] = useState('')
-
-    // const keyMap = useContext(KeyMapContext);
-
-    // useEffect(() => {
-    //     // Set sorting arrow symbol
-    //     setArrow(arrows[sorting.get(head) | 0]);
-
-    //     // Set sorting index for multisort
-    //     const getIdx = (head) => {
-    //         let idx = 0;
-    //         for (const [k,v] of sorting) {
-    //             if (v !== 0) idx++;
-    //             if (k === head) {
-    //                 if (v === 0) idx = '';
-    //                 return idx;
-    //             }
-    //         }
-    //         return '';
-    //     };
-
-    //     const nsort = [...sorting.values()].filter((e) => e !== 0).length;
-    //     const idx = getIdx(head);
-
-    //     if (nsort > 1){
-    //         setSortIdx(`${idx} `)
-    //     } else {
-    //         setSortIdx(' ');
-    //     }
-
-    // }, [sorting, head]);
-
-
-    // 0 - no sort, 1 - asc, 2 - desc
-    // const onSort = (head) => {
-    //     let res;
-    //     const app = sorting.get(head) | 0;
-    //     if (keyMap.get('Shift', 0)) {
-    //         res = new Map(sorting);
-    //     } else {
-    //         res = new Map();
-    //         res.set(head, app);
-    //     };
-    //     res.delete(head)
-    //     res.set(head, (app + 2)%3 - 1);
-    //     setSorting(res);
-    // };
-
     return (
-        <Col className="d-flex justify-content-between flex-grow-1" {...layout}>
+        <Col className="m-0 p-0" {...layout}>
+            <Container className="d-flex justify-content-between flex-grow-1 m-0 p-0">
             {/* <span onClick={() => onSort(head)}>{arrow}{sortIdx}{head}</span> */}
             <span>{head}</span>
             <FilterComponent head={head} />
+            </Container>
         </Col> 
     )
 }
@@ -87,7 +38,11 @@ export function FilterComponent({ head }) {
     
     return (
         <Container ref={ref}>
-            <Button variant={`${filters.has(head) ? '' : 'outline-'}primary`} className="px-1" onClick={onFilter}>{filterSymbol}</Button>
+            <Button 
+                variant={`${filters.has(head) ? '' : 'outline-'}primary`} 
+                className="px-1 mx-0" 
+                onClick={onFilter}>{filterSymbol}
+            </Button>
             <Overlay 
                 target={target} container={ref} show={show} placement="bottom"
                 onHide={() => setShow(false)} rootClose
