@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { TodoAPIContext } from '../API/TodoListWrapper';
 import { ItemTypes } from '../Constants';
@@ -11,35 +11,32 @@ import './TodoList.css';
 // const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]
 const ColLayout = [{'sm': 10}, {'sm': 2}]
 
-export default function TodoList({ ...rest }) {
+export default function TodoList() {
     const {theme} = useContext(ThemeContext);
     const { list } = useContext(TodoAPIContext);
 
+    const [active, setActive] = useState(null);
     // const Headers = ['priority', 'title', 'completed'];
     const Headers = ['title', 'completed'];
 
+    // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
     return (
-        <ListGroup className='p-2 list-container' variant={theme}>
+        <ListGroup className='px-3 py-1 list-container' variant={theme}>
             <ListGroup.Item as={Row} key={-1} className='d-flex justify-content-between' variant='primary'>
-                {Headers.map((head, idx) => <FilterSortHeader head={head} {...rest} layout={ColLayout[idx]}/>)}
+                {Headers.map((head, idx) => <FilterSortHeader head={head} layout={ColLayout[idx]}/>)}
             </ListGroup.Item>
-            {list.map((todo) => (
+            {list.map((todo,idx) => (
                 // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-                <TodoItem todo={todo} {...rest} />
+                <TodoItem todo={todo} idx={idx} active={active} setActive={setActive} />
             ))}
         </ListGroup>
     );
 }
 
-function lock(ms) {
-    // console.log('locking');
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-export function TodoItem({ todo }) {
+export function TodoItem({ todo, active, setActive, ...rest }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
-    const {moveItemTo, active, setActive, setFormAction} = useContext(TodoAPIContext);
+    const {moveItemTo, setFormAction} = useContext(TodoAPIContext);
 
     const onSelect = (todo) => {
         active === todo  ? setActive(null) : setActive(todo);
@@ -61,7 +58,7 @@ export function TodoItem({ todo }) {
             onDrop={moveItemTo}
             placeHolder={<EmptyTodoItem />}
         >
-        <ListGroup.Item as={Card} key={todo.id} bg={theme} text={themeContrast1} border={themeContrast2} className={`mt-1 p-0 bg-${theme}`}>
+        <ListGroup.Item as={Card} {...rest} bg={theme} text={themeContrast1} border={themeContrast2} className={`mt-1 p-0`}>
             <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-flex justify-content-between' >
                 <Form.Group as={Row} className='d-flex flex-grow-1' >
                     <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(todo)}> {`${todo.priority})  ${todo.title}`}</Form.Label>
