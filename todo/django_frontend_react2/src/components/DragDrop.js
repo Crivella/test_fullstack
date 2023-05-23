@@ -39,7 +39,7 @@ export function ListItemDragDropFrame({
         collect: monitor => {
             if (onCollect) onCollect(monitor);
             if (!!monitor.isOver()) return {};
-            setDraggedDir(0);
+            if (draggedDir) setDraggedDir(0);
             return {}
         },
     }), [data]);

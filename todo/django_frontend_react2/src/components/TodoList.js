@@ -31,6 +31,11 @@ export default function TodoList({ ...rest }) {
     );
 }
 
+function lock(ms) {
+    // console.log('locking');
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function TodoItem({ todo }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
