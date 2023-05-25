@@ -27,6 +27,12 @@
     right: 1rem;
   }
 
+.pos-tl {
+  position: absolute;
+  top: 5rem;
+  left: 1rem;
+}
+
 .pos-bl {
   position: absolute;
   bottom: 1rem;

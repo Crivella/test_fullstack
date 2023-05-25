@@ -9,52 +9,35 @@ axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
 export const TodoAPIContext = createContext({});
+export const TodoAPIBulkContext = createContext({});
 
-export default function TodosClientWrapper({children}) {
-    const { user } = useContext(AuthContext);
-    const { getList  } = useTodoAPI();
+export function TodosAPIWrapper({children}) {
+    // const { list: serverList } = useTodoAPI();
 
     const applyFilters = useFilter();
     const applySort = useSort();
     const {paginateList} = usePagination();
 
     const [active, setActive] = useState(null);
-    const [maxID, setMacID] = useState(0); // [{}
-    const [maxPrio, setMaxPrio] = useState(0); // [{}
-    const [list, setList] = useState([]); // [{}
-    const [fullList, setFullList] = useState([]); // [{}
-    const [serverList, setServerList] = useState([]); // [{}
+    const [visibleList, setVisibleList] = useState([]); // [{}]
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, setFormAction] = useState('add');
-    
-    // const [update, setUpdate] = useState([]); // [{}
-    const [addList, setAddList] = useState([]); // [{}
-    const [updateList, setUpdateList] = useState({}); // [{}
-    const [deleteList, setDeleteList] = useState([]); // [{}]
+
+    const { 
+        list: serverList,
+        addItemBulk: addItem,
+        updateItemBulk: updateItem,
+        deleteItemBulk: deleteItem,
+        flusthItems
+    } = useTodoBulkAPI()
+    // const { addItem, updateItem, deleteItem } = useTodoAPI()
 
     // Lifecycle
     useEffect(() => {
-        getList()
-            .then(data => setServerList(data));
-    }, [user, getList]);
-
-    useEffect(() => {
-        const app = paginateList(applySort(applyFilters(fullList)));
+        const app = paginateList(applySort(applyFilters(serverList)));
         app.forEach((e, idx) => e.idx = idx);
-        setList(app);
-    }, [fullList, paginateList, applyFilters, applySort]);
-
-    useEffect(() => {
-        setFullList(serverList);
-    }, [serverList]);
-
-    useEffect(() => {
-        let max;
-        max = list.reduce((acc, e) => Math.max(acc, e.priority), 0);
-        setMaxPrio(max);
-        max = list.reduce((acc, e) => Math.max(acc, e.id), 0);
-        setMacID(max);
-    }, [list]);
+        setVisibleList(app);
+    }, [serverList, paginateList, applyFilters, applySort]);
 
     useEffect(() => {
         switch (formAction) {
@@ -65,29 +48,7 @@ export default function TodosClientWrapper({children}) {
         }
     }, [formAction]);
 
-    // Callbacks
-    const addItem = useCallback((data) => {
-        const app = {priority: maxPrio + 1, id: maxID + 1, ...data};
-        setAddList([...addList, app]);
-        setFullList([app, ...fullList]);
-        return true;
-    }, [fullList, addList, maxPrio, maxID]);
-
-    const updateItem = useCallback((data) => {
-        const app = {...updateList};
-        app[data.id] = data;
-        setUpdateList(app);
-        setFullList(fullList.map(e => e.id === data.id ? data : e));
-        return true;
-    }, [fullList, updateList]);
-
-    const deleteItem = useCallback((id) => {
-        setDeleteList([...deleteList, id]);
-        setFullList(fullList.filter(e => e.id !== id));
-        setActive(null);
-        return true;
-    }, [fullList, deleteList]);
-
+    // This should probably be somewhere else?
     const moveItemTo = useCallback((itm1, itm2) => { // itm1: dragged, itm2: inplace
         const idx1 = itm1.idx;
         const idx2 = itm2.idx;
@@ -96,10 +57,10 @@ export default function TodosClientWrapper({children}) {
 
         itm1.priority = itm2.priority;
         if (idx1 > idx2) {
-            slice = list.slice(idx2, idx1);
+            slice = visibleList.slice(idx2, idx1);
             slice.forEach(e => e.priority -= 1);
         } else {
-            slice = list.slice(idx1+1, idx2+1);
+            slice = visibleList.slice(idx1+1, idx2+1);
             slice.forEach(e => e.priority += 1);
         }
         
@@ -107,7 +68,7 @@ export default function TodosClientWrapper({children}) {
         updateItem(itm1);
         
         return true;
-    }, [list, updateItem]);
+    }, [visibleList, updateItem]);
 
     const onSubmit = (data) => {
         switch (formAction) {
@@ -122,7 +83,7 @@ export default function TodosClientWrapper({children}) {
     };
 
     const newProps = {
-        'list': list, // [{}, {}, {}]
+        'list': visibleList, // [{}, {}, {}]
         'formHeader': formHeader,
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
@@ -130,6 +91,7 @@ export default function TodosClientWrapper({children}) {
         'addItem': addItem,
         'updateItem': updateItem,
         'deleteItem': deleteItem,
+        'flushItems': flusthItems,
         'moveItemTo': moveItemTo,
         'active': active,
         'setActive': setActive,
@@ -143,13 +105,32 @@ export default function TodosClientWrapper({children}) {
 }
 
 export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
-    const getList = useCallback(() => {
-        return axios.get(`${endpoint}/`, {
+    const { user } = useContext(AuthContext);
+    const [list, setList] = useState([]); // [{}, {}
+
+    // const [addList, setAddList] = useState([]); // [{}
+    // const [updateList, setUpdateList] = useState({}); // [{}
+    // const [deleteList, setDeleteList] = useState([]); // [{}]
+
+    // const [maxID, setMaxID] = useState(0); // [{}
+    // const [maxPrio, setMaxPrio] = useState(0); // [{}
+
+    // Lifecycle
+    useEffect(() => {
+        axios.get(`${endpoint}/`, {
             headers: { 'Content-Type': 'application/json' },
         })
         .catch((err) => console.log(err))
-        .then(({data}) => data);
-    }, [endpoint]);
+        .then(({data}) => setList(data));
+    }, [user, endpoint]);
+
+    // useEffect(() => {
+    //     let max;
+    //     max = list.reduce((acc, e) => Math.max(acc, e.priority), 0);
+    //     setMaxPrio(max);
+    //     max = list.reduce((acc, e) => Math.max(acc, e.id), 0);
+    //     setMaxID(max);
+    // }, [list]);
 
     const getItem = useCallback((id) => {
         return axios.get(`${endpoint}/${id}/`, {
@@ -157,8 +138,8 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         });
     }, [endpoint]);
 
-    const updateItem = useCallback((id, data) => {
-        return axios.patch(`${endpoint}/${id}/`, data, {})
+    const updateItem = useCallback((data) => {
+        return axios.patch(`${endpoint}/${data.id}/`, data, {})
             .catch((err) => console.log(err));
     }, [endpoint]);
 
@@ -172,5 +153,123 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
             .catch((err) => console.log(err));
     }, [endpoint]);
 
-    return { getList, getItem, updateItem, deleteItem, addItem};
+    // const flusthItems = useCallback(() => {
+    //     deleteList.forEach(e => deleteItem(e));
+    //     setDeleteList([]);
+    //     updateList.forEach(e => updateItem(e));
+    //     setUpdateList({});
+    //     addList.forEach(e => addItem(e));
+    //     setAddList([]);
+    // }, [addList, updateList, deleteList, addItem, updateItem, deleteItem]);
+
+    // const addItemBulk = useCallback((data) => {
+    //     const app = {priority: maxPrio + 1, id: maxID + 1, ...data};
+    //     setAddList([...addList, app]);
+    //     setList([app, ...list]);
+    //     return true;
+    // }, [list, addList, maxPrio, maxID]);
+
+    // const updateItemBulk = useCallback((data) => {
+    //     console.log(data);
+    //     const app = {...updateList};
+    //     app[data.id] = data;
+    //     setUpdateList(app);
+    //     setList(list.map(e => e.id === data.id ? data : e));
+    //     return true;
+    // }, [list, updateList]);
+
+    // const deleteItemBulk = useCallback((id) => {
+    //     const idxAdd = addList.findIndex(e => e.id === id);
+    //     if (idxAdd !== -1) {
+    //         setAddList(addList.filter(e => e.id !== id));
+    //     } else {
+    //         setDeleteList([...deleteList, id]);
+    //     }
+    //     setDeleteList([...deleteList, id]);
+    //     setList(list.filter(e => e.id !== id));
+    //     // setActive(null);
+    //     return true;
+    // }, [list, addList, deleteList]);
+
+    return { 
+        list, setList,
+        getItem, updateItem, deleteItem, addItem,
+        // addItemBulk, updateItemBulk, deleteItemBulk,
+    };
+}
+
+export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
+    const { list, setList, getItem, updateItem, deleteItem, addItem } = useTodoAPI();
+
+    const [addList, setAddList] = useState(new Map()); // [{}
+    const [updateList, setUpdateList] = useState(new Map()); // [{}
+    const [deleteList, setDeleteList] = useState(new Map()); // [{}]
+
+    const [maxID, setMaxID] = useState(0); // [{}
+    const [maxPrio, setMaxPrio] = useState(0); // [{}
+
+    // Lifecycle
+
+    useEffect(() => {
+        let max;
+        max = list.reduce((acc, e) => Math.max(acc, e.priority), 0);
+        setMaxPrio(max);
+        max = list.reduce((acc, e) => Math.max(acc, e.id), 0);
+        setMaxID(max);
+    }, [list]);
+
+    const flusthItems = useCallback(() => {
+        // console.log('Flush');
+        // console.log('Add', addList);
+        // console.log('Update', updateList);
+        // console.log('Delete', deleteList);
+        deleteList.forEach(e => deleteItem(e));
+        setDeleteList([]);
+        updateList.forEach(e => updateItem(e));
+        setUpdateList({});
+        addList.forEach(e => addItem(e));
+        setAddList([]);
+    }, [addList, updateList, deleteList, addItem, updateItem, deleteItem]);
+
+    const addItemBulk = useCallback((data) => {
+        const newItem = {priority: maxPrio + 1, id: maxID + 1, ...data};
+        addList.set(newItem.id, newItem);
+        setAddList(addList);
+        if (deleteList.delete(newItem.id)) {
+            setDeleteList(deleteList);
+        }
+        setList([newItem, ...list]);
+        return true;
+    }, [list, setList, addList, deleteList, maxPrio, maxID]);
+
+    const updateItemBulk = useCallback((data) => {
+        updateList.set(data.id, data);
+        setUpdateList(updateList);
+        setList(list.map(e => e.id === data.id ? data : e));
+        return true;
+    }, [list, setList, updateList]);
+
+    const deleteItemBulk = useCallback((id) => {
+        // console.log('Delete', id);
+        // console.log('Update', updateList);
+        updateList.delete(id);
+        // setUpdateList(updateList);
+        console.log('Update', updateList);
+        if (addList.delete(id)) {
+            setAddList(addList);
+        } else {
+            deleteList.set(id, true);
+            setDeleteList(deleteList);
+        }
+        setList(list.filter(e => e.id !== id));
+        // setActive(null);
+        return true;
+    }, [list, setList, addList, deleteList]);
+
+    return { 
+        list,
+        getItem, updateItem, deleteItem, addItem,
+        addItemBulk, updateItemBulk, deleteItemBulk,
+        flusthItems
+    };
 }

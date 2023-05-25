@@ -37,6 +37,17 @@ export function OrderFilterResetButton() {
     );
 }
 
+export function SaveButton() {
+    const {themeContrast1} = useContext(ThemeContext);
+    const { flushItems } = useContext(TodoAPIContext);
+
+    return (
+        <Button className="round-button pos-tl" variant="primary" onClick={flushItems}>
+            <span style={{paddingBottom: 10}} className={`text-${themeContrast1}`}>💾</span>
+        </Button>
+    );
+}
+
 export function TrashCan() {
     const {themeContrast1} = useContext(ThemeContext);
     const { setActive, setFormAction } = useContext(TodoAPIContext);
