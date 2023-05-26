@@ -108,13 +108,6 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     const { user } = useContext(AuthContext);
     const [list, setList] = useState([]); // [{}, {}
 
-    // const [addList, setAddList] = useState([]); // [{}
-    // const [updateList, setUpdateList] = useState({}); // [{}
-    // const [deleteList, setDeleteList] = useState([]); // [{}]
-
-    // const [maxID, setMaxID] = useState(0); // [{}
-    // const [maxPrio, setMaxPrio] = useState(0); // [{}
-
     // Lifecycle
     useEffect(() => {
         axios.get(`${endpoint}/`, {
@@ -123,14 +116,6 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         .catch((err) => console.log(err))
         .then(({data}) => setList(data));
     }, [user, endpoint]);
-
-    // useEffect(() => {
-    //     let max;
-    //     max = list.reduce((acc, e) => Math.max(acc, e.priority), 0);
-    //     setMaxPrio(max);
-    //     max = list.reduce((acc, e) => Math.max(acc, e.id), 0);
-    //     setMaxID(max);
-    // }, [list]);
 
     const getItem = useCallback((id) => {
         return axios.get(`${endpoint}/${id}/`, {
@@ -153,62 +138,40 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
             .catch((err) => console.log(err));
     }, [endpoint]);
 
-    // const flusthItems = useCallback(() => {
-    //     deleteList.forEach(e => deleteItem(e));
-    //     setDeleteList([]);
-    //     updateList.forEach(e => updateItem(e));
-    //     setUpdateList({});
-    //     addList.forEach(e => addItem(e));
-    //     setAddList([]);
-    // }, [addList, updateList, deleteList, addItem, updateItem, deleteItem]);
-
-    // const addItemBulk = useCallback((data) => {
-    //     const app = {priority: maxPrio + 1, id: maxID + 1, ...data};
-    //     setAddList([...addList, app]);
-    //     setList([app, ...list]);
-    //     return true;
-    // }, [list, addList, maxPrio, maxID]);
-
-    // const updateItemBulk = useCallback((data) => {
-    //     console.log(data);
-    //     const app = {...updateList};
-    //     app[data.id] = data;
-    //     setUpdateList(app);
-    //     setList(list.map(e => e.id === data.id ? data : e));
-    //     return true;
-    // }, [list, updateList]);
-
-    // const deleteItemBulk = useCallback((id) => {
-    //     const idxAdd = addList.findIndex(e => e.id === id);
-    //     if (idxAdd !== -1) {
-    //         setAddList(addList.filter(e => e.id !== id));
-    //     } else {
-    //         setDeleteList([...deleteList, id]);
-    //     }
-    //     setDeleteList([...deleteList, id]);
-    //     setList(list.filter(e => e.id !== id));
-    //     // setActive(null);
-    //     return true;
-    // }, [list, addList, deleteList]);
-
     return { 
         list, setList,
         getItem, updateItem, deleteItem, addItem,
-        // addItemBulk, updateItemBulk, deleteItemBulk,
     };
 }
 
 export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
-    const { list, setList, getItem, updateItem, deleteItem, addItem } = useTodoAPI();
+    const { list: serverList, getItem, updateItem, deleteItem, addItem } = useTodoAPI();
 
-    const [addList, setAddList] = useState(new Map()); // [{}
-    const [updateList, setUpdateList] = useState(new Map()); // [{}
-    const [deleteList, setDeleteList] = useState(new Map()); // [{}]
+    const [list, setList] = useState([]); // [{}, {}
+    const [addList, setAddList] = useState(new Map(JSON.parse(localStorage.getItem('addList')))); // [{}
+    const [updateList, setUpdateList] = useState(new Map(JSON.parse(localStorage.getItem('updateList')))); // [{}
+    const [deleteList, setDeleteList] = useState(new Map(JSON.parse(localStorage.getItem('deleteList')))); // [{}]
 
     const [maxID, setMaxID] = useState(0); // [{}
     const [maxPrio, setMaxPrio] = useState(0); // [{}
 
+    const [adding, setAdding] = useState(false); // [{
+    const [updating, setUpdating] = useState(false); // [{}
+    const [deleting, setDeleting] = useState(false); // [{}]
+
     // Lifecycle
+    // Apply local changes to server list
+    useEffect(() => {
+        let app = [...serverList];
+
+        app = app.concat(Array.from(addList.values()));
+        app = Array.from(updateList.values()).reduce((acc, e) => {
+            return acc.map((itm) => itm.id === e.id ? e : itm );
+        }, app);
+        app = app.filter((itm) => !deleteList.has(itm.id));
+
+        setList(app);
+    }, [serverList]);
 
     useEffect(() => {
         let max;
@@ -218,53 +181,90 @@ export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         setMaxID(max);
     }, [list]);
 
+    useEffect(() => {
+        localStorage.setItem('addList', JSON.stringify(Array.from(addList.entries())));
+        if (adding) {
+            setAddList(new Map(addList));
+            setAdding(false);
+            setList([...list, ...Array.from(addList.values())]);
+        }
+    }, [adding, addList]);
+
+    useEffect(() => {
+        localStorage.setItem('updateList', JSON.stringify(Array.from(updateList.entries())));
+        if (updating) {
+            setUpdateList(new Map(updateList))
+            setUpdating(false);
+            let app = [...list];
+            app = Array.from(updateList.values()).reduce((acc, e) => {
+                return acc.map((itm) => itm.id === e.id ? e : itm );
+            }
+            , app);
+            setList(app);
+        }
+    }, [updating, updateList]);
+
+    useEffect(() => {
+        localStorage.setItem('deleteList', JSON.stringify(Array.from(deleteList.entries())));
+        if (deleting) {
+            setDeleteList(new Map(deleteList));
+            setDeleting(false);
+            setList(list.filter((itm) => !deleteList.has(itm.id)));
+        }
+    }, [deleting, deleteList]);
+
+    // Callbacks
     const flusthItems = useCallback(() => {
-        // console.log('Flush');
-        // console.log('Add', addList);
-        // console.log('Update', updateList);
-        // console.log('Delete', deleteList);
-        deleteList.forEach(e => deleteItem(e));
-        setDeleteList([]);
-        updateList.forEach(e => updateItem(e));
-        setUpdateList({});
-        addList.forEach(e => addItem(e));
-        setAddList([]);
+        console.log('Flush');
+        console.log('Add', addList);
+        console.log('Update', updateList);
+        console.log('Delete', deleteList);
+        Array.from(deleteList.keys()).forEach(e => deleteItem(e));
+        Array.from(updateList.values()).forEach(e => updateItem(e));
+        Array.from(addList.values()).forEach(e => addItem(e));
+        setDeleteList(new Map());
+        setUpdateList(new Map());
+        setAddList(new Map());
     }, [addList, updateList, deleteList, addItem, updateItem, deleteItem]);
 
     const addItemBulk = useCallback((data) => {
+        console.log('Add', data);
         const newItem = {priority: maxPrio + 1, id: maxID + 1, ...data};
         addList.set(newItem.id, newItem);
-        setAddList(addList);
-        if (deleteList.delete(newItem.id)) {
-            setDeleteList(deleteList);
+        setAdding(true);
+        if (deleteList.delete(data.id)) {
+            setDeleting(true);
         }
-        setList([newItem, ...list]);
         return true;
-    }, [list, setList, addList, deleteList, maxPrio, maxID]);
+    }, [addList, deleteList, maxPrio, maxID]);
 
     const updateItemBulk = useCallback((data) => {
-        updateList.set(data.id, data);
-        setUpdateList(updateList);
-        setList(list.map(e => e.id === data.id ? data : e));
+        if (addList.has(data.id)) {
+            addList.set(data.id, data);
+            setAdding(true);
+        } else {
+            updateList.set(data.id, data);
+            setUpdating(true);
+        };
         return true;
-    }, [list, setList, updateList]);
+    }, [updateList, addList]);
 
     const deleteItemBulk = useCallback((id) => {
-        // console.log('Delete', id);
-        // console.log('Update', updateList);
-        updateList.delete(id);
-        // setUpdateList(updateList);
-        console.log('Update', updateList);
-        if (addList.delete(id)) {
-            setAddList(addList);
-        } else {
-            deleteList.set(id, true);
-            setDeleteList(deleteList);
+        console.log('Delete', id);
+        if (updateList.delete(id)) {
+            console.log('Updating');
+            setUpdating(true);
         }
-        setList(list.filter(e => e.id !== id));
-        // setActive(null);
+        if (addList.delete(id)) {
+            console.log('Adding');
+            setAdding(true);
+        } else {
+            console.log('Deleting');
+            deleteList.set(id, true);
+            setDeleting(true);
+        }
         return true;
-    }, [list, setList, addList, deleteList]);
+    }, [ addList, updateList, deleteList]);
 
     return { 
         list,
