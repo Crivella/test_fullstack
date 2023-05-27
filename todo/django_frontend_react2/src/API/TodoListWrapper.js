@@ -77,7 +77,7 @@ export function TodosAPIWrapper({children}) {
     const onSubmit = (data) => {
         switch (formAction) {
             case 'add': return addItem(data);
-            case 'edit': return updateItem(data.id, data);
+            case 'edit': return updateItem(data);
             case 'delete':
                 const id = data.id || data;
                 return deleteItem(id);

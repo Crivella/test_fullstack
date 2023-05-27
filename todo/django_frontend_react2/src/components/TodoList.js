@@ -13,11 +13,15 @@ const ColLayout = [{'sm': 10}, {'sm': 2}]
 
 export default function TodoList() {
     const {theme} = useContext(ThemeContext);
-    const { list } = useContext(TodoAPIContext);
+    const { list, setActive } = useContext(TodoAPIContext);
 
-    const [active, setActive] = useState(null);
+    const [activeLocal, setActiveLocal] = useState(null);
     // const Headers = ['priority', 'title', 'completed'];
     const Headers = ['title', 'completed'];
+
+    useEffect(() => {
+        setActive(activeLocal);
+    }, [activeLocal, setActive]);
 
     // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
     return (
@@ -29,7 +33,7 @@ export default function TodoList() {
             </Container>
             {list.map((todo,idx) => (
                 // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-                <TodoItem todo={todo} idx={idx} active={active} setActive={setActive} />
+                <TodoItem todo={todo} idx={idx} active={activeLocal} setActive={setActiveLocal} />
             ))}
         </ListGroup>
     );
