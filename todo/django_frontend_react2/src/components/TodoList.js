@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { TodoAPIContext } from '../API/TodoListWrapper';
 import { ItemTypes } from '../Constants';
@@ -60,11 +60,16 @@ export function TodoItem({ todo, active, setActive, ...rest }) {
 
     return (
         <ListItemDragDropFrame 
-            type={ItemTypes.CARD} data={todo} 
+            type={todo.completed ? ItemTypes.CardCompleted : ItemTypes.CARD} data={todo} 
             onDrop={moveItemTo}
             placeHolder={<EmptyTodoItem />}
         >
-        <ListGroup.Item as={Card} {...rest} bg={theme} text={themeContrast1} border={themeContrast2} className={`mt-1 p-0`}>
+        <ListGroup.Item 
+        as={Card}  
+        bg={theme} text={themeContrast1} 
+        border={themeContrast2} 
+        className={`mt-1 p-0 ${ todo.completed ? 'todo-completed' : ''}`}
+        {...rest}>
             <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-md-flex justify-content-between' >
                 <Form.Group as={Row} className='d-flex flex-grow-1' >
                     <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(todo)}> {`${todo.priority})  ${todo.title}`}</Form.Label>

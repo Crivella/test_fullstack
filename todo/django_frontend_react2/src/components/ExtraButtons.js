@@ -53,7 +53,7 @@ export function TrashCan() {
     const { setActive, setFormAction } = useContext(TodoAPIContext);
     const { setShowDelete } = useContext(ModalContext);
     const [{isOver}, dropRef] = useDrop(() => ({
-        accept: ItemTypes.CARD,
+        accept: [ItemTypes.CARD, ItemTypes.CardCompleted],
         drop: (item, monitor) => {
             setActive(item);
             setFormAction('delete');

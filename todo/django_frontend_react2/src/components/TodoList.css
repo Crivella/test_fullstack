@@ -9,4 +9,17 @@
 .todo-check > .form-check-input {
     width: 1.8rem;
     height: 1.8rem;
+    border-radius: 30%;
+}
+
+.todo-completed .todo-check > .form-check-input {
+    /* width: 1.4rem;
+    height: 1.4rem; */
+    border-radius: 30%;
+    filter: brightness(150%);
+}
+
+.todo-completed {
+    text-decoration: line-through;
+    filter: brightness(70%);
 }
