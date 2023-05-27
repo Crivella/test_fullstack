@@ -55,17 +55,21 @@ export function TodosAPIWrapper({children}) {
 
         let  slice;
 
-        itm1.priority = itm2.priority;
+        console.log('Move', itm1, itm2);
+        console.log('list', visibleList);
+
         if (idx1 > idx2) {
             slice = visibleList.slice(idx2, idx1);
-            slice.forEach(e => e.priority -= 1);
+            slice = slice.map(e => ({...e, priority: e.priority - 1}))
         } else {
             slice = visibleList.slice(idx1+1, idx2+1);
-            slice.forEach(e => e.priority += 1);
+            slice = slice.map(e => ({...e, priority: e.priority + 1}))
         }
+
+        console.log('Slice', slice);
         
         slice.forEach(e => updateItem(e));
-        updateItem(itm1);
+        updateItem({...itm1, priority: itm2.priority});
         
         return true;
     }, [visibleList, updateItem]);
@@ -117,6 +121,18 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         .then(({data}) => setList(data));
     }, [user, endpoint]);
 
+    const getEmptyItem = useCallback((data) => {
+        return {
+            title: '',
+            description: '',
+            priority: 0,
+            completed: false,
+            private: false,
+            user: user.id,
+            ...data
+        };
+    }, [user]);
+
     const getItem = useCallback((id) => {
         return axios.get(`${endpoint}/${id}/`, {
             headers: { 'Content-Type': 'application/json' }
@@ -140,38 +156,55 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
 
     return { 
         list, setList,
-        getItem, updateItem, deleteItem, addItem,
+        getItem, getEmptyItem,
+        updateItem, deleteItem, addItem,
     };
 }
 
 export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
-    const { list: serverList, getItem, updateItem, deleteItem, addItem } = useTodoAPI();
+    const { list: serverList, getItem, getEmptyItem, updateItem, deleteItem, addItem } = useTodoAPI();
 
     const [list, setList] = useState([]); // [{}, {}
-    const [addList, setAddList] = useState(new Map(JSON.parse(localStorage.getItem('addList')))); // [{}
-    const [updateList, setUpdateList] = useState(new Map(JSON.parse(localStorage.getItem('updateList')))); // [{}
-    const [deleteList, setDeleteList] = useState(new Map(JSON.parse(localStorage.getItem('deleteList')))); // [{}]
+    const [queue, setQueue] = useState(JSON.parse(localStorage.getItem('queue'))); // [(action, data), (action, data)
+    const [queueIdx, setQueueIdx] = useState(0); // [{}
+    const [queueLock, setQueueLock] = useState(false); // [{}
 
     const [maxID, setMaxID] = useState(0); // [{}
     const [maxPrio, setMaxPrio] = useState(0); // [{}
 
-    const [adding, setAdding] = useState(false); // [{
-    const [updating, setUpdating] = useState(false); // [{}
-    const [deleting, setDeleting] = useState(false); // [{}]
-
     // Lifecycle
-    // Apply local changes to server list
     useEffect(() => {
-        let app = [...serverList];
-
-        app = app.concat(Array.from(addList.values()));
-        app = Array.from(updateList.values()).reduce((acc, e) => {
-            return acc.map((itm) => itm.id === e.id ? e : itm );
-        }, app);
-        app = app.filter((itm) => !deleteList.has(itm.id));
-
-        setList(app);
+        if (queue === null) {
+            setQueue([]);
+            localStorage.setItem('queue', JSON.stringify([]));
+        }
+    }, [queue]);
+    useEffect(() => {
+        setList([...serverList]);
+        setQueueIdx(0);
+        setQueueLock(false);
     }, [serverList]);
+
+    useEffect(() => {
+        if (!queueLock && queue !== null) {
+            let app = [...list];
+
+            for (let i = queueIdx; i < queue.length; i++) {
+                const [action, data] = queue[i];
+                switch (action) {
+                    case 'add': app.unshift(data); break;
+                    case 'update': app = app.map((itm) => itm.id === data.id ? data : itm ); break;
+                    case 'delete': app = app.filter((itm) => itm.id !== data); break;
+                    default: throw new Error('Invalid action');
+                }
+            }
+            localStorage.setItem('queue', JSON.stringify(queue));
+            setQueueIdx(queue.length);
+            setList(app);
+            setQueueLock(true);
+        }
+
+    }, [queueLock]);
 
     useEffect(() => {
         let max;
@@ -181,94 +214,43 @@ export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         setMaxID(max);
     }, [list]);
 
-    useEffect(() => {
-        localStorage.setItem('addList', JSON.stringify(Array.from(addList.entries())));
-        if (adding) {
-            setAddList(new Map(addList));
-            setAdding(false);
-            setList([...list, ...Array.from(addList.values())]);
-        }
-    }, [adding, addList]);
-
-    useEffect(() => {
-        localStorage.setItem('updateList', JSON.stringify(Array.from(updateList.entries())));
-        if (updating) {
-            setUpdateList(new Map(updateList))
-            setUpdating(false);
-            let app = [...list];
-            app = Array.from(updateList.values()).reduce((acc, e) => {
-                return acc.map((itm) => itm.id === e.id ? e : itm );
-            }
-            , app);
-            setList(app);
-        }
-    }, [updating, updateList]);
-
-    useEffect(() => {
-        localStorage.setItem('deleteList', JSON.stringify(Array.from(deleteList.entries())));
-        if (deleting) {
-            setDeleteList(new Map(deleteList));
-            setDeleting(false);
-            setList(list.filter((itm) => !deleteList.has(itm.id)));
-        }
-    }, [deleting, deleteList]);
-
     // Callbacks
-    const flusthItems = useCallback(() => {
-        console.log('Flush');
-        console.log('Add', addList);
-        console.log('Update', updateList);
-        console.log('Delete', deleteList);
-        Array.from(deleteList.keys()).forEach(e => deleteItem(e));
-        Array.from(updateList.values()).forEach(e => updateItem(e));
-        Array.from(addList.values()).forEach(e => addItem(e));
-        setDeleteList(new Map());
-        setUpdateList(new Map());
-        setAddList(new Map());
-    }, [addList, updateList, deleteList, addItem, updateItem, deleteItem]);
+    const flusthItems = useCallback(async () => {
+        for (const [action, data] of queue) {
+            switch (action) {
+                case 'add': await addItem(data); break;
+                case 'update': await updateItem(data); break;
+                case 'delete': await deleteItem(data); break;
+                default: throw new Error('Invalid action');
+            }
+        }
+        setQueue([]);
+        localStorage.setItem('queue', JSON.stringify([]));
+    }, [queue]);
 
     const addItemBulk = useCallback((data) => {
-        console.log('Add', data);
-        const newItem = {priority: maxPrio + 1, id: maxID + 1, ...data};
-        addList.set(newItem.id, newItem);
-        setAdding(true);
-        if (deleteList.delete(data.id)) {
-            setDeleting(true);
-        }
+        const newItem = getEmptyItem({priority: maxPrio + 1, id: maxID + 1, ...data});
+        queue.push(['add', newItem]);
+        setQueueLock(false);
         return true;
-    }, [addList, deleteList, maxPrio, maxID]);
+    }, [getEmptyItem, queue, maxPrio, maxID]);
 
     const updateItemBulk = useCallback((data) => {
-        if (addList.has(data.id)) {
-            addList.set(data.id, data);
-            setAdding(true);
-        } else {
-            updateList.set(data.id, data);
-            setUpdating(true);
-        };
+        queue.push(['update', data]);
+        setQueueLock(false);
         return true;
-    }, [updateList, addList]);
+    }, [queue]);
 
     const deleteItemBulk = useCallback((id) => {
-        console.log('Delete', id);
-        if (updateList.delete(id)) {
-            console.log('Updating');
-            setUpdating(true);
-        }
-        if (addList.delete(id)) {
-            console.log('Adding');
-            setAdding(true);
-        } else {
-            console.log('Deleting');
-            deleteList.set(id, true);
-            setDeleting(true);
-        }
+        queue.push(['delete', id]);
+        setQueueLock(false);
         return true;
-    }, [ addList, updateList, deleteList]);
+    }, [queue]);
 
     return { 
         list,
-        getItem, updateItem, deleteItem, addItem,
+        getItem, getEmptyItem,
+        updateItem, deleteItem, addItem,
         addItemBulk, updateItemBulk, deleteItemBulk,
         flusthItems
     };
