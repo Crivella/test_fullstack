@@ -201,8 +201,8 @@ export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
             localStorage.setItem('queue', JSON.stringify(queue));
             setQueueIdx(queue.length);
             setList(app);
-            setQueueLock(true);
         }
+        setQueueLock(true);
 
     }, [queueLock]);
 
@@ -226,7 +226,7 @@ export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         }
         setQueue([]);
         localStorage.setItem('queue', JSON.stringify([]));
-    }, [queue]);
+    }, [queue, addItem, updateItem, deleteItem]);
 
     const addItemBulk = useCallback((data) => {
         const newItem = getEmptyItem({priority: maxPrio + 1, id: maxID + 1, ...data});
