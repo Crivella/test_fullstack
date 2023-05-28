@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import useQueue from '../Hooks/Queue';
 import { useFilter, useSort } from '../commons/FilterSortWrapper';
 import { usePagination } from '../commons/PaginationWrapper';
 import { AuthContext } from './AuthWrapper';
@@ -54,10 +55,6 @@ export function TodosAPIWrapper({children}) {
         const idx2 = itm2.idx;
 
         let  slice;
-
-        console.log('Move', itm1, itm2);
-        console.log('list', visibleList);
-
         if (idx1 > idx2) {
             slice = visibleList.slice(idx2, idx1);
             slice = slice.map(e => ({...e, priority: e.priority - 1}))
@@ -65,9 +62,6 @@ export function TodosAPIWrapper({children}) {
             slice = visibleList.slice(idx1+1, idx2+1);
             slice = slice.map(e => ({...e, priority: e.priority + 1}))
         }
-
-        console.log('Slice', slice);
-        
         slice.forEach(e => updateItem(e));
         updateItem({...itm1, priority: itm2.priority});
         
@@ -165,46 +159,38 @@ export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     const { list: serverList, getItem, getEmptyItem, updateItem, deleteItem, addItem } = useTodoAPI();
 
     const [list, setList] = useState([]); // [{}, {}
-    const [queue, setQueue] = useState(JSON.parse(localStorage.getItem('queue'))); // [(action, data), (action, data)
-    const [queueIdx, setQueueIdx] = useState(0); // [{}
-    const [queueLock, setQueueLock] = useState(false); // [{}
+    const [changedServerList, setChangedServerList] = useState(false);
+    const { push, flush } = useQueue({
+        id: 'todo',
+        cache: 'local',
+        dataActions: {
+            'add': (data) => setList((list) => [data, ...list]), // list.push(data)
+            'update': (data) => setList((list) => list.map((itm) => itm.id === data.id ? data : itm)),
+            'delete': (id) => setList((list) => list.filter((itm) => itm.id !== id)),
+            'list': list
+            // 'finalize': () => setList([...list]),
+            // 'add': list,
+            // 'update': list,
+            // 'delete': list,
+        },
+        flustActions: {
+            'add': addItem,
+            'update': updateItem,
+            'delete': deleteItem
+        },
+    }, [changedServerList, setList]);
 
     const [maxID, setMaxID] = useState(0); // [{}
     const [maxPrio, setMaxPrio] = useState(0); // [{}
 
     // Lifecycle
+
     useEffect(() => {
-        if (queue === null) {
-            setQueue([]);
-            localStorage.setItem('queue', JSON.stringify([]));
-        }
-    }, [queue]);
-    useEffect(() => {
-        setList([...serverList]);
-        setQueueIdx(0);
-        setQueueLock(false);
+        setChangedServerList((c) => {
+            setList([...serverList]);
+            return !c;
+        })
     }, [serverList]);
-
-    useEffect(() => {
-        if (!queueLock && queue !== null) {
-            let app = [...list];
-
-            for (let i = queueIdx; i < queue.length; i++) {
-                const [action, data] = queue[i];
-                switch (action) {
-                    case 'add': app.unshift(data); break;
-                    case 'update': app = app.map((itm) => itm.id === data.id ? data : itm ); break;
-                    case 'delete': app = app.filter((itm) => itm.id !== data); break;
-                    default: throw new Error('Invalid action');
-                }
-            }
-            localStorage.setItem('queue', JSON.stringify(queue));
-            setQueueIdx(queue.length);
-            setList(app);
-        }
-        setQueueLock(true);
-
-    }, [queueLock]);
 
     useEffect(() => {
         let max;
@@ -215,43 +201,27 @@ export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     }, [list]);
 
     // Callbacks
-    const flusthItems = useCallback(async () => {
-        for (const [action, data] of queue) {
-            switch (action) {
-                case 'add': await addItem(data); break;
-                case 'update': await updateItem(data); break;
-                case 'delete': await deleteItem(data); break;
-                default: throw new Error('Invalid action');
-            }
-        }
-        setQueue([]);
-        localStorage.setItem('queue', JSON.stringify([]));
-    }, [queue, addItem, updateItem, deleteItem]);
-
     const addItemBulk = useCallback((data) => {
         const newItem = getEmptyItem({priority: maxPrio + 1, id: maxID + 1, ...data});
-        queue.push(['add', newItem]);
-        setQueueLock(false);
+        push('add', newItem);
         return true;
-    }, [getEmptyItem, queue, maxPrio, maxID]);
+    }, [getEmptyItem, push, maxPrio, maxID]);
 
     const updateItemBulk = useCallback((data) => {
-        queue.push(['update', data]);
-        setQueueLock(false);
+        push('update', data);
         return true;
-    }, [queue]);
+    }, [push]);
 
     const deleteItemBulk = useCallback((id) => {
-        queue.push(['delete', id]);
-        setQueueLock(false);
+        push('delete', id);
         return true;
-    }, [queue]);
+    }, [push]);
 
     return { 
         list,
         getItem, getEmptyItem,
         updateItem, deleteItem, addItem,
         addItemBulk, updateItemBulk, deleteItemBulk,
-        flusthItems
+        flusthItems: flush
     };
 }
