@@ -27,13 +27,13 @@ export default function TodoList() {
     return (
         <ListGroup className='px-3 py-1 list-container' variant={theme}>
             <Container fluid className='m-0 p-0' >
-            <ListGroup.Item as={Row} key={-1} className='d-flex justify-content-between' variant='primary'>
-                {Headers.map((head, idx) => <FilterSortHeader head={head} layout={ColLayout[idx]}/>)}
+            <ListGroup.Item as={Row} className='d-flex justify-content-between' variant='primary'>
+                {Headers.map((head, idx) => <FilterSortHeader head={head} key={idx} layout={ColLayout[idx]}/>)}
             </ListGroup.Item>
             </Container>
             {list.map((todo,idx) => (
                 // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-                <TodoItem todo={todo} idx={idx} active={activeLocal} setActive={setActiveLocal} />
+                <TodoItem todo={todo} key={idx} active={activeLocal} setActive={setActiveLocal} />
             ))}
         </ListGroup>
     );
