@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useReducer, useState } from 'react';
 import { TodoAPIContext } from '../Context/API';
 import useQueue from '../Hooks/Queue';
 import { useFilter, useSort } from '../commons/FilterSortWrapper';
@@ -9,7 +9,6 @@ import { AuthContext } from './AuthWrapper';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
-
 
 export function TodosAPIWrapper({children}) {
     // const { list: serverList } = useTodoAPI();
@@ -23,17 +22,16 @@ export function TodosAPIWrapper({children}) {
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, setFormAction] = useState('add');
 
-    const { 
-        list: serverList,
-        addItemBulk: addItem,
-        updateItemBulk: updateItem,
-        deleteItemBulk: deleteItem,
-        flusthItems
-    } = useTodoBulkAPI()
+    const {list: serverList, dispatch} = useTodoBackendAPI()
+    // const { 
+    //     list: serverList,
+    //     dispatch,
+    // } = useTodoSimpleAPI(_serverList)
     // const { addItem, updateItem, deleteItem } = useTodoAPI()
 
     // Lifecycle
     useEffect(() => {
+        console.log('TodosAPIWrapper useEffect', serverList);
         const app = paginateList(applySort(applyFilters(serverList)));
         app.forEach((e, idx) => e.idx = idx);
         setVisibleList(app);
@@ -61,19 +59,19 @@ export function TodosAPIWrapper({children}) {
             slice = visibleList.slice(idx1+1, idx2+1);
             slice = slice.map(e => ({...e, priority: e.priority + 1}))
         }
-        slice.forEach(e => updateItem(e));
-        updateItem({...itm1, priority: itm2.priority});
+        slice.forEach(e => dispatch({type: 'update', data: e}));
+        dispatch({type: 'update', data: {...itm1, priority: itm2.priority}});
         
         return true;
-    }, [visibleList, updateItem]);
+    }, [visibleList, dispatch]);
 
     const onSubmit = (data) => {
         switch (formAction) {
-            case 'add': return addItem(data);
-            case 'edit': return updateItem(data);
+            case 'add': return dispatch({type: 'add', data: data});
+            case 'edit': return dispatch({type: 'update', data: data});
             case 'delete':
                 const id = data.id || data;
-                return deleteItem(id);
+                return dispatch({type: 'delete', id: id});
             default:
                 throw new Error('Invalid form action');
         }
@@ -85,10 +83,7 @@ export function TodosAPIWrapper({children}) {
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
         'todoAction': onSubmit,
-        'addItem': addItem,
-        'updateItem': updateItem,
-        'deleteItem': deleteItem,
-        'flushItems': flusthItems,
+        'dispatch': dispatch,
         'moveItemTo': moveItemTo,
         'active': active,
         'setActive': setActive,
@@ -101,17 +96,34 @@ export function TodosAPIWrapper({children}) {
     )
 }
 
-export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
+function listReducer(state, action) {
+    console.log('listReducer', state, action);
+    switch (action.type) {
+        case 'set': 
+            return action.data;
+        case 'add': 
+            return [action.data, ...state];
+        case 'update':
+            return state.map((itm) => itm.id === action.data.id ? action.data : itm);
+        case 'delete':
+            return state.filter((itm) => itm.id !== action.id);
+        default:
+            throw new Error('Invalid action type');
+    }
+}
+
+export function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     const { user } = useContext(AuthContext);
-    const [list, setList] = useState([]); // [{}, {}
+    const [list, dispatch] = useReducer(listReducer, []); // [{}, {}
 
     // Lifecycle
     useEffect(() => {
         axios.get(`${endpoint}/`, {
             headers: { 'Content-Type': 'application/json' },
         })
-        .catch((err) => console.log(err))
-        .then(({data}) => setList(data));
+            .then(({data}) => dispatch({type: 'set', data}))
+            .catch((err) => console.log(err));
+        console.log('useTodoBackendAPI useEffect', endpoint);
     }, [user, endpoint]);
 
     const getEmptyItem = useCallback((data) => {
@@ -121,17 +133,15 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
             priority: 0,
             completed: false,
             private: false,
-            user: user.id,
             ...data
         };
-    }, [user]);
+    }, []);
 
-    const getItem = useCallback((id) => {
-        return axios.get(`${endpoint}/${id}/`, {
-            headers: { 'Content-Type': 'application/json' }
-        });
+    const addItem = useCallback((data) => {
+        return axios.post(`${endpoint}/`, data, {})
+            .catch((err) => console.log(err));
     }, [endpoint]);
-
+    
     const updateItem = useCallback((data) => {
         return axios.patch(`${endpoint}/${data.id}/`, data, {})
             .catch((err) => console.log(err));
@@ -142,51 +152,62 @@ export function useTodoAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
             .catch((err) => console.log(err));
     }, [endpoint]);
 
-    const addItem = useCallback((data) => {
-        return axios.post(`${endpoint}/`, data, {})
-            .catch((err) => console.log(err));
-    }, [endpoint]);
+    const asyncDispatch = useCallback(action => {
+        switch (action.type) {
+            case 'add': 
+                return addItem(action.data)
+                    .then(() => dispatch(action));
+            case 'update':
+                return updateItem(action.data)
+                    .then(() => dispatch(action));
+            case 'delete':
+                return deleteItem(action.id)
+                    .then(() => dispatch(action));
+            default:
+                throw new Error('Invalid action type');
+        }
+    }, [addItem, updateItem, deleteItem]);
 
     return { 
-        list, setList,
-        getItem, getEmptyItem,
-        updateItem, deleteItem, addItem,
+        list, 'dispatch': asyncDispatch, getEmptyItem,
     };
 }
 
-export function useTodoBulkAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
-    const { list: serverList, getItem, getEmptyItem, updateItem, deleteItem, addItem } = useTodoAPI();
+export function useTodoSimpleAPI(serverList) {
+    const [list, dispatch] = useReducer(listReducer, []); // [{}, {}
 
-    const [list, setList] = useState([]); // [{}, {}
-    const [changedServerList, setChangedServerList] = useState(false);
+    // Lifecycle
+    useEffect(() => {
+        console.log('simpleAPI useEffect', serverList);
+        dispatch({type: 'set', data: serverList});
+    }, [serverList]);
+
+    return { list, dispatch };
+}
+
+export function useTodoCacheAPI() {
+    const {getItem, getEmptyItem, updateItem, deleteItem, addItem } = useTodoSimpleAPI();
+
+    const [list, dispatch] = useTodoSimpleAPI(); // [{}, {}
     const { push, flush } = useQueue({
         id: 'todo',
         cache: 'local',
         dataActions: {
-            'add': (data) => setList((list) => [data, ...list]), // list.push(data)
-            'update': (data) => setList((list) => list.map((itm) => itm.id === data.id ? data : itm)),
-            'delete': (id) => setList((list) => list.filter((itm) => itm.id !== id)),
-            'list': list
+            'add': (data) => dispatch({type: 'add', data}), 
+            'update': (data) => dispatch({type: 'update', data}), 
+            'delete': (id) => dispatch({type: 'delete', id}),
         },
         flustActions: {
             'add': addItem,
             'update': updateItem,
             'delete': deleteItem
         },
-    }, [changedServerList, setList]);
+    }, [dispatch]);
 
     const [maxID, setMaxID] = useState(0); // [{}
     const [maxPrio, setMaxPrio] = useState(0); // [{}
 
     // Lifecycle
-
-    useEffect(() => {
-        setChangedServerList((c) => {
-            setList([...serverList]);
-            return !c;
-        })
-    }, [serverList]);
-
     useEffect(() => {
         let max;
         max = list.reduce((acc, e) => Math.max(acc, e.priority), 0);
