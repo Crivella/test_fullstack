@@ -30,7 +30,6 @@ export function TodosAPIWrapper({children}) {
 
     // Lifecycle
     useEffect(() => {
-        console.log('TodosAPIWrapper useEffect', serverList);
         const app = paginateList(applySort(applyFilters(serverList)));
         app.forEach((e, idx) => e.idx = idx);
         setVisibleList(app);
@@ -98,7 +97,6 @@ export function TodosAPIWrapper({children}) {
 }
 
 function listReducer(state, action) {
-    console.log('listReducer', state, action);
     let newData = state.data;
     let loading = false;
     let error = null;
