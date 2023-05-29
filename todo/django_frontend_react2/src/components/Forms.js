@@ -1,8 +1,8 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
-import { TodoAPIContext } from "../Context/API";
-import { ThemeContext } from "../commons/ThemeWrapper";
+import { TodoAPIContext } from "../API/Todos";
+import { ThemeContext } from "../context/Contexts";
 
 export function TodoForm({onSubmit}) {
     const {list, formAction, active} = useContext(TodoAPIContext);

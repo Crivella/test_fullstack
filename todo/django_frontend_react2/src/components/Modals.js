@@ -1,38 +1,37 @@
-import { createContext, useContext, useState } from "react";
-import { Alert, Button, Container } from "react-bootstrap";
-import { ModalFormWrapper } from "../commons/ModalWrapper";
+import { useContext, useState } from "react";
+import { Alert, Button, Container, Modal } from "react-bootstrap";
 import { LoginForm, PasswordResetForm, TodoForm } from "./Forms";
 
-// import { useAuth } from "../hooks/useAuth";
-import { AuthContext } from "../API/AuthWrapper";
-import { TodoAPIContext } from '../Context/API';
+import { AuthContext } from "../API/Auth";
+import { TodoAPIContext } from '../API/Todos';
+import { ModalContext, ThemeContext } from "../context/Contexts";
 
-export const ModalContext = createContext({});
+export function ModalFormWrapper({ children, show, setShow, onSubmit, header }) {
+    const {theme, themeContrast1} = useContext(ThemeContext);
+    
+    const handleSubmit = async (fdata) => {
+        const res = await onSubmit(fdata);
+        setShow(!res);
+        return res;
+    };
 
-export function ModalWrapper({children}) {
-    const [showLogin, setShowLogin] = useState(false);
-    const [showTodo, setShowTodo] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
-    const [showUserProfile, setShowUserProfile] = useState(false);
-
-    const newProps = {
-        'showLogin': showLogin,
-        'showTodo': showTodo,
-        'showDelete': showDelete,
-        'showUserProfile': showUserProfile,
-        'setShowLogin': setShowLogin,
-        'setShowTodo': setShowTodo,
-        'setShowDelete': setShowDelete,
-        'setShowUserProfile': setShowUserProfile,
-    }
+    let form = {...children};
+    form.props = {...form.props, onSubmit: handleSubmit}; 
 
     return (
-        <ModalContext.Provider value={newProps}>
-            {children}
-        </ModalContext.Provider>
+        <Modal show={show} onHide={() => setShow(false)}>
+            <Container fluid className={`bg-${theme} text-${themeContrast1}`}>
+                <Modal.Header  closeButton>
+                    <Modal.Title>{header}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {form}
+                </Modal.Body>
+            </Container>
+        </Modal>
     )
-    
 }
+
 
 export function LoginModal() {
     const {login} = useContext(AuthContext);
@@ -51,7 +50,7 @@ export function LoginModal() {
     )
 }
 
-export function AddEditModal({ formHeader }) {
+export function AddEditModal() {
     const { todoAction, formAction } = useContext(TodoAPIContext);
     const { showTodo: show, setShowTodo: setShow } = useContext(ModalContext);
 
@@ -69,7 +68,7 @@ export function AddEditModal({ formHeader }) {
 }
 
 export function DeleteModal() {
-    const {list, active, todoAction } = useContext(TodoAPIContext);
+    const { active, todoAction } = useContext(TodoAPIContext);
     const { showDelete: show, setShowDelete: setShow } = useContext(ModalContext);
 
     const handleSubmit = async () => {

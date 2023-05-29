@@ -3,7 +3,7 @@ import { Container } from "react-bootstrap";
 
 export const KeyMapContext = createContext(new Map());
 
-export default function KeyMapWrapper({children, ...rest}) {
+export default function HoldingKeyMapProvider({children}) {
     const [keyMap, setKeyMap] = useState(new Map());
 
     const ref = useRef(null);

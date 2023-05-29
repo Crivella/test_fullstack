@@ -2,7 +2,7 @@
 import { useContext, useRef, useState } from "react";
 import { Button, Col, Container, Form, Overlay, Popover } from 'react-bootstrap';
 
-import { FilterSortContext } from "../commons/FilterSortWrapper";
+import { FilterSortContext } from "../context/Contexts";
 
 const arrows = {
     '-1': '↓',

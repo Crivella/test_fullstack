@@ -1,11 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row, Spinner } from 'react-bootstrap';
+import { TodoAPIContext } from '../API/Todos';
 import { ItemTypes } from '../Constants';
-import { TodoAPIContext } from '../Context/API';
-import { ThemeContext } from '../commons/ThemeWrapper';
+import { ModalContext, ThemeContext } from '../context/Contexts';
 import { ListItemDragDropFrame } from './DragDrop';
 import { FilterSortHeader } from './FilterSort';
-import { ModalContext } from './Modals';
 import { PaginationToolbar } from './PaginationToolbar';
 import './TodoList.css';
 
@@ -58,8 +57,8 @@ function TodoBody() {
         if (_loading) setLoading(_loading);
     }, [trigger]);
 
-    if (loading) return <TodoBodyLoading />
     if (error) return <TodoBodyError error={error} />
+    if (loading) return <TodoBodyLoading />
     return <TodoBodyList list={list} setActive={setActive} />
 }
 

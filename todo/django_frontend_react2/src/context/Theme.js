@@ -3,7 +3,7 @@ import { Container } from "react-bootstrap";
 
 export const ThemeContext = createContext('dark');
 
-export default function ThemeWrapper({children, theme: _theme}) {
+export default function ThemeProvider({children, theme: _theme}) {
     const [theme, setTheme] = useState(_theme || localStorage.getItem('theme') || "dark"); 
 
     useEffect(() => {

@@ -1,3 +1,22 @@
+@keyframes expandPoint {
+  0% {
+      transform: scale(0);
+  }
+  100% {
+      transform: scale(1);
+  }
+}
+
+
+@keyframes collapsePoint {
+  0% {
+      transform: scale(1);
+  }
+  100% {
+      transform: scale(0);
+  }
+}
+
 .round-button {
     text-align: center;
     /* width: 149px;
@@ -38,3 +57,14 @@
   bottom: 1rem;
   left: 1rem;
 }
+
+.expandPoint {
+    animation: expandPoint 0.3s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+.collapsePoint {
+    animation: collapsePoint 0.3s ease-in-out;
+    animation-fill-mode: forwards;
+}
+

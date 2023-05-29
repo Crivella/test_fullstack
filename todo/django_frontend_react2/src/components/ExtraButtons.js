@@ -4,10 +4,8 @@ import { ItemTypes } from '../Constants';
 import './ExtraButtons.css';
 
 import { useContext } from "react";
-import { TodoAPIContext } from "../Context/API";
-import { FilterSortContext } from "../commons/FilterSortWrapper";
-import { ThemeContext } from "../commons/ThemeWrapper";
-import { ModalContext } from "./Modals";
+import { TodoAPIContext } from "../API/Todos";
+import { FilterSortContext, ModalContext, ThemeContext } from "../context/Contexts";
 
 export function AddButton() {
     const {setFormAction} = useContext(TodoAPIContext);
@@ -52,7 +50,7 @@ export function TrashCan() {
     const {themeContrast1} = useContext(ThemeContext);
     const { setActive, setFormAction } = useContext(TodoAPIContext);
     const { setShowDelete } = useContext(ModalContext);
-    const [{isOver}, dropRef] = useDrop(() => ({
+    const [{canDrop, extraClass}, dropRef] = useDrop(() => ({
         accept: [ItemTypes.CARD, ItemTypes.CardCompleted],
         drop: (item, monitor) => {
             setActive(item);
@@ -60,12 +58,13 @@ export function TrashCan() {
             setShowDelete(true);
         },
         collect: monitor => ({
-            isOver: !!monitor.isOver(),
+            canDrop: !monitor.canDrop(),
+            extraClass: monitor.canDrop() ? 'expandPoint' : 'collapsePoint',
         }),
     }), []);
 
     return (
-        <Button ref={dropRef} className="round-button pos-bl" variant="primary">
+        <Button ref={dropRef} className={`round-button pos-bl ${extraClass}`} variant="primary">
             <span style={{paddingBottom: 10}} className={`text-${themeContrast1}`}>🗑</span>
         </Button>
     );
