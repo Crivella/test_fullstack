@@ -36,8 +36,27 @@ function TodoHeader() {
     )
 }
 
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function TodoBody() {
-    const { list, loading, error, setActive } = useContext(TodoAPIContext);
+    const { list, loading: _loading, error, setActive } = useContext(TodoAPIContext);
+
+    const [loading, setLoading] = useState(false);
+    const [trigger, setTrigger] = useState(false); // [0, 1
+
+    useEffect(() => {
+        if (_loading) {
+            timeout(200).then(() => setTrigger(!trigger))
+        } else {
+            setLoading(_loading);
+        }
+    }, [_loading]);
+
+    useEffect(() => {
+        if (_loading) setLoading(_loading);
+    }, [trigger]);
 
     if (loading) return <TodoBodyLoading />
     if (error) return <TodoBodyError error={error} />
@@ -53,10 +72,6 @@ function TodoBodyLoading() {
 }
 
 function TodoBodyError({error}) {
-    useEffect(() => {
-        if (error) console.log('Error', error.message);
-    }, [error]);
-
     return (
         <ListGroup.Item as={Alert} variant='danger'>
             <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
@@ -136,11 +151,11 @@ function TodoItem({ todo, active, setActive, ...rest }) {
 
 
 function CompletedCheckbox({ todo }) {
-    const {updateItem} = useContext(TodoAPIContext);
+    const {dispatch} = useContext(TodoAPIContext);
 
     const onCheck = (todo, e) => {
         const data = {...todo, completed: e.target.checked};
-        return updateItem(data);
+        return dispatch({type: 'update', data});
     };
 
     return (
