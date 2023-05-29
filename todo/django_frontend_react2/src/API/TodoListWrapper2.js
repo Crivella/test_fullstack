@@ -97,38 +97,27 @@ export function TodosAPIWrapper({children}) {
 }
 
 function listReducer(state, action) {
-    let newData = state.data;
-    let loading = false;
-    let error = null;
     switch (action.type) {
-        case 'loading':
-            loading = true;
-            break;
-        case 'error':
-            error = action.error;
-            break;
-        case 'set': 
-            newData = action.data;
-            break
-        case 'add': 
-            newData = [action.data, ...state];
-            break; 
-        case 'update':
-            newData = state.data.map((itm) => itm.id === action.data.id ? action.data : itm);
-            break;
-        case 'delete':
-            newData = state.data.filter((itm) => itm.id !== action.id);
-            break;
+        case 'set': return action.data;
+        case 'add': return [action.data, ...state];
+        case 'update': return state.map((itm) => itm.id === action.data.id ? action.data : itm);
+        case 'delete': return state.filter((itm) => itm.id !== action.id);
         default:
-            throw new Error('Invalid action type');
+            return state;
     }
+}
 
-    return {data: newData, loading: loading, error: error};
+function statusReducer(state, action) {
+    let data = listReducer(state.data, action);
+    let loading = (action.type === 'loading');
+    let error = (action.type === 'error' ? action.error : null);
+
+    return {data, loading, error};
 }
 
 export function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     const { user } = useContext(AuthContext);
-    const [list, dispatch] = useReducer(listReducer, {
+    const [list, dispatch] = useReducer(statusReducer, {
         loading: false,
         error: null,
         data: [] // [{}, {}
