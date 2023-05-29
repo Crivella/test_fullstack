@@ -11,7 +11,6 @@ import ThemeWrapper from './commons/ThemeWrapper';
 import { AddButton, OrderFilterResetButton, SaveButton, TrashCan } from './components/ExtraButtons';
 import { AddEditModal, DeleteModal, LoginModal, ModalWrapper, UserProfileModal } from './components/Modals';
 import CustomNavbar from './components/Navbar';
-import { PaginationToolbar } from './components/PaginationToolbar';
 import TodoList from './components/TodoList';
 
 export function App() {
@@ -22,15 +21,14 @@ export function App() {
         <ModalWrapper>
         <PaginatorWrapper size={16}>
         <AuthWrapper>
+            <CustomNavbar />
             <LoginModal />
             <UserProfileModal />
-            <CustomNavbar />
             <FilterSortWrapper>
                 <TodosAPIWrapper size={1024}>
                     <AddEditModal />
                     <DeleteModal />
                     <TodoList />
-                    <PaginationToolbar />
                     <AddButton />
                     <SaveButton />
                     <TrashCan />
