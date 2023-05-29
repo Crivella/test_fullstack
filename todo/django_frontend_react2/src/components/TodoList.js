@@ -14,37 +14,74 @@ const ColLayout = [{'sm': 10}, {'sm': 2}]
 
 export default function TodoList() {
     const {theme} = useContext(ThemeContext);
-    const { list, setActive } = useContext(TodoAPIContext);
 
+    // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
+    return (
+        <Container className='list-container'>
+            <ListGroup className='px-3 py-1' variant={theme}>
+                <TodoHeader />
+                <TodoBody />
+            </ListGroup>
+            <PaginationToolbar />
+        </Container>
+    );
+}
+
+function TodoHeader() {
+    return (
+        <ListGroup.Item as={Row} className='d-md-flex justify-content-between' variant='primary'>
+            <FilterSortHeader head='Title' cname='title' layout={{'sm': 10}} />
+            <FilterSortHeader head='' cname='completed' layout={{'sm': 1}} />
+        </ListGroup.Item>
+    )
+}
+
+function TodoBody() {
+    const { list, loading, error, setActive } = useContext(TodoAPIContext);
+
+    if (loading) return <TodoBodyLoading />
+    if (error) return <TodoBodyError error={error} />
+    return <TodoBodyList list={list} setActive={setActive} />
+}
+
+function TodoBodyLoading() {
+    return (
+        <ListGroup.Item as={Alert} variant='primary'>
+            <Alert.Heading>Loading...</Alert.Heading>
+        </ListGroup.Item>
+    )
+}
+
+function TodoBodyError({error}) {
+    useEffect(() => {
+        if (error) console.log('Error', error.message);
+    }, [error]);
+
+    return (
+        <ListGroup.Item as={Alert} variant='danger'>
+            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+            <p>{error.message}</p>
+        </ListGroup.Item>
+    )
+}
+
+function TodoBodyList({list = [], setActive}) {
     const [activeLocal, setActiveLocal] = useState(null);
-    // const Headers = ['priority', 'title', 'completed'];
 
     useEffect(() => {
         setActive(activeLocal);
     }, [activeLocal, setActive]);
 
-    // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
     return (
-        <Container className='list-container'>
-        <ListGroup className='px-3 py-1' variant={theme}>
-            <Container fluid className='m-0 p-0' >
-            <ListGroup.Item as={Row} className='d-md-flex justify-content-between' variant='primary'>
-                {/* {Headers.map((head, idx) => <FilterSortHeader head={head} key={idx} layout={ColLayout[idx]}/>)} */}
-                <FilterSortHeader head='Title' cname='title' layout={{'sm': 10}} />
-                <FilterSortHeader head='' cname='completed' layout={{'sm': 1}} />
-            </ListGroup.Item>
-            </Container>
-            {list.map((todo,idx) => (
-                // <Todo key={e.id} user={user} todo={e} updateTodo={updateTodo} />
-                <TodoItem todo={todo} key={idx} active={activeLocal} setActive={setActiveLocal} />
+        <>
+        {list.map((todo,idx) => (
+            <TodoItem todo={todo} key={idx} active={activeLocal} setActive={setActiveLocal} />
             ))}
-        </ListGroup>
-        <PaginationToolbar />
-        </Container>
-    );
+        </>
+    )
 }
 
-export function TodoItem({ todo, active, setActive, ...rest }) {
+function TodoItem({ todo, active, setActive, ...rest }) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
     const {moveItemTo, setFormAction} = useContext(TodoAPIContext);

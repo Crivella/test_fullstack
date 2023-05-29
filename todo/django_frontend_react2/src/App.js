@@ -3,7 +3,7 @@ import React from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import AuthWrapper from './API/AuthWrapper';
-import { TodosAPIWrapper } from './API/TodoListWrapper';
+import { TodosAPIWrapper } from './API/TodoListWrapper2';
 import './App.css';
 import FilterSortWrapper from './commons/FilterSortWrapper';
 import PaginatorWrapper from './commons/PaginationWrapper';

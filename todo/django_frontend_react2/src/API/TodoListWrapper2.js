@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { useCallback, useContext, useEffect, useReducer, useState } from 'react';
 import { TodoAPIContext } from '../Context/API';
-import useQueue from '../Hooks/Queue';
 import { useFilter, useSort } from '../commons/FilterSortWrapper';
 import { usePagination } from '../commons/PaginationWrapper';
 import { AuthContext } from './AuthWrapper';
@@ -22,7 +21,7 @@ export function TodosAPIWrapper({children}) {
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, setFormAction] = useState('add');
 
-    const {list: serverList, dispatch} = useTodoBackendAPI()
+    const {list: serverList, loading: serverLoading, error: serverError, dispatch} = useTodoBackendAPI()
     // const { 
     //     list: serverList,
     //     dispatch,
@@ -79,6 +78,8 @@ export function TodosAPIWrapper({children}) {
 
     const newProps = {
         'list': visibleList, // [{}, {}, {}]
+        'loading': serverLoading,
+        'error': serverError,
         'formHeader': formHeader,
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
@@ -98,32 +99,51 @@ export function TodosAPIWrapper({children}) {
 
 function listReducer(state, action) {
     console.log('listReducer', state, action);
+    let newData = state.data;
+    let loading = false;
+    let error = null;
     switch (action.type) {
+        case 'loading':
+            loading = true;
+            break;
+        case 'error':
+            error = action.error;
+            break;
         case 'set': 
-            return action.data;
+            newData = action.data;
+            break
         case 'add': 
-            return [action.data, ...state];
+            newData = [action.data, ...state];
+            break; 
         case 'update':
-            return state.map((itm) => itm.id === action.data.id ? action.data : itm);
+            newData = state.data.map((itm) => itm.id === action.data.id ? action.data : itm);
+            break;
         case 'delete':
-            return state.filter((itm) => itm.id !== action.id);
+            newData = state.data.filter((itm) => itm.id !== action.id);
+            break;
         default:
             throw new Error('Invalid action type');
     }
+
+    return {data: newData, loading: loading, error: error};
 }
 
 export function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     const { user } = useContext(AuthContext);
-    const [list, dispatch] = useReducer(listReducer, []); // [{}, {}
+    const [list, dispatch] = useReducer(listReducer, {
+        loading: false,
+        error: null,
+        data: [] // [{}, {}
 
+    }); 
     // Lifecycle
     useEffect(() => {
+        dispatch({type: 'loading'});
         axios.get(`${endpoint}/`, {
             headers: { 'Content-Type': 'application/json' },
         })
             .then(({data}) => dispatch({type: 'set', data}))
-            .catch((err) => console.log(err));
-        console.log('useTodoBackendAPI useEffect', endpoint);
+            .catch((err) => dispatch({type: 'error', error: err}));
     }, [user, endpoint]);
 
     const getEmptyItem = useCallback((data) => {
@@ -137,107 +157,85 @@ export function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT
         };
     }, []);
 
-    const addItem = useCallback((data) => {
-        return axios.post(`${endpoint}/`, data, {})
-            .catch((err) => console.log(err));
-    }, [endpoint]);
-    
-    const updateItem = useCallback((data) => {
-        return axios.patch(`${endpoint}/${data.id}/`, data, {})
-            .catch((err) => console.log(err));
-    }, [endpoint]);
-
-    const deleteItem = useCallback((id) => {
-        return axios.delete(`${endpoint}/${id}/`, {}) 
-            .catch((err) => console.log(err));
-    }, [endpoint]);
-
-    const asyncDispatch = useCallback(action => {
-        switch (action.type) {
-            case 'add': 
-                return addItem(action.data)
-                    .then(() => dispatch(action));
-            case 'update':
-                return updateItem(action.data)
-                    .then(() => dispatch(action));
-            case 'delete':
-                return deleteItem(action.id)
-                    .then(() => dispatch(action));
-            default:
-                throw new Error('Invalid action type');
+    const asyncDispatch = useCallback((action) => {
+        dispatch({type: 'loading'})
+        const fn = (type, data) => {
+            switch (type) {
+                case 'add': 
+                    return axios.post(`${endpoint}/`, data, {});
+                case 'update':
+                    return axios.patch(`${endpoint}/${data.id}/`, data, {});
+                case 'delete':
+                    return axios.delete(`${endpoint}/${data.id}/`, {}) ;
+                default:
+                    throw new Error('Invalid action type');
+            }
         }
-    }, [addItem, updateItem, deleteItem]);
+        fn(action.type, action.data)
+            .catch((err) => dispatch({type: 'error', error: err}))
+            .then(() => dispatch(action));
+    }, [endpoint]);
 
     return { 
-        list, 'dispatch': asyncDispatch, getEmptyItem,
+        'list': list.data, 'loading': list.loading, 'error': list.error,
+        'dispatch': asyncDispatch, getEmptyItem,
     };
 }
 
-export function useTodoSimpleAPI(serverList) {
-    const [list, dispatch] = useReducer(listReducer, []); // [{}, {}
 
-    // Lifecycle
-    useEffect(() => {
-        console.log('simpleAPI useEffect', serverList);
-        dispatch({type: 'set', data: serverList});
-    }, [serverList]);
+// export function useTodoCacheAPI() {
+//     const {getItem, getEmptyItem, updateItem, deleteItem, addItem } = useTodoSimpleAPI();
 
-    return { list, dispatch };
-}
+//     const [list, dispatch] = useTodoSimpleAPI(); // [{}, {}
+//     const { push, flush } = useQueue({
+//         id: 'todo',
+//         cache: 'local',
+//         dataActions: {
+//             'add': (data) => dispatch({type: 'add', data}), 
+//             'update': (data) => dispatch({type: 'update', data}), 
+//             'delete': (id) => dispatch({type: 'delete', id}),
+//         },
+//         flustActions: {
+//             'add': addItem,
+//             'update': updateItem,
+//             'delete': deleteItem
+//         },
+//     }, [dispatch]);
 
-export function useTodoCacheAPI() {
-    const {getItem, getEmptyItem, updateItem, deleteItem, addItem } = useTodoSimpleAPI();
+//     const [maxID, setMaxID] = useState(0); // [{}
+//     const [maxPrio, setMaxPrio] = useState(0); // [{}
 
-    const [list, dispatch] = useTodoSimpleAPI(); // [{}, {}
-    const { push, flush } = useQueue({
-        id: 'todo',
-        cache: 'local',
-        dataActions: {
-            'add': (data) => dispatch({type: 'add', data}), 
-            'update': (data) => dispatch({type: 'update', data}), 
-            'delete': (id) => dispatch({type: 'delete', id}),
-        },
-        flustActions: {
-            'add': addItem,
-            'update': updateItem,
-            'delete': deleteItem
-        },
-    }, [dispatch]);
+//     // Lifecycle
+//     useEffect(() => {
+//         let max;
+//         max = list.reduce((acc, e) => Math.max(acc, e.priority), 0);
+//         setMaxPrio(max);
+//         max = list.reduce((acc, e) => Math.max(acc, e.id), 0);
+//         setMaxID(max);
+//     }, [list]);
 
-    const [maxID, setMaxID] = useState(0); // [{}
-    const [maxPrio, setMaxPrio] = useState(0); // [{}
+//     // Callbacks
+//     const addItemBulk = useCallback((data) => {
+//         const newItem = getEmptyItem({priority: maxPrio + 1, id: maxID + 1, ...data});
+//         push('add', newItem);
+//         return true;
+//     }, [getEmptyItem, push, maxPrio, maxID]);
 
-    // Lifecycle
-    useEffect(() => {
-        let max;
-        max = list.reduce((acc, e) => Math.max(acc, e.priority), 0);
-        setMaxPrio(max);
-        max = list.reduce((acc, e) => Math.max(acc, e.id), 0);
-        setMaxID(max);
-    }, [list]);
+//     const updateItemBulk = useCallback((data) => {
+//         push('update', data);
+//         return true;
+//     }, [push]);
 
-    // Callbacks
-    const addItemBulk = useCallback((data) => {
-        const newItem = getEmptyItem({priority: maxPrio + 1, id: maxID + 1, ...data});
-        push('add', newItem);
-        return true;
-    }, [getEmptyItem, push, maxPrio, maxID]);
+//     const deleteItemBulk = useCallback((id) => {
+//         push('delete', id);
+//         return true;
+//     }, [push]);
 
-    const updateItemBulk = useCallback((data) => {
-        push('update', data);
-        return true;
-    }, [push]);
-
-    const deleteItemBulk = useCallback((id) => {
-        push('delete', id);
-        return true;
-    }, [push]);
-
-    return { 
-        list,
-        getItem, getEmptyItem,
-        updateItem, deleteItem, addItem,
-        addItemBulk, updateItemBulk, deleteItemBulk,
-        flusthItems: flush
-    };
-}
+//     return { 
+//         list,
+//         getItem, getEmptyItem,
+//         updateItem, deleteItem, addItem,
+//         addItemBulk, updateItemBulk, deleteItemBulk,
+//         flusthItems: flush
+//     };
+// }
