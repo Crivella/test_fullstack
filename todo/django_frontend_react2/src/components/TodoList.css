@@ -1,9 +1,10 @@
 .list-container {
     overflow: auto;
-    margin: auto;
-    width: 87%;
+    /* margin: auto; */
+    /* width: 6%; */
+    max-width: 960px;
     height: 85%;
-    display: flex;
+    /* display: flex; */
 }
 
 .todo-check > .form-check-input {

@@ -25,7 +25,7 @@ export default function TodoList() {
 
     // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
     return (
-        <Container  className='list-container'>
+        <Container className='list-container'>
         <ListGroup className='px-3 py-1' variant={theme}>
             <Container fluid className='m-0 p-0' >
             <ListGroup.Item as={Row} className='d-md-flex justify-content-between' variant='primary'>

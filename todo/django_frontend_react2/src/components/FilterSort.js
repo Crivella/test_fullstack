@@ -12,19 +12,19 @@ const arrows = {
 
 const filterSymbol = '⧩';
 
-export function FilterSortHeader({head, layout = {}}) {
+export function FilterSortHeader({head, cname, layout = {}}) {
     return (
         <Col className="m-0 p-0" {...layout}>
             <Container className="d-flex justify-content-between flex-grow-1 m-0 p-0">
             {/* <span onClick={() => onSort(head)}>{arrow}{sortIdx}{head}</span> */}
-            <span>{head}</span>
-            <FilterComponent head={head} />
+            <span>{head === null ? cname : head}</span>
+            <FilterComponent cname={cname} />
             </Container>
         </Col> 
     )
 }
 
-export function FilterComponent({ head }) {
+export function FilterComponent({ cname }) {
     const { filters } = useContext(FilterSortContext);
     const [show, setShow] = useState(false);
     const [target, setTarget] = useState(null);
@@ -39,7 +39,7 @@ export function FilterComponent({ head }) {
     return (
         <Container ref={ref}>
             <Button 
-                variant={`${filters.has(head) ? '' : 'outline-'}primary`} 
+                variant={`${filters.has(cname) ? '' : 'outline-'}primary`} 
                 className="px-1 mx-0" 
                 onClick={onFilter}>{filterSymbol}
             </Button>
@@ -49,7 +49,7 @@ export function FilterComponent({ head }) {
                 >
                 <Popover id="popover-contained">
                     <Popover.Body>
-                        <FilterForm setShow={setShow} head={head} />
+                        <FilterForm setShow={setShow} head={cname} />
                     </Popover.Body>
                 </Popover>
             </Overlay>
