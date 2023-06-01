@@ -9,11 +9,11 @@ export default function CommonProviders({children, theme='dark', size=16}) {
         <ThemeProvider theme={theme}>
         <HoldingKeyMapProvider>
         <ModalProvider>
-        <PaginatorProvider size={size}>
-        <FilterSortProvider>
+        {/* <PaginatorProvider size={size}> */}
+        {/* <FilterSortProvider> */}
             {children}
-        </FilterSortProvider>
-        </PaginatorProvider>
+        {/* </FilterSortProvider> */}
+        {/* </PaginatorProvider> */}
         </ModalProvider>
         </HoldingKeyMapProvider>
         </ThemeProvider>

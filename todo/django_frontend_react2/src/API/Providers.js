@@ -1,14 +1,22 @@
 import APIAuthProvider from "./Auth";
+import APIFilterSortProvider from "./FilterSort";
+import APIPaginatorProvider from "./Pagination";
 import APITodosProvider from "./Todos";
 
-export default function APIProvider({children}) {
+// APIFilterSort and APIPaginatorProvider has to be above APITodosProvider 
+// which makes use of their contexts
+export default function APIProvider({children, size=16}) {
     return (
         <APIAuthProvider>
-            <APITodosProvider>
-                {children}
-            </APITodosProvider>
+            <APIFilterSortProvider> 
+                <APIPaginatorProvider size={size}>
+                    <APITodosProvider>
+                        {children}
+                    </APITodosProvider>
+                </APIPaginatorProvider>
+            </APIFilterSortProvider>
         </APIAuthProvider>
     )
 }
 
-export { APIAuthProvider, APITodosProvider };
+export { APIAuthProvider, APIFilterSortProvider, APIPaginatorProvider, APITodosProvider };

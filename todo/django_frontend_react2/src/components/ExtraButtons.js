@@ -4,8 +4,9 @@ import { ItemTypes } from '../Constants';
 import './ExtraButtons.css';
 
 import { useContext } from "react";
+import { FilterSortContext } from "../API/Contexts";
 import { TodoAPIContext } from "../API/Todos";
-import { FilterSortContext, ModalContext, ThemeContext } from "../context/Contexts";
+import { ModalContext, ThemeContext } from "../context/Contexts";
 
 export function AddButton() {
     const {setFormAction} = useContext(TodoAPIContext);

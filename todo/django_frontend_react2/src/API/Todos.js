@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { createContext, useCallback, useContext, useEffect, useReducer, useState } from 'react';
-import { useFilter, usePagination, useSort } from "../context/Hooks";
 import { AuthContext } from './Auth';
+import { FilterSortContext } from './FilterSort';
+import { PaginationContext } from './Pagination';
 
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
@@ -10,9 +11,9 @@ axios.defaults.withCredentials = true
 export const TodoAPIContext = createContext({});
 
 export default function APITodosProvider({children}) {
-    const applyFilters = useFilter();
-    const applySort = useSort();
-    const {paginateList} = usePagination();
+    // const applyFilters = useFilter();
+    // const applySort = useSort();
+    // const {paginateList} = usePagination();
 
     const [active, setActive] = useState(null);
     const [visibleList, setVisibleList] = useState([]); // [{}]
@@ -22,11 +23,14 @@ export default function APITodosProvider({children}) {
     const {list: serverList, loading: serverLoading, error: serverError, dispatch} = useTodoBackendAPI()
 
     // Lifecycle
+    // useEffect(() => {
+    //     const app = paginateList(applySort(applyFilters(serverList)));
+    //     app.forEach((e, idx) => e.idx = idx);
+    //     setVisibleList(app);
+    // }, [serverList, paginateList, applyFilters, applySort]);
     useEffect(() => {
-        const app = paginateList(applySort(applyFilters(serverList)));
-        app.forEach((e, idx) => e.idx = idx);
-        setVisibleList(app);
-    }, [serverList, paginateList, applyFilters, applySort]);
+        setVisibleList(serverList);
+    }, [serverList]);
 
     useEffect(() => {
         switch (formAction) {
@@ -109,6 +113,8 @@ function statusReducer(state, action) {
 
 function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     const { user } = useContext(AuthContext);
+    const {getParams: FSParams} = useContext(FilterSortContext);
+    const {getParams: PagParams, setCount} = useContext(PaginationContext);
     const [list, dispatch] = useReducer(statusReducer, {
         loading: false,
         error: null,
@@ -120,10 +126,14 @@ function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         dispatch({type: 'loading'});
         axios.get(`${endpoint}/`, {
             headers: { 'Content-Type': 'application/json' },
+            params: {...FSParams, ...PagParams}
         })
-            .then(({data}) => dispatch({type: 'set', data}))
+            .then(({data}) => {
+                setCount(data.count);
+                return dispatch({type: 'set', 'data': data.results});
+            })
             .catch((err) => dispatch({type: 'error', error: err}));
-    }, [user, endpoint]);
+    }, [user, endpoint, FSParams, PagParams, setCount]);
 
     const getNewItem = useCallback((data) => {
         const maxPrio = list.data.reduce((acc, e) => Math.max(acc, e.priority), 0);

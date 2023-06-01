@@ -20,13 +20,13 @@ export function App() {
             <CustomNavbar />
             <LoginModal />
             <UserProfileModal />
-                    <AddEditModal />
-                    <DeleteModal />
-                    <TodoList />
-                    <AddButton />
-                    {/* <SaveButton /> */}
-                    <TrashCan />
-                <OrderFilterResetButton />
+            <AddEditModal />
+            <DeleteModal />
+            <TodoList />
+            <AddButton />
+            {/* <SaveButton /> */}
+            <TrashCan />
+            <OrderFilterResetButton />
         </APIProvider>
         </DndProvider>
         </CommonProviders>

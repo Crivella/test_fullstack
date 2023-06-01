@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Pagination } from 'react-bootstrap';
 
-import { PaginationContext } from "../context/Contexts";
+import { PaginationContext } from "../API/Contexts";
 
 
 export function PaginationToolbar() {
