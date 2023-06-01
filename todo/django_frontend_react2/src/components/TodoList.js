@@ -45,6 +45,11 @@ function TodoBody() {
     const [loading, setLoading] = useState(false);
     const [trigger, setTrigger] = useState(false); // [0, 1
 
+    // Useful for avoiding flickering on updates
+    useEffect(() => {
+        console.log('list', list)
+    }, [list])
+    
     useEffect(() => {
         if (_loading) {
             timeout(200).then(() => setTrigger(!trigger))

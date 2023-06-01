@@ -2,7 +2,10 @@ import { createContext, useEffect, useState } from "react";
 
 export const FilterSortContext = createContext({});
 
-const defaultSorting = new Map([['completed',1], ['priority',-1]]);
+const defaultSorting = new Map([
+    ['completed',1], 
+    ['priority',-1]
+]);
 
 export default function APIFilterSortProvider({children}) {
     const [getParams, setGetParams] = useState({});

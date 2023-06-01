@@ -9,7 +9,7 @@ axios.defaults.withCredentials = true
 export const AuthContext = createContext({});
 
 export default function APIAuthProvider({children}) {
-    const [user, setUser] = useState("");
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         getCSRFToken() //Needed to get CSRF token first time app is run
