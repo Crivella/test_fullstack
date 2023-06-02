@@ -73,6 +73,7 @@ export function DeleteModal() {
 
     const handleSubmit = async () => {
         if (!active) return false;
+        console.log(active);
         const res = await todoAction(active);
         setShow(!res);
         return res;

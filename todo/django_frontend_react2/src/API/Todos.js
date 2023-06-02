@@ -87,16 +87,13 @@ function statusReducer(state, action) {
     const error = (action.type === 'error' ? action.error : null);
 
     switch (action.type) {
-        case 'loading': break;
-        case 'error': break;
+        case 'loading':
+            return {data, map, list, loading, error, maptrigger};
+        case 'error': 
+            return {data, map, list, loading, error, maptrigger};
         case 'set': 
             data = {};
             action.data.forEach((itm) => data[itm.id] = itm);
-            list = applyMap(data, map);
-            break;
-        case 'list':
-            list = applyMap(data, map);
-            list = list.sort((a, b) => a.completed - b.completed);
             break;
         case 'map': 
             map = action.data;
@@ -121,25 +118,17 @@ function statusReducer(state, action) {
             const idx1 = map.indexOf(itm1.id);
             const idx2 = map.indexOf(itm2.id);
 
-            let slice1, slice2, slice3;
-            if (idx1 > idx2) {
-                slice1 = map.slice(0, idx2);
-                slice2 = map.slice(idx2, idx1);
-                slice3 = map.slice(idx1+1);
-                map = [...slice1, itm1.id, ...slice2, ...slice3];
-            } else {
-                slice1 = map.slice(0, idx1);
-                slice2 = map.slice(idx1+1, idx2+1);
-                slice3 = map.slice(idx2+1);
-                map = [...slice1, ...slice2, itm1.id, ...slice3];
-            }
-            list = applyMap(data, map, list)
+            map = [...map];
+            map.splice(idx1, 1);
+            map.splice(idx2 + (idx1 < idx2), 0, itm1.id);
             maptrigger = true;
             break;
         }
         default:
             throw new Error('Invalid action type');
     }
+    list = applyMap(data, map);
+    list = list.sort((a, b) => a.completed - b.completed);
 
     return {data, map, list, loading, error, maptrigger};
 }
@@ -200,37 +189,28 @@ function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     }, [list.maptrigger]);
 
     const asyncDispatch = useCallback((action) => {
-        const {type, data} = action;
-
         dispatch({type: 'loading'})
-        switch (type) {
-            case 'map': 
-                return axios.post(`${endpoint}/map/`, data, {})
-                    .then(({data}) => dispatch({type: 'map', 'data': data}))
-                    .then(() => dispatch({type: 'list'}))
-                    .then(() => true)
-                    .catch((err) => dispatch({type: 'error', error: err}));
-            case 'add': 
-                return axios.post(`${endpoint}/`, data, {})
-                    .then(({data}) => dispatch({type: 'add', 'data': data}))
-                    .then(() => dispatch({type: 'list'}))
-                    .then(() => true)
-                    .catch((err) => dispatch({type: 'error', error: err}));
-            case 'update': 
-                return axios.patch(`${endpoint}/${data.id}/`, data, {})
-                    .then(({data}) => dispatch({type: 'update', 'data': data}))
-                    .then(() => dispatch({type: 'list'}))
-                    .then(() => true)
-                    .catch((err) => dispatch({type: 'error', error: err}));
-            case 'delete':
-                return axios.delete(`${endpoint}/${data.id}/`, {})
-                    .then(() => dispatch({type: 'delete', 'data': data}))
-                    .then(() => dispatch({type: 'list'}))
-                    .then(() => true)
-                    .catch((err) => dispatch({type: 'error', error: err}));
-            default:
-                return new Promise(r => r({'data': data, 'res': dispatch({type: type, 'data': data})}));
+
+        const fn = (type, data) => {
+                switch (type) {
+                    case 'map': 
+                        return axios.post(`${endpoint}/map/`, data, {})
+                    case 'add': 
+                        return axios.post(`${endpoint}/`, data, {})
+                    case 'update': 
+                        return axios.patch(`${endpoint}/${data.id}/`, data, {})
+                    case 'delete':
+                        return axios.delete(`${endpoint}/${data.id}/`, {})
+                            .then(() => ({data}))
+                    default:
+                        return new Promise(r => r({'data': data}));
+                    }
             }
+
+        return fn(action.type, action.data)
+            .then(({data}) => dispatch({type: action.type, data}))
+            .then(() => true)
+            .catch((err) => dispatch({type: 'error', error: err}));
     }, [endpoint]);
 
     return { 
