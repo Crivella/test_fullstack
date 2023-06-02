@@ -10,5 +10,12 @@
         "latex",
         "markdown",
         "plaintext"
+    ],
+    "python.linting.pylintArgs": [
+        "--disable=C0103",
+        "--disable=C0111",
+        "--disable=C0115",
+        "--load-plugins=pylint_django",
+        "--django-settings-module=backend.settings"
     ]
 }

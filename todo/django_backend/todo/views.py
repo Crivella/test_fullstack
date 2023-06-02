@@ -1,24 +1,24 @@
 # from django.http import HttpResponseRedirect
 import json
 
-from django.http import HttpRequest, JsonResponse
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import render
-from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.cache import cache_page
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_protect
 
 from .filters import MyFilterBackend, TodoFilter
 from .models import TodoItem, TodoListMap
 from .permissions import IsOwner, IsOwnerOrReadOnly
 from .serializers import TodoSerializer, UserSerializer
 
+User = get_user_model()
 
 def index(request):
     return render(request, 'todo/index.html')
@@ -27,12 +27,6 @@ class OwnerMixin:
     def get_queryset(self):
         q = super().get_queryset()
         q = q.filter(owner=self.request.user.id)
-        return q
-    
-class OwnerOrPublicMixin:
-    def get_queryset(self):
-        q = super().get_queryset()
-        q = q.filter(Q(private=False) | Q(owner=self.request.user.id))
         return q
     
 class SortedMixin:
@@ -47,7 +41,12 @@ def TodoMapView(request: HttpRequest):
     q = q.filter(owner=request.user.id)
     elem = q.first()
     if elem is None:
-        seq = TodoItem.objects.filter(owner=request.user.id).order_by('completed').values_list('id', flat=True)
+        seq = (
+            TodoItem.objects
+            .filter(owner=request.user.id)
+            .order_by('completed')
+            .values_list('id', flat=True)
+            )
         elem = TodoListMap(owner=request.user, seq=list(seq))
         elem.save()
 

@@ -11,28 +11,14 @@ axios.defaults.withCredentials = true
 export const TodoAPIContext = createContext({});
 
 export default function APITodosProvider({children}) {
-    // const applyFilters = useFilter();
-    // const applySort = useSort();
-    // const {paginateList} = usePagination();
-
     const [active, setActive] = useState(null);
-    const [visibleList, setVisibleList] = useState([]); // [{}]
+    // const [visibleList, setVisibleList] = useState([]); // [{}]
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, setFormAction] = useState('add');
 
-    const {list: serverList, loading: serverLoading, error: serverError, dispatch} = useTodoBackendAPI()
+    const {list, loading, error, dispatch} = useTodoBackendAPI()
 
     // Lifecycle
-    // useEffect(() => {
-    //     const app = paginateList(applySort(applyFilters(serverList)));
-    //     app.forEach((e, idx) => e.idx = idx);
-    //     setVisibleList(app);
-    // }, [serverList, paginateList, applyFilters, applySort]);
-    useEffect(() => {
-        serverList.forEach((e, idx) => e.idx = idx);
-        setVisibleList(serverList);
-    }, [serverList]);
-
     useEffect(() => {
         switch (formAction) {
             case 'add': return setFormHeader('Add Item');
@@ -47,7 +33,7 @@ export default function APITodosProvider({children}) {
         dispatch({type: 'moveInsert', data: {itm1, itm2}})
 
         return true;
-    }, [visibleList, dispatch]);
+    }, [dispatch]);
 
     const onSubmit = (data) => {
         switch (formAction) {
@@ -60,9 +46,9 @@ export default function APITodosProvider({children}) {
     };
 
     const newProps = {
-        'list': visibleList, // [{}, {}, {}]
-        'loading': serverLoading,
-        'error': serverError,
+        'list': list, // [{}, {}, {}]
+        'loading': loading,
+        'error': error,
         'formHeader': formHeader,
         'formAction': formAction, // 'add' or 'edit
         'setFormAction': setFormAction,
@@ -80,17 +66,18 @@ export default function APITodosProvider({children}) {
     )
 }
 
-function listReducer(state, action) {
-    const data = action.data;
-    switch (action.type) {
-        case 'add': return {...state, [data.id]: data};
-        case 'update': return {...state, [data.id]: data};
-        case 'delete': 
-            const {[data.id]: _, ...rest} = state;
-            return rest;
-        default:
-            return state;
+const applyMap = (data, map, list) => {
+    let res = map
+        .map((id) => data[id])
+        .filter((itm) => itm !== undefined);
+
+    if (res.length === 0) {
+        if (list !== undefined)
+            res = list;
+        else
+            res = Object.values(data);
     }
+    return res;
 }
 
 function statusReducer(state, action) {
@@ -99,21 +86,6 @@ function statusReducer(state, action) {
     const loading = (action.type === 'loading');
     const error = (action.type === 'error' ? action.error : null);
 
-    const applyMap = (data, map, list) => {
-        let res = map
-        .map((id) => data[id])
-        .filter((itm) => itm !== undefined);
-
-        if (res.length === 0) {
-            if (list !== undefined)
-                res = list;
-            else
-                res = Object.values(data);
-        }
-        return res;
-    }
-    
-    console.log('statusReducer', action);
     switch (action.type) {
         case 'loading': break;
         case 'error': break;
@@ -122,14 +94,26 @@ function statusReducer(state, action) {
             action.data.forEach((itm) => data[itm.id] = itm);
             list = applyMap(data, map);
             break;
+        case 'list':
+            list = applyMap(data, map);
+            list = list.sort((a, b) => a.completed - b.completed);
+            break;
         case 'map': 
             map = action.data;
-            list = applyMap(data, map, list);
+            break;
+        case 'delete':
+            const {[action.data.id]: _, ...rest} = data
+            data = rest;
+            map = map.filter((id) => id !== action.data.id);
+            maptrigger = true;
+            break
+        case 'update':
+            data = {...data, [action.data.id]: action.data};
             break;
         case 'add':
-            data = listReducer(data, action);
-            map = [data.id, ...map];
-            list = applyMap(data, map, list);
+            data = {...data, [action.data.id]: action.data};
+            map = [action.data.id, ...map];
+            maptrigger = true;
             break;
         case 'moveInsert': {
             const itm1 = action.data.itm1;
@@ -154,9 +138,7 @@ function statusReducer(state, action) {
             break;
         }
         default:
-            data = listReducer(data, action);
-            list = applyMap(data, map, list);
-            break;
+            throw new Error('Invalid action type');
     }
 
     return {data, map, list, loading, error, maptrigger};
@@ -217,39 +199,38 @@ function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         }
     }, [list.maptrigger]);
 
-    // const getNewItem = useCallback((data) => {
-    //     const maxPrio = list.data.reduce((acc, e) => Math.max(acc, e.priority), 0);
-    //     return {
-    //         title: '',
-    //         description: '',
-    //         priority: maxPrio + 1,
-    //         completed: false,
-    //         private: false,
-    //         ...data
-    //     };
-    // }, [list]);
-
     const asyncDispatch = useCallback((action) => {
-        const fn = (type, data) => {
-            switch (type) {
-                case 'map': return axios.post(`${endpoint}/map/`, data, {});
-                case 'add': return axios.post(`${endpoint}/`, data, {});
-                case 'update': return axios.patch(`${endpoint}/${data.id}/`, data, {});
-                case 'delete': return axios.delete(`${endpoint}/${data.id}/`, {}) ;
-                default:
-                    return new Promise(r => r({'data': data}));
-                }
-            }
-        // if (action.type === 'add') action.data = getNewItem(action.data);
+        const {type, data} = action;
 
         dispatch({type: 'loading'})
-        fn(action.type, action.data)
-            .then(({data}) => {
-                dispatch({'type': action.type, 'data': data || action.data});
-                return {data};
-            })
-            .catch((err) => dispatch({type: 'error', error: err}));
-        return true;
+        switch (type) {
+            case 'map': 
+                return axios.post(`${endpoint}/map/`, data, {})
+                    .then(({data}) => dispatch({type: 'map', 'data': data}))
+                    .then(() => dispatch({type: 'list'}))
+                    .then(() => true)
+                    .catch((err) => dispatch({type: 'error', error: err}));
+            case 'add': 
+                return axios.post(`${endpoint}/`, data, {})
+                    .then(({data}) => dispatch({type: 'add', 'data': data}))
+                    .then(() => dispatch({type: 'list'}))
+                    .then(() => true)
+                    .catch((err) => dispatch({type: 'error', error: err}));
+            case 'update': 
+                return axios.patch(`${endpoint}/${data.id}/`, data, {})
+                    .then(({data}) => dispatch({type: 'update', 'data': data}))
+                    .then(() => dispatch({type: 'list'}))
+                    .then(() => true)
+                    .catch((err) => dispatch({type: 'error', error: err}));
+            case 'delete':
+                return axios.delete(`${endpoint}/${data.id}/`, {})
+                    .then(() => dispatch({type: 'delete', 'data': data}))
+                    .then(() => dispatch({type: 'list'}))
+                    .then(() => true)
+                    .catch((err) => dispatch({type: 'error', error: err}));
+            default:
+                return new Promise(r => r({'data': data, 'res': dispatch({type: type, 'data': data})}));
+            }
     }, [endpoint]);
 
     return { 

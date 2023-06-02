@@ -1,7 +1,9 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import TodoItem, TodoListMap
+from .models import TodoItem
+
+User = get_user_model()
 
 class OwnedSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
