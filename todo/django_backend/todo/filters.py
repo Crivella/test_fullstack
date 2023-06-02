@@ -7,7 +7,7 @@ from .models import TodoItem
 class TodoFilter(FilterSet):
     order = OrderingFilter(
         fields=(
-            ('priority', 'priority'),
+            # ('priority', 'priority'),
             ('title', 'title'),
             ('completed', 'completed'),
         )
@@ -17,7 +17,7 @@ class TodoFilter(FilterSet):
         model = TodoItem
         fields = {
             'completed': ['exact'],
-            'private': ['exact'],
+            # 'private': ['exact'],
             'title': ['icontains', 'exact', 'startswith', 'endswith'],
             'description': ['icontains', 'exact', 'startswith', 'endswith'],
         }

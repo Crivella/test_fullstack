@@ -26,6 +26,7 @@ router.register(r'user', todo_views.UserView, 'api_user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/todo/map/", todo_views.TodoMapView),
     path("api/", include(router.urls)),
     path('todo/', include('todo.urls')),
     path('accounts/', include('django.contrib.auth.urls')),

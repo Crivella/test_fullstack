@@ -1,11 +1,15 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import TodoItem
+from .models import TodoItem, TodoListMap
 
-
-class TodoSerializer(serializers.ModelSerializer):
+class OwnedSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        abstract = True
+
+class TodoSerializer(OwnedSerializer):
     priority = serializers.IntegerField(required=False)
 
     class Meta:

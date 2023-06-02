@@ -45,29 +45,7 @@ export default function APITodosProvider({children}) {
     // This should probably be somewhere else?
     const moveItemTo = useCallback((itm1, itm2) => { // itm1: dragged, itm2: inplace
         dispatch({type: 'moveInsert', data: {itm1, itm2}})
-        // const idx1 = itm1.idx;
-        // const idx2 = itm2.idx;
 
-        // console.log('moveItemTo', itm1, itm2, idx1, idx2);
-        // let  slice, slice1, slice2, slice3;
-        // if (idx1 > idx2) {
-        //     slice1 = visibleList.slice(0, idx2);
-        //     slice2 = visibleList.slice(idx2, idx1);
-        //     slice3 = visibleList.slice(idx1+1);
-        //     slice = visibleList.slice(idx2, idx1);
-        //     slice = slice.map(e => ({...e, priority: e.priority - 1}))
-        //     setVisibleList([...slice1, itm1, ...slice2, ...slice3]);
-        // } else {
-        //     slice1 = visibleList.slice(0, idx1);
-        //     slice2 = visibleList.slice(idx1+1, idx2+1);
-        //     slice3 = visibleList.slice(idx2+1);
-        //     slice = visibleList.slice(idx1+1, idx2+1);
-        //     slice = slice.map(e => ({...e, priority: e.priority + 1}))
-        //     setVisibleList([...slice1, ...slice2, itm1, ...slice3]);
-        // }
-        // slice.forEach(e => dispatch({type: 'update', data: e}));
-        // dispatch({type: 'update', data: {...itm1, priority: itm2.priority}});
-        
         return true;
     }, [visibleList, dispatch]);
 
@@ -103,42 +81,85 @@ export default function APITodosProvider({children}) {
 }
 
 function listReducer(state, action) {
-    console.log('listReducer', action);
+    const data = action.data;
     switch (action.type) {
-        case 'set': return action.data;
-        case 'add': return [action.data, ...state];
-        case 'moveInsert': {
-            const itm1 = action.data.itm1;
-            const itm2 = action.data.itm2;
-            const idx1 = state.findIndex((itm) => itm.id === itm1.id);
-            const idx2 = state.findIndex((itm) => itm.id === itm2.id);
-            let  slice1, slice2, slice3;
-            if (idx1 > idx2) {
-                slice1 = state.slice(0, idx2);
-                slice2 = state.slice(idx2, idx1);
-                slice3 = state.slice(idx1+1);
-                return [...slice1, itm1, ...slice2, ...slice3];
-            } else {
-                slice1 = state.slice(0, idx1);
-                slice2 = state.slice(idx1+1, idx2+1);
-                slice3 = state.slice(idx2+1);
-                return [...slice1, ...slice2, itm1, ...slice3];
-            }
-
-        } 
-        case 'update': return state.map((itm) => itm.id === action.data.id ? action.data : itm);
-        case 'delete': return state.filter((itm) => itm.id !== action.data.id);
+        case 'add': return {...state, [data.id]: data};
+        case 'update': return {...state, [data.id]: data};
+        case 'delete': 
+            const {[data.id]: _, ...rest} = state;
+            return rest;
         default:
             return state;
     }
 }
 
 function statusReducer(state, action) {
-    let data = listReducer(state.data, action);
-    let loading = (action.type === 'loading');
-    let error = (action.type === 'error' ? action.error : null);
+    let { data, map, list } = state;
+    let maptrigger = false;
+    const loading = (action.type === 'loading');
+    const error = (action.type === 'error' ? action.error : null);
 
-    return {data, loading, error};
+    const applyMap = (data, map, list) => {
+        let res = map
+        .map((id) => data[id])
+        .filter((itm) => itm !== undefined);
+
+        if (res.length === 0) {
+            if (list !== undefined)
+                res = list;
+            else
+                res = Object.values(data);
+        }
+        return res;
+    }
+    
+    console.log('statusReducer', action);
+    switch (action.type) {
+        case 'loading': break;
+        case 'error': break;
+        case 'set': 
+            data = {};
+            action.data.forEach((itm) => data[itm.id] = itm);
+            list = applyMap(data, map);
+            break;
+        case 'map': 
+            map = action.data;
+            list = applyMap(data, map, list);
+            break;
+        case 'add':
+            data = listReducer(data, action);
+            map = [data.id, ...map];
+            list = applyMap(data, map, list);
+            break;
+        case 'moveInsert': {
+            const itm1 = action.data.itm1;
+            const itm2 = action.data.itm2;
+            const idx1 = map.indexOf(itm1.id);
+            const idx2 = map.indexOf(itm2.id);
+
+            let slice1, slice2, slice3;
+            if (idx1 > idx2) {
+                slice1 = map.slice(0, idx2);
+                slice2 = map.slice(idx2, idx1);
+                slice3 = map.slice(idx1+1);
+                map = [...slice1, itm1.id, ...slice2, ...slice3];
+            } else {
+                slice1 = map.slice(0, idx1);
+                slice2 = map.slice(idx1+1, idx2+1);
+                slice3 = map.slice(idx2+1);
+                map = [...slice1, ...slice2, itm1.id, ...slice3];
+            }
+            list = applyMap(data, map, list)
+            maptrigger = true;
+            break;
+        }
+        default:
+            data = listReducer(data, action);
+            list = applyMap(data, map, list);
+            break;
+    }
+
+    return {data, map, list, loading, error, maptrigger};
 }
 
 function timeout(ms) {
@@ -153,15 +174,18 @@ function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
     const [list, dispatch] = useReducer(statusReducer, {
         loading: false,
         error: null,
-        data: [] // [{}, {}
-
+        data: {}, // {id: {}, id: {}, id: {}}
+        list: [],
+        map: [],
+        maptrigger: false,
     }); 
+
     // Lifecycle
     // Usefull for avoiding spamming the backend when state
     // are adjusting on initialization
     useEffect(() => {
         if (user != null) {
-            timeout(300).then(() => setTrigger(true));
+            timeout(150).then(() => setTrigger(true));
         }
     }, [user, endpoint, FSParams, PagParams, setCount]);
 
@@ -177,49 +201,59 @@ function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
                     return dispatch({type: 'set', 'data': data.results});
                 })
                 .catch((err) => dispatch({type: 'error', error: err}));
+            axios.get(`${endpoint}/map/`, {
+                headers: { 'Content-Type': 'application/json' },
+            })
+                .then(({data}) => dispatch({type: 'map', 'data': data}))
+                .catch((err) => dispatch({type: 'error', error: err}));
             setTrigger(false);
-        }
+            }
     }, [trigger]);
 
-    const getNewItem = useCallback((data) => {
-        const maxPrio = list.data.reduce((acc, e) => Math.max(acc, e.priority), 0);
-        return {
-            title: '',
-            description: '',
-            priority: maxPrio + 1,
-            completed: false,
-            private: false,
-            ...data
-        };
-    }, [list]);
+    useEffect(() => {
+        if (list.maptrigger && list.map.length > 0)
+        {
+            asyncDispatch({type: 'map', 'data': list.map});
+        }
+    }, [list.maptrigger]);
+
+    // const getNewItem = useCallback((data) => {
+    //     const maxPrio = list.data.reduce((acc, e) => Math.max(acc, e.priority), 0);
+    //     return {
+    //         title: '',
+    //         description: '',
+    //         priority: maxPrio + 1,
+    //         completed: false,
+    //         private: false,
+    //         ...data
+    //     };
+    // }, [list]);
 
     const asyncDispatch = useCallback((action) => {
-        console.log('asyncDispatch', action);
         const fn = (type, data) => {
-            console.log('fn', type, data);
             switch (type) {
+                case 'map': return axios.post(`${endpoint}/map/`, data, {});
                 case 'add': return axios.post(`${endpoint}/`, data, {});
                 case 'update': return axios.patch(`${endpoint}/${data.id}/`, data, {});
                 case 'delete': return axios.delete(`${endpoint}/${data.id}/`, {}) ;
                 default:
-                    return Promise.resolve();
-                    throw new Error('Invalid action type');
+                    return new Promise(r => r({'data': data}));
                 }
             }
-        if (action.type === 'add') action.data = getNewItem(action.data);
+        // if (action.type === 'add') action.data = getNewItem(action.data);
 
         dispatch({type: 'loading'})
         fn(action.type, action.data)
             .then(({data}) => {
-                console.log('asyncDispatch...', data);
                 dispatch({'type': action.type, 'data': data || action.data});
+                return {data};
             })
             .catch((err) => dispatch({type: 'error', error: err}));
         return true;
-    }, [endpoint, getNewItem]);
+    }, [endpoint]);
 
     return { 
-        'list': list.data, 'loading': list.loading, 'error': list.error,
-        'dispatch': asyncDispatch, getEmptyItem: getNewItem,
+        'list': list.list, 'loading': list.loading, 'error': list.error,
+        'dispatch': asyncDispatch
     };
 }

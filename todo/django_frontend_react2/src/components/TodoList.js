@@ -47,10 +47,6 @@ function TodoBody() {
 
     // Useful for avoiding flickering on updates
     useEffect(() => {
-        console.log('list', list)
-    }, [list])
-    
-    useEffect(() => {
         if (_loading) {
             timeout(200).then(() => setTrigger(!trigger))
         } else {
@@ -135,7 +131,7 @@ function TodoItem({ todo, active, setActive, ...rest }) {
             >
             <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-md-flex justify-content-between' >
                 <Form.Group as={Row} className='d-flex flex-grow-1' >
-                    <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(todo)}> {`${todo.priority})  ${todo.title}`}</Form.Label>
+                    <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(todo)}> {todo.title} </Form.Label>
                 </Form.Group>
                 <CompletedCheckbox todo={todo} />
             </Card.Header>
