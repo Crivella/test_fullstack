@@ -1,7 +1,9 @@
 import axios from 'axios';
-import { createContext, useCallback, useContext, useEffect, useReducer, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from './Auth';
 import { FilterSortContext } from './FilterSort';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaginationContext } from './Pagination';
 
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -10,13 +12,13 @@ axios.defaults.withCredentials = true
 
 export const TodoAPIContext = createContext({});
 
-export default function APITodosProvider({children}) {
+export default function APITodosProvider({children, pageSize=16}) {
     const [active, setActive] = useState(null);
     // const [visibleList, setVisibleList] = useState([]); // [{}]
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, setFormAction] = useState('add');
 
-    const {list, loading, error, dispatch} = useTodoBackendAPI()
+    const {list, loading, error, dispatch} = useTodoBackendAPI({pageSize})
 
     // Lifecycle
     useEffect(() => {
@@ -67,7 +69,7 @@ export default function APITodosProvider({children}) {
 }
 
 const applyMap = (data, map, list) => {
-    let res = map
+    let res = (map || [])
         .map((id) => data[id])
         .filter((itm) => itm !== undefined);
 
@@ -80,76 +82,118 @@ const applyMap = (data, map, list) => {
     return res;
 }
 
-function statusReducer(state, action) {
-    let { data, map, list } = state;
-    let maptrigger = false;
-    const loading = (action.type === 'loading');
-    const error = (action.type === 'error' ? action.error : null);
-
-    switch (action.type) {
-        case 'loading':
-            return {data, map, list, loading, error, maptrigger};
-        case 'error': 
-            return {data, map, list, loading, error, maptrigger};
-        case 'set': 
-            data = {};
-            action.data.forEach((itm) => data[itm.id] = itm);
-            break;
-        case 'map': 
-            map = action.data;
-            break;
-        case 'delete':
-            const {[action.data.id]: _, ...rest} = data
-            data = rest;
-            map = map.filter((id) => id !== action.data.id);
-            maptrigger = true;
-            break
-        case 'update':
-            data = {...data, [action.data.id]: action.data};
-            break;
-        case 'add':
-            data = {...data, [action.data.id]: action.data};
-            map = [action.data.id, ...map];
-            maptrigger = true;
-            break;
-        case 'moveInsert': {
-            const itm1 = action.data.itm1;
-            const itm2 = action.data.itm2;
-            const idx1 = map.indexOf(itm1.id);
-            const idx2 = map.indexOf(itm2.id);
-
-            map = [...map];
-            map.splice(idx1, 1);
-            map.splice(idx2 + (idx1 < idx2), 0, itm1.id);
-            maptrigger = true;
-            break;
-        }
-        default:
-            throw new Error('Invalid action type');
-    }
-    list = applyMap(data, map);
-    list = list.sort((a, b) => a.completed - b.completed);
-
-    return {data, map, list, loading, error, maptrigger};
-}
-
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
+function useTodoBackendAPI({endpoint = process.env.REACT_APP_TODO_ENDPOINT, pageSize=16}) {
     const { user } = useContext(AuthContext);
+    const queryClient = useQueryClient();
     const {getParams: FSParams} = useContext(FilterSortContext);
-    const {getParams: PagParams, setCount} = useContext(PaginationContext);
+    // const [page, setPage] = useState(1); // [1
+    // const [count, setCount] = useState(0); // [0]
+    const {page, count, setCount} = useContext(PaginationContext);
+    const [list, setList] = useState([]); // [{}]
     const [trigger, setTrigger] = useState(false);
-    const [list, dispatch] = useReducer(statusReducer, {
-        loading: false,
-        error: null,
-        data: {}, // {id: {}, id: {}, id: {}}
-        list: [],
-        map: [],
-        maptrigger: false,
-    }); 
+
+    const getTodoData = useCallback((page, params, signal) => {
+        return axios.get(`${endpoint}/`, {
+            headers: { 'Content-Type': 'application/json' },
+            params: {...params, limit: pageSize, offset: (page - 1) * pageSize},
+            signal
+        });
+    }, [endpoint, pageSize]);
+
+    const extractData = (data) => {
+        const res = {};
+        setCount(data.count);
+        data.results.forEach((itm) => res[itm.id] = itm);
+        return res;
+    }
+
+    // Queries
+    const serverData = useQuery({
+        queryKey: ['todos', page, FSParams], 
+        queryFn: ({ signal }) => getTodoData(page, FSParams, signal)
+            .then(({data}) => extractData(data)), 
+        keepPreviousData: true,
+        staleTime: 1000 * 60 * 5,
+    });
+    const serverMap = useQuery({
+        queryKey: ['todosMap'], 
+        queryFn: ({ signal }) => axios.get(`${endpoint}/map/`, {
+            headers: { 'Content-Type': 'application/json' },
+            signal: signal
+        }).then(({data}) => data)
+    });
+
+    useEffect(() => {
+        if (!serverData.isPreviousData && page < Math.ceil(count / pageSize)) {
+            queryClient.prefetchQuery({
+                queryKey: ['todos', page + 1, FSParams],
+                queryFn: ({ signal }) => getTodoData(page + 1, FSParams, signal)
+                    .then(({data}) => extractData(data)),
+                staleTime: 1000 * 60 * 5,
+            });
+        }
+      }, [serverData.data, serverData.isPreviousData, page, queryClient, FSParams, count])
+
+    // Mutations
+    const serverAdd = useMutation((data) => axios.post(`${endpoint}/`, data, {}), {
+        onMutate: (data) => {
+            queryClient.cancelQueries(['todos']);
+            const oldData = queryClient.getQueryData(['todos']);
+            queryClient.setQueryData(['todos'], (old) => ({...old, [data.id]: data}));
+            return {oldData};
+        },
+        onError: (err, data, context) => {
+            queryClient.setQueryData(['todos'], context.oldData);
+        },
+        onSuccess: ({data}) => {
+            queryClient.setQueryData(['todos'], (old) => ({...old, [data.id]: data}))
+            queryClient.invalidateQueries(['todos']);
+        },
+        });
+
+    const serverUpdate = useMutation((data) => axios.patch(`${endpoint}/${data.id}/`, data, {}), {
+        onMutate: (data) => {
+            queryClient.cancelQueries(['todos']);
+            const oldData = queryClient.getQueryData(['todos']);
+            queryClient.setQueryData(['todos'], (old) => ({...old, [data.id]: data}));
+            return {oldData};
+        },
+        onError: (err, data, context) =>  queryClient.setQueryData(['todos'], context.oldData),
+        onSuccess: (data) => queryClient.invalidateQueries(['todos']),
+        });
+    const serverDelete = useMutation((data) => axios.delete(`${endpoint}/${data.id}/`, {}), {
+        onMutate: (data) => {
+            queryClient.cancelQueries(['todos']);
+            const oldData = queryClient.getQueryData(['todos']);
+            queryClient.setQueryData(['todos'], (old) => {
+                const {[data.id]: _, ...rest} = old;
+                return rest;
+            }
+            );
+            return {oldData};
+        },
+        onError: (err, data, context) => queryClient.setQueryData(['todos'], context.oldData),
+        onSuccess: (data) => queryClient.invalidateQueries(['todos']),
+        });
+    const serverUpdateMap = useMutation((data) => axios.post(`${endpoint}/map/`, data, {}), {
+        onMutate: (data) => {
+            queryClient.cancelQueries(['todosMap']);
+            const oldMap = queryClient.getQueryData(['todosMap']);
+            queryClient.setQueryData(['todosMap'], () => data);
+            return {oldMap};
+        },
+        onError: (err, data, context) => {
+            queryClient.setQueryData(['todosMap'], context.oldMap);
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries(['todosMap']);
+        },
+        });
+
 
     // Lifecycle
     // Usefull for avoiding spamming the backend when state
@@ -158,63 +202,48 @@ function useTodoBackendAPI(endpoint = process.env.REACT_APP_TODO_ENDPOINT) {
         if (user != null) {
             timeout(150).then(() => setTrigger(true));
         }
-    }, [user, endpoint, FSParams, PagParams, setCount]);
+    }, [user, endpoint, FSParams]);
 
     useEffect(() => {
         if (trigger) {
-            dispatch({type: 'loading'});
-            axios.get(`${endpoint}/`, {
-                headers: { 'Content-Type': 'application/json' },
-                params: {...FSParams, ...PagParams}
-            })
-                .then(({data}) => {
-                    setCount(data.count);
-                    return dispatch({type: 'set', 'data': data.results});
-                })
-                .catch((err) => dispatch({type: 'error', error: err}));
-            axios.get(`${endpoint}/map/`, {
-                headers: { 'Content-Type': 'application/json' },
-            })
-                .then(({data}) => dispatch({type: 'map', 'data': data}))
-                .catch((err) => dispatch({type: 'error', error: err}));
+            serverData.refetch();
+            serverMap.refetch();
             setTrigger(false);
             }
     }, [trigger]);
 
     useEffect(() => {
-        if (list.maptrigger && list.map.length > 0)
-        {
-            asyncDispatch({type: 'map', 'data': list.map});
+        setList(applyMap(serverData.data || [], serverMap?.data, list));
+    }, [serverData.data, serverMap.data]);
+
+    const dispatch = useCallback((action) => {
+        const { type, data } = action;
+        switch (type) {
+            case 'delete':
+                return serverDelete.mutateAsync(data)
+                    .then(() => serverUpdateMap.mutateAsync(serverMap.data.filter((id) => id !== data.id)));
+            case 'update':
+                return serverUpdate.mutateAsync(data);
+            case 'add':
+                return serverAdd.mutateAsync(data)
+                    .then(({data}) => serverUpdateMap.mutateAsync([data.id, ...serverMap.data]));
+            case 'moveInsert':
+                const newMap = [...serverMap.data];
+                const itm1 = action.data.itm1;
+                const itm2 = action.data.itm2;
+                const idx1 = newMap.indexOf(itm1.id);
+                const idx2 = newMap.indexOf(itm2.id);
+
+                newMap.splice(idx1, 1);
+                newMap.splice(idx2, 0, itm1.id);
+                return serverUpdateMap.mutateAsync(newMap);
+            default:
+                throw new Error('Invalid action type');
         }
-    }, [list.maptrigger]);
-
-    const asyncDispatch = useCallback((action) => {
-        dispatch({type: 'loading'})
-
-        const fn = (type, data) => {
-                switch (type) {
-                    case 'map': 
-                        return axios.post(`${endpoint}/map/`, data, {})
-                    case 'add': 
-                        return axios.post(`${endpoint}/`, data, {})
-                    case 'update': 
-                        return axios.patch(`${endpoint}/${data.id}/`, data, {})
-                    case 'delete':
-                        return axios.delete(`${endpoint}/${data.id}/`, {})
-                            .then(() => ({data}))
-                    default:
-                        return new Promise(r => r({'data': data}));
-                    }
-            }
-
-        return fn(action.type, action.data)
-            .then(({data}) => dispatch({type: action.type, data}))
-            .then(() => true)
-            .catch((err) => dispatch({type: 'error', error: err}));
-    }, [endpoint]);
+    }, [serverAdd, serverDelete, serverUpdate, serverUpdateMap]);
 
     return { 
-        'list': list.list, 'loading': list.loading, 'error': list.error,
-        'dispatch': asyncDispatch
+        'list': list, 'loading': serverData.isLoading, 'error': serverData.error,
+        dispatch
     };
 }

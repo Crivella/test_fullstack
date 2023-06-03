@@ -137,7 +137,6 @@ function TodoItem({ todo, active, setActive, ...rest }) {
             </Card.Header>
             <Card.Body as={Alert} show={active === todo} variant={themeContrast2}>
                 <Card.Text>{todo.description}</Card.Text>
-                <Card.Text>{todo.private ? 'Private' : 'Public'}</Card.Text>
                 <Container className='d-flex justify-content-between'>
                     <Button variant='primary' size='sm' onClick={onEdit}>Edit</Button>
                     <Button variant='danger' size='sm' onClick={onDelete}>Delete</Button>
