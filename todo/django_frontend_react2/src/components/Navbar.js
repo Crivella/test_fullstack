@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Container, Dropdown, DropdownButton, Form, Nav, Navbar } from "react-bootstrap";
-import { AuthContext } from "../API/Auth";
+import { AuthContext } from "../API/Contexts";
 import { ModalContext } from "../context/Contexts";
 import { useTheme } from "../context/Hooks";
 
@@ -40,7 +40,7 @@ function AnonDropdown() {
 
 function UserDropdown() {
     const {theme} = useTheme();
-    const { user, logout} = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
     const {setShowUserProfile} = useContext(ModalContext);
 
     return (

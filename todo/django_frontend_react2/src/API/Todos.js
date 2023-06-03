@@ -96,43 +96,46 @@ function useTodoBackendAPI({endpoint = process.env.REACT_APP_TODO_ENDPOINT, page
     const [list, setList] = useState([]); // [{}]
     const [trigger, setTrigger] = useState(false);
 
-    const getTodoData = useCallback((page, params, signal) => {
-        return axios.get(`${endpoint}/`, {
+    const getTodoData = useCallback(async ({page, params, signal}) => {
+        const {data} = await axios.get(`${endpoint}/`, {
             headers: { 'Content-Type': 'application/json' },
             params: {...params, limit: pageSize, offset: (page - 1) * pageSize},
             signal
         });
-    }, [endpoint, pageSize]);
-
-    const extractData = (data) => {
-        const res = {};
         setCount(data.count);
+        const res = {};
         data.results.forEach((itm) => res[itm.id] = itm);
         return res;
-    }
+    }, [endpoint, pageSize]);
+
+    const getTodoMap = useCallback(async ({signal}) => {
+        if (!user) return [];
+        const {data} = await axios.get(`${endpoint}/map/`, {
+            headers: { 'Content-Type': 'application/json' },
+            signal
+        });
+        return data;
+    }, [endpoint, user]);
+
 
     // Queries
     const serverData = useQuery({
-        queryKey: ['todos', page, FSParams], 
-        queryFn: ({ signal }) => getTodoData(page, FSParams, signal)
-            .then(({data}) => extractData(data)), 
+        queryKey: ['todos', user, page, FSParams], 
+        queryFn: ({ signal }) => getTodoData({page, params: FSParams, signal}), 
         keepPreviousData: true,
+        enabled: user !== undefined,
         staleTime: 1000 * 60 * 5,
     });
     const serverMap = useQuery({
-        queryKey: ['todosMap'], 
-        queryFn: ({ signal }) => axios.get(`${endpoint}/map/`, {
-            headers: { 'Content-Type': 'application/json' },
-            signal: signal
-        }).then(({data}) => data)
+        queryKey: ['todosMap', user], 
+        queryFn: ({ signal }) => getTodoMap({signal}),
     });
 
     useEffect(() => {
         if (!serverData.isPreviousData && page < Math.ceil(count / pageSize)) {
             queryClient.prefetchQuery({
                 queryKey: ['todos', page + 1, FSParams],
-                queryFn: ({ signal }) => getTodoData(page + 1, FSParams, signal)
-                    .then(({data}) => extractData(data)),
+                queryFn: ({ signal }) => getTodoData({page: page + 1, params: FSParams, signal}),
                 staleTime: 1000 * 60 * 5,
             });
         }
@@ -213,7 +216,7 @@ function useTodoBackendAPI({endpoint = process.env.REACT_APP_TODO_ENDPOINT, page
     }, [trigger]);
 
     useEffect(() => {
-        setList(applyMap(serverData.data || [], serverMap?.data, list));
+        setList(applyMap(serverData.data || {}, serverMap?.data));
     }, [serverData.data, serverMap.data]);
 
     const dispatch = useCallback((action) => {

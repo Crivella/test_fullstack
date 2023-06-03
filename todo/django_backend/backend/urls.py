@@ -29,8 +29,8 @@ urlpatterns = [
     path("api/todo/map/", todo_views.TodoMapView),
     path("api/", include(router.urls)),
     path('todo/', include('todo.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('accounts.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api-token-auth/', token_views.obtain_auth_token)
 ]

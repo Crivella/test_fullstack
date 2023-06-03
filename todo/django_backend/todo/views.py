@@ -37,6 +37,8 @@ class SortedMixin:
 
 @csrf_protect
 def TodoMapView(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'not authenticated'}, status=401)
     q = TodoListMap.objects
     q = q.filter(owner=request.user.id)
     elem = q.first()
