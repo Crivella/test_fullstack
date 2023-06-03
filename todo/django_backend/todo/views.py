@@ -54,9 +54,6 @@ def TodoMapView(request: HttpRequest):
         return JsonResponse(elem.seq, safe=False)
     elif request.method == 'POST':
         new = json.loads(request.body.decode('utf-8'))
-        print(request)
-        print(request.POST)
-        print(request.body)
         if not isinstance(new, list):
             return JsonResponse({'error': 'map must be a list'}, status=400)
         elem.seq = new
