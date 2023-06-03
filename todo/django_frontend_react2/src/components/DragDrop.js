@@ -43,7 +43,10 @@ export function ListItemDragDropFrame({
             setDraggedDir(0);
             return {}
         },
-    }), [data]);
+    // Before it was working why?
+    // Now had to add onDrop on the dependecies array
+    // otherwise dispatch inside onDrop works on the old data
+    }), [data, onDrop]);
 
     const [extraClass, setExtraClass] = useState('');
 

@@ -1,10 +1,12 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row, Spinner } from 'react-bootstrap';
+import { useTodoItemAPI } from '../API/Hooks';
 import { TodoAPIContext } from '../API/Todos';
 import { ItemTypes } from '../Constants';
 import { ModalContext, ThemeContext } from '../context/Contexts';
 import { ListItemDragDropFrame } from './DragDrop';
 import { FilterSortHeader } from './FilterSort';
+import LoadingErrorFrame from './LoadingErrorFrame';
 import { PaginationToolbar } from './PaginationToolbar';
 import './TodoList.css';
 
@@ -13,13 +15,20 @@ const ColLayout = [{'sm': 10}, {'sm': 2}]
 
 export default function TodoList() {
     const {theme} = useContext(ThemeContext);
+    const { list, loading, error, setActive } = useContext(TodoAPIContext);
 
     // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
     return (
         <Container className='list-container'>
             <ListGroup className='px-3 py-1' variant={theme}>
                 <TodoHeader />
-                <TodoBody />
+                <LoadingErrorFrame 
+                    onError={() => <TodoError error={error} />}
+                    onLoading={() => <TodoLoading />} 
+                    loading={loading} error={error}
+                    >
+                    <TodoBodyList list={list} setActive={setActive} />
+                </LoadingErrorFrame>
             </ListGroup>
             <PaginationToolbar />
         </Container>
@@ -35,51 +44,7 @@ function TodoHeader() {
     )
 }
 
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
-function TodoBody() {
-    const { list, loading: _loading, error, setActive } = useContext(TodoAPIContext);
-
-    const [loading, setLoading] = useState(false);
-    const [trigger, setTrigger] = useState(false); // [0, 1
-
-    // Useful for avoiding flickering on updates
-    useEffect(() => {
-        if (_loading) {
-            timeout(200).then(() => setTrigger(!trigger))
-        } else {
-            setLoading(_loading);
-        }
-    }, [_loading]);
-
-    useEffect(() => {
-        if (_loading) setLoading(_loading);
-    }, [trigger]);
-
-    if (error) return <TodoBodyError error={error} />
-    if (loading) return <TodoBodyLoading />
-    return <TodoBodyList list={list} setActive={setActive} />
-}
-
-function TodoBodyLoading() {
-    return (
-        <ListGroup.Item as={Alert} variant='primary'>
-            <Alert.Heading>Loading...</Alert.Heading>
-            <Spinner animation='border' variant='primary' />
-        </ListGroup.Item>
-    )
-}
-
-function TodoBodyError({error}) {
-    return (
-        <ListGroup.Item as={Alert} variant='danger'>
-            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
-            <p>{error.message}</p>
-        </ListGroup.Item>
-    )
-}
 
 function TodoBodyList({list = [], setActive}) {
     const [activeLocal, setActiveLocal] = useState(null);
@@ -90,17 +55,31 @@ function TodoBodyList({list = [], setActive}) {
 
     return (
         <>
-        {list.map((todo,idx) => (
-            <TodoItem todo={todo} key={idx} active={activeLocal} setActive={setActiveLocal} />
+        {list.map((id) => (
+            <TodoItem id={id} key={id} active={activeLocal} setActive={setActiveLocal} />
             ))}
         </>
     )
 }
 
-function TodoItem({ todo, active, setActive, ...rest }) {
+function TodoItem({ id, active, setActive }) {
+    const {data, loading, error} = useTodoItemAPI(id);
+
+    return (
+        <LoadingErrorFrame 
+            onError={() => <TodoError error={error} />}
+            onLoading={() => <TodoLoading />}
+            loading={loading} error={error}
+            >
+            <TodoItemBody data={data} active={active} setActive={setActive} />
+        </LoadingErrorFrame>
+    )
+};
+
+function TodoItemBody({data = {}, active, setActive}) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
     const {setShowTodo, setShowDelete} = useContext(ModalContext);
-    const {moveItemTo, setFormAction} = useContext(TodoAPIContext);
+    const {setFormAction, dispatch} = useContext(TodoAPIContext);
 
     const onSelect = (todo) => {
         active === todo  ? setActive(null) : setActive(todo);
@@ -116,27 +95,30 @@ function TodoItem({ todo, active, setActive, ...rest }) {
         setShowDelete(true);
     };
 
+    const onDrop = useCallback(async ( itm1, itm2 ) => {
+        await dispatch({type: 'moveInsert', data: {itm1, itm2}})
+    }, [dispatch]);
+
     return (
         <ListItemDragDropFrame 
-            type={todo.completed ? ItemTypes.CardCompleted : ItemTypes.CARD} data={todo} 
-            onDrop={moveItemTo}
+            type={data.completed ? ItemTypes.CardCompleted : ItemTypes.CARD} data={data} 
+            onDrop={onDrop}
             placeHolder={<EmptyTodoItem />}
         >
         <ListGroup.Item 
             as={Card}  
             bg={theme} text={themeContrast1} 
             border={themeContrast2} 
-            className={`mt-1 p-0 ${ todo.completed ? 'todo-completed' : ''}`}
-            {...rest}
+            className={`mt-1 p-0 ${ data.completed ? 'todo-completed' : ''}`}
             >
             <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-md-flex justify-content-between' >
                 <Form.Group as={Row} className='d-flex flex-grow-1' >
-                    <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(todo)}> {todo.title} </Form.Label>
+                    <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(data)}> {data.title} </Form.Label>
                 </Form.Group>
-                <CompletedCheckbox todo={todo} />
+                <CompletedCheckbox todo={data} />
             </Card.Header>
-            <Card.Body as={Alert} show={active === todo} variant={themeContrast2}>
-                <Card.Text>{todo.description}</Card.Text>
+            <Card.Body as={Alert} show={active === data} variant={themeContrast2}>
+                <Card.Text>{data.description}</Card.Text>
                 <Container className='d-flex justify-content-between'>
                     <Button variant='primary' size='sm' onClick={onEdit}>Edit</Button>
                     <Button variant='danger' size='sm' onClick={onDelete}>Delete</Button>
@@ -148,8 +130,6 @@ function TodoItem({ todo, active, setActive, ...rest }) {
     )
 };
 
-
-
 function CompletedCheckbox({ todo }) {
     const {dispatch} = useContext(TodoAPIContext);
 
@@ -160,6 +140,24 @@ function CompletedCheckbox({ todo }) {
 
     return (
         <Form.Check className="todo-check" type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)} />
+    )
+}
+
+function TodoLoading() {
+    return (
+        <ListGroup.Item as={Alert} variant='primary'>
+            <Alert.Heading>Loading...</Alert.Heading>
+            <Spinner animation='border' variant='primary' />
+        </ListGroup.Item>
+    )
+}
+
+function TodoError({error}) {
+    return (
+        <ListGroup.Item as={Alert} variant='danger'>
+            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+            <p>{error.message}</p>
+        </ListGroup.Item>
     )
 }
 

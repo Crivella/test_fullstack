@@ -16,7 +16,7 @@ export function App() {
     return (
         <CommonProviders >
         <DndProvider backend={HTML5Backend}>
-        <APIProvider>
+        <APIProvider size={16}>
             <CustomNavbar />
             <LoginModal />
             <UserProfileModal />
