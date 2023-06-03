@@ -5,6 +5,9 @@ function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// A wrapper for displaying loading and error states
+// Uses a delay to avoid flickering between loading and normal state on quick updates
+// eg. loading should persist for at least 200ms
 export default function LoadingErrorFrame({loading: _loading, error, onLoading, onError, children}) {
     const [loading, setLoading] = useState(false);
     const [trigger, setTrigger] = useState(false); // [0, 1

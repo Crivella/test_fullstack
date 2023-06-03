@@ -143,6 +143,7 @@ function CompletedCheckbox({ todo }) {
     )
 }
 
+// An empty loading item
 function TodoLoading() {
     return (
         <ListGroup.Item as={Alert} variant='primary'>
@@ -152,6 +153,7 @@ function TodoLoading() {
     )
 }
 
+// An empty error item
 function TodoError({error}) {
     return (
         <ListGroup.Item as={Alert} variant='danger'>
@@ -161,6 +163,7 @@ function TodoError({error}) {
     )
 }
 
+// An empty item to fill in the space when dragging
 function EmptyTodoItem(props) {
     const {theme} = useContext(ThemeContext);
     return (
