@@ -118,14 +118,17 @@ function TodoItemBody({data = {}, active, setActive}) {
                 </Form.Group>
                 <CompletedCheckbox todo={data} />
             </Card.Header>
-            <Card.Body as={Alert} show={active === data} variant={themeContrast2}>
-                <Card.Text>{data.description}</Card.Text>
-                <Container className='d-flex justify-content-between'>
-                    <Button variant='primary' size='sm' onClick={onEdit}>Edit</Button>
-                    <Button variant='danger' size='sm' onClick={onDelete}>Delete</Button>
-                </Container>
+            <Card.Body as={Alert} show={active === data} variant={theme}>
+                <Row className='d-flex justify-content-between'>
+                    <Card.Text as={Col} className='flex-grow-1'>{data.description}</Card.Text>
+                    <Col sm={1} className='d-inline-flex justify  ml-auto'>
+                        <Container className='d-flex flex-column justify-content-center'>
+                            <Button variant='primary' className='round-button-sm my-1' size='sm' onClick={onEdit}>✎</Button>
+                            <Button variant='danger'className='round-button-sm my-1' onClick={onDelete}>X</Button>
+                        </Container>
+                    </Col>
+                </Row>
             </Card.Body>
-
         </ListGroup.Item>
         </ListItemDragDropFrame>
     )

@@ -34,6 +34,23 @@
     opacity: 0.8;
   }
 
+  .round-button-sm {
+    text-align: center;
+    /* width: 149px;
+    height: 149px; */
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    opacity: 0.8;
+  }
+
 .pos-br {
     position: absolute;
     bottom: 1rem;
