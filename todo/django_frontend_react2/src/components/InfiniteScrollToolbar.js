@@ -16,8 +16,9 @@ export default function InfiniteScrollToolbar() {
         if (page < numPages) {
             const observer = new IntersectionObserver((entries) => {
                 if (entries[entries.length-1].isIntersecting) {
-                    setPage(page+1);
+                    setPage(p => p + 1);
                     setLoading(true);
+                    observer.disconnect();
                 }
             // Difficutl to get 1 if element is at bottom of page
             }, {threshold: 0.5});
@@ -28,7 +29,7 @@ export default function InfiniteScrollToolbar() {
 
     // pb-1 necessaty to have some intersection
     return (
-        <Container fluid ref={ref} className='pb-1' >
+        <Container fluid ref={ref} className={`pb-${page < Math.ceil(count/pageSize) ? 4 : 0}`} >
             <LoadingErrorFrame onLoading={() => <></>} loading={loading} error={false} />
         </Container>
     )
