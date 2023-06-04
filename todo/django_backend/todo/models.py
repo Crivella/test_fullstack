@@ -10,7 +10,9 @@ class Owned(models.Model):
         abstract = True
 
 class TodoListMap(Owned):
+    name = models.CharField(max_length=256)
     seq = models.JSONField(null=True, blank=True)
+    
 
 class TodoItem(Owned):
     title = models.CharField(max_length=256)

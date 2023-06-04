@@ -5,13 +5,15 @@ import { AuthContext } from './Auth';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaginationContext } from './Pagination';
 
-const endpoint = process.env.REACT_APP_TODO_ENDPOINT;
+const APIendpoint = process.env.REACT_APP_TODO_ENDPOINT;
+const todoEndpoint = APIendpoint + '/todo';
+const mapEndpoint = APIendpoint + '/map';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
 const getTodoData = async ({id, signal}) => {
-    const {data} = await axios.get(`${endpoint}/${id}/`, {
+    const {data} = await axios.get(`${todoEndpoint}/${id}/`, {
         headers: { 'Content-Type': 'application/json' },
         signal
     });
@@ -29,7 +31,7 @@ export function useTodoItemAPI(id) {
         staleTime: 1000 * 60 * 5,
     });
 
-    const updateMutation = useMutation((data) => axios.patch(`${endpoint}/${id}/`, data, {}), {
+    const updateMutation = useMutation((data) => axios.patch(`${todoEndpoint}/${id}/`, data, {}), {
         onMutate: (data) => {
             queryClient.cancelQueries(['todos', id]);
             const oldData = queryClient.getQueryData(['todos', id]);
@@ -44,7 +46,7 @@ export function useTodoItemAPI(id) {
         },
         });
 
-    const deleteMutation = useMutation((data) => axios.delete(`${endpoint}/${id}/`, {}), {
+    const deleteMutation = useMutation((data) => axios.delete(`${todoEndpoint}/${id}/`, {}), {
         onMutate: (data) => {
             queryClient.cancelQueries(['todos', id]);
             const oldData = queryClient.getQueryData(['todos', id]);
@@ -66,30 +68,30 @@ export function useTodoItemAPI(id) {
     };
 }
 
-export function useTodoAPI() {
+export function useTodoAPI({ id }) {
     const { user } = useContext(AuthContext);
     const queryClient = useQueryClient();
 
     const {page, pageSize, count, setCount} = useContext(PaginationContext);
 
     const getTodoMap = async ({signal}) => {
-        const {data} = await axios.get(`${endpoint}/map/`, {
+        const {data} = await axios.get(`${mapEndpoint}/${id}`, {
             headers: { 'Content-Type': 'application/json' },
             signal 
         });
-        setCount(data.length);
-        return data;
+        setCount(data.seq.length);
+        return data.seq;
     };
 
     // Queries
     const serverMap = useQuery({
-        queryKey: ['todosMap'], 
+        queryKey: ['todosMap', id], 
         queryFn: ({ signal }) => getTodoMap({signal}),
         enabled: user !== undefined,
     });
 
     useEffect(() => {
-        queryClient.invalidateQueries(['todosMap']);
+        queryClient.invalidateQueries(['todosMap', id]);
         queryClient.invalidateQueries(['todos']);
     }, [user, queryClient]);
 
@@ -110,14 +112,14 @@ export function useTodoAPI() {
       }, [serverMap, page, pageSize, queryClient, count])
 
     // Mutations
-    const serverAdd = useMutation((data) => axios.post(`${endpoint}/`, data, {}), {
+    const serverAdd = useMutation((data) => axios.post(`${todoEndpoint}/`, data, {}), {
         onSuccess: ({data}) => {
             queryClient.setQueryData(['todos', data.id], () => data)
             queryClient.invalidateQueries(['todos', data.id]);
         },
         });
 
-    const serverUpdate = useMutation((data) => axios.patch(`${endpoint}/${data.id}/`, data, {}), {
+    const serverUpdate = useMutation((data) => axios.patch(`${todoEndpoint}/${data.id}/`, data, {}), {
         onMutate: (data) => {
             queryClient.cancelQueries(['todos', data.id]);
             const oldData = queryClient.getQueryData(['todos', data.id]);
@@ -131,25 +133,25 @@ export function useTodoAPI() {
             queryClient.invalidateQueries(['todos', data.id]);
         }
         });
-    const serverDelete = useMutation((data) => axios.delete(`${endpoint}/${data.id}/`, {}), {
+    const serverDelete = useMutation((data) => axios.delete(`${todoEndpoint}/${data.id}/`, {}), {
         onSuccess: (data) => {
             queryClient.invalidateQueries(['todos', data.id])
         },
         });
 
-    const serverUpdateMap = useMutation((data) => axios.post(`${endpoint}/map/`, data, {}), {
+    const serverUpdateMap = useMutation((data) => axios.post(`${mapEndpoint}/${id}`, data, {}), {
         onMutate: (data) => {
-            queryClient.cancelQueries(['todosMap']);
-            const oldMap = queryClient.getQueryData(['todosMap']);
-            queryClient.setQueryData(['todosMap'], () => data);
+            queryClient.cancelQueries(['todosMap', id]);
+            const oldMap = queryClient.getQueryData(['todosMap', id]);
+            queryClient.setQueryData(['todosMap', id], () => data);
             return {oldMap};
         },
         onError: (err, data, context) => {
-            queryClient.setQueryData(['todosMap'], context.oldMap);
+            queryClient.setQueryData(['todosMap', id], context.oldMap);
         },
         onSuccess: ({data}) => {
-            queryClient.setQueryData(['todosMap'], (old) => data);
-            queryClient.invalidateQueries(['todosMap']);
+            queryClient.setQueryData(['todosMap', id], (old) => data);
+            queryClient.invalidateQueries(['todosMap', id]);
         },
         });
 
@@ -183,7 +185,7 @@ export function useTodoAPI() {
     // , [serverMap.data, serverAdd, serverDelete, serverUpdate, serverUpdateMap, ]);
 
     return { 
-        'list': serverMap.data?.slice((page - 1) * pageSize, page * pageSize),
+        'list': serverMap.data?.slice(0, page * pageSize),
         'loading': serverMap.isLoading,
         'error': serverMap.error,
         dispatch

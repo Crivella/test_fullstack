@@ -3,12 +3,13 @@ import { useTodoAPI } from './Hooks';
 
 export const TodoAPIContext = createContext({});
 
-export default function APITodosProvider({children, pageSize=16}) {
+const testID = 7;
+export default function APITodosProvider({children}) {
     const [active, setActive] = useState(null);
     const [formHeader, setFormHeader] = useState('Add Item'); 
     const [formAction, setFormAction] = useState('add');
 
-    const {list, loading, error, dispatch} = useTodoAPI({pageSize})
+    const {list , loading, error, dispatch} = useTodoAPI({id: testID});
 
     // Lifecycle
     useEffect(() => {

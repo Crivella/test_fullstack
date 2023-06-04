@@ -22,11 +22,12 @@ from todo import views as todo_views
 
 router = routers.DefaultRouter()
 router.register(r'todo', todo_views.TodoView, 'api_todo')
+router.register(r'map', todo_views.TodoMapView, 'api_todo')
 router.register(r'user', todo_views.UserView, 'api_user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/todo/map/", todo_views.TodoMapView),
+    # path("api/todo/map/", todo_views.TodoMapView),
     path("api/", include(router.urls)),
     path('todo/', include('todo.urls')),
     path('accounts/', include('accounts.urls')),
