@@ -4,7 +4,7 @@ import { Pagination } from 'react-bootstrap';
 import { PaginationContext } from "../API/Contexts";
 
 
-export function PaginationToolbar() {
+export default function PaginationToolbar() {
     const {page, setPage, pageSize, count} = useContext(PaginationContext);
     const [pagination, setPagination] = useState([]); // [{}
 

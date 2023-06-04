@@ -1,34 +1,35 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import './App.css';
-import { AddButton, TrashCan } from './components/ExtraButtons';
-import { AddEditModal, DeleteModal, LoginModal, UserProfileModal } from './components/Modals';
-import CustomNavbar from './components/Navbar';
 
-import APIProvider from './API/Providers';
-import TodoList from './components/TodoList';
-import CommonProviders from './context/Providers';
+
+import { ListShow } from './routes/listshow';
+import { Root } from './routes/root';
+import UserLists from './routes/UserLists';
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Root />,
+        children: [
+            {
+                path: ":user",
+                element: <UserLists />,
+            },
+            {
+                path: ":user/:id",
+                element: <ListShow />,
+            }
+            ]
+    },
+  ]);
+
 
 export function App() {
 
     return (
-        <CommonProviders >
-        <DndProvider backend={HTML5Backend}>
-        <APIProvider size={16}>
-            <CustomNavbar />
-            <LoginModal />
-            <UserProfileModal />
-            <AddEditModal />
-            <DeleteModal />
-            <TodoList />
-            <AddButton />
-            {/* <SaveButton /> */}
-            <TrashCan />
-            {/* <OrderFilterResetButton /> */}
-        </APIProvider>
-        </DndProvider>
-        </CommonProviders>
+
+        <RouterProvider router={router} />
     );
 }

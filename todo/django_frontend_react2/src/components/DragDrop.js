@@ -27,12 +27,12 @@ export function ListItemDragDropFrame({
     const [{}, dropRef] = useDrop(() => ({
         accept: type,
         drop: (item, monitor) => {
-            if (item.id === data.id) return;
+            if (item.data.id === data.data.id) return;
             if (onDrop) onDrop(item, data, monitor);
             setDropped(true);
         },
         hover: (item, monitor) => {
-            if (item.id === data.id) return;
+            if (item.data.id === data.data.id) return;
             if (onHover) onHover(item, data, monitor);
             const {x,y} = monitor.getDifferenceFromInitialOffset();
             setDraggedDir(Math.sign(y));

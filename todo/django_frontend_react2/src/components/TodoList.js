@@ -1,24 +1,32 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Button, Card, Col, Container, Form, ListGroup, Row, Spinner } from 'react-bootstrap';
-import { useTodoItemAPI } from '../API/Hooks';
-import { TodoAPIContext } from '../API/Todos';
+import { useTodoItemAPI, useTodoMapAPI } from '../API/Hooks';
 import { ItemTypes } from '../Constants';
-import { ModalContext, ThemeContext } from '../context/Contexts';
+import { ThemeContext } from '../context/Contexts';
 import { ListItemDragDropFrame } from './DragDrop';
+import './ExtraButtons.css';
 import { FilterSortHeader } from './FilterSort';
 import InfiniteScrollToolbar from './InfiniteScrollToolbar';
+// import PaginationToolbar from './PaginationToolbar';
 import LoadingErrorFrame from './LoadingErrorFrame';
 import './TodoList.css';
+
+import { createContext } from 'react';
+import { useDrop } from 'react-dnd';
+
+const mapContext = createContext();
 
 // const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]
 const ColLayout = [{'sm': 10}, {'sm': 2}]
 
-export default function TodoList() {
+export default function TodoList({id}) {
     const {theme} = useContext(ThemeContext);
-    const { list, loading, error, setActive } = useContext(TodoAPIContext);
+    const map =  useTodoMapAPI(id);
+    const {loading, error, deleteItem } = map;
 
     // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
     return (
+        <mapContext.Provider value={map}>
         <Container className='list-container'>
             <ListGroup className='px-3 py-1' variant={theme}>
                 <TodoHeader />
@@ -27,12 +35,14 @@ export default function TodoList() {
                     onLoading={() => <TodoLoading />} 
                     loading={loading} error={error}
                     >
-                    <TodoBodyList list={list} setActive={setActive} />
+                    <TodoBodyList />
                 </LoadingErrorFrame>
             </ListGroup>
             <InfiniteScrollToolbar />
             {/* <PaginationToolbar /> */}
+            <TrashCan onDelete={deleteItem} />
         </Container>
+        </mapContext.Provider>
     );
 }
 
@@ -47,24 +57,30 @@ function TodoHeader() {
 
 
 
-function TodoBodyList({list = [], setActive}) {
-    const [activeLocal, setActiveLocal] = useState(null);
-
-    useEffect(() => {
-        setActive(activeLocal);
-    }, [activeLocal, setActive]);
+function TodoBodyList() {
+    const [active, setActive] = useState(null);
+    const {list = [], addItem, deleteItem, onSwap} = useContext(mapContext);
 
     return (
         <>
-        {list.map((id) => (
-            <TodoItem id={id} key={id} active={activeLocal} setActive={setActiveLocal} />
-            ))}
+            <TodoAddItem addItem={addItem} />
+            {list.map((id) => (
+                <TodoItem id={id} key={id} active={active} setActive={setActive} deleteItem={deleteItem} onSwap={onSwap} />
+                ))}
         </>
     )
 }
 
 function TodoItem({ id, active, setActive }) {
-    const {data, loading, error} = useTodoItemAPI(id);
+    const {loading, error, ...item} = useTodoItemAPI(id);
+    const { deleteItem } = useContext(mapContext);
+
+    const onDelete = useCallback(() => {
+        deleteItem(item.data);
+        item.delete();
+        setActive(null);
+    }, [item, setActive, deleteItem]);
+
 
     return (
         <LoadingErrorFrame 
@@ -72,78 +88,220 @@ function TodoItem({ id, active, setActive }) {
             onLoading={() => <TodoLoading />}
             loading={loading} error={error}
             >
-            <TodoItemBody data={data} active={active} setActive={setActive} />
+            <TodoItemBody 
+                item={item} 
+                active={active} setActive={setActive} 
+                onDelete={onDelete}
+            />
         </LoadingErrorFrame>
     )
 };
 
-function TodoItemBody({data = {}, active, setActive}) {
+function TodoItemBody({item, active, setActive, onDelete}) {
     const {theme, themeContrast1, themeContrast2} = useContext(ThemeContext);
-    const {setShowTodo, setShowDelete} = useContext(ModalContext);
-    const {setFormAction, dispatch} = useContext(TodoAPIContext);
+    // const {setShowTodo, setShowDelete} = useContext(ModalContext);
+    // const {setFormAction, dispatch} = useContext(TodoAPIContext);
+    const [editing, setEditing] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
-    const onSelect = (todo) => {
-        active === todo  ? setActive(null) : setActive(todo);
+    const { onSwap } = useContext(mapContext);
+
+    const {data = {}, update} = item;
+
+    const [title, setTitle] = useState(data.title);
+    const [description, setDescription] = useState(data.description);
+
+    useEffect(() => {
+        if (active !== data) {
+            setEditing(false);
+            setDeleting(false);
+        }
+    }, [active, data]);
+
+    useEffect(() => {
+        if (!editing) {
+            setTitle(data.title);
+            setDescription(data.description);
+        }
+    }, [data, editing]);
+
+    // const title = useRef();
+    const onSelect = (itm) => {
+        active === itm  ? setActive(null) : setActive(itm);
     };
 
-    const onEdit = () => {
-        setFormAction('edit');
-        setShowTodo(true);
+    const onUpdate = () => {
+        const newData = {...data, title, description};
+        update(newData);
+        setEditing(false);
     };
 
-    const onDelete = () => {
-        setFormAction('delete');
-        setShowDelete(true);
-    };
+    const onDrop = useCallback(( itm1, itm2 ) => {
+        onSwap(itm1.data, itm2.data);
+    }, [onSwap]);
 
-    const onDrop = useCallback(async ( itm1, itm2 ) => {
-        await dispatch({type: 'moveInsert', data: {itm1, itm2}})
-    }, [dispatch]);
+    const modeProps = {
+        item,
+        editing, setEditing,
+        deleting, setDeleting,
+        onUpdate, onDelete,
+        title, setTitle,
+        description, setDescription,
+        onSelect,
+    }
+
+    const lgItemProps = {
+        as: Card,
+        bg: theme,
+        text: themeContrast1,
+        border: themeContrast2,
+        className: `mt-1 p-0 ${ data.completed ? 'todo-completed' : ''}`,
+    }
+
+    if (editing){
+        return (
+            <ListGroup.Item {...lgItemProps}>
+                <ItemHeaderEditing item={item} {...modeProps} />
+                <ItemBody active={active === data} {...modeProps} />
+            </ListGroup.Item>
+        )
+    }
 
     return (
         <ListItemDragDropFrame 
-            type={data.completed ? ItemTypes.CardCompleted : ItemTypes.CARD} data={data} 
+            type={data.completed ? ItemTypes.CardCompleted : ItemTypes.CARD} data={item} 
             onDrop={onDrop}
             placeHolder={<EmptyTodoItem />}
         >
-        <ListGroup.Item 
-            as={Card}  
-            bg={theme} text={themeContrast1} 
-            border={themeContrast2} 
-            className={`mt-1 p-0 ${ data.completed ? 'todo-completed' : ''}`}
-            >
-            <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-md-flex justify-content-between' >
-                <Form.Group as={Row} className='d-flex flex-grow-1' >
-                    <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(data)}> {data.title} </Form.Label>
-                </Form.Group>
-                <CompletedCheckbox todo={data} />
-            </Card.Header>
-            <Card.Body as={Alert} show={active === data} variant={theme}>
-                <Row className='d-flex justify-content-between'>
-                    <Card.Text as={Col} className='flex-grow-1'>{data.description}</Card.Text>
-                    <Col sm={1} className='d-inline-flex justify  ml-auto'>
-                        <Container className='d-flex flex-column justify-content-center'>
-                            <Button variant='primary' className='round-button-sm my-1' size='sm' onClick={onEdit}>✎</Button>
-                            <Button variant='danger'className='round-button-sm my-1' onClick={onDelete}>X</Button>
-                        </Container>
-                    </Col>
-                </Row>
-            </Card.Body>
-        </ListGroup.Item>
+            <ListGroup.Item {...lgItemProps}>
+                <ItemHeader item={item} onSelect={onSelect}/>
+                <ItemBody active={active === data} {...modeProps} />
+            </ListGroup.Item>
         </ListItemDragDropFrame>
     )
 };
 
-function CompletedCheckbox({ todo }) {
-    const {dispatch} = useContext(TodoAPIContext);
+function ItemHeader({item, onSelect}) {
+    const {data = {}} = item;
 
-    const onCheck = (todo, e) => {
-        const data = {...todo, completed: e.target.checked};
-        return dispatch({type: 'update', data});
+    return (
+        <Card.Header as={Form} onSubmit={e => e.preventDefault()} className='d-md-flex justify-content-between' >
+            <Form.Group as={Row} className='d-flex flex-grow-1' >
+                <Form.Label as={Col} {...ColLayout[0]} onClick={() => onSelect(data)}> {data.title} </Form.Label>
+            </Form.Group>
+            <CompletedCheckbox item={item} />
+        </Card.Header>
+    )
+}
+
+function ItemHeaderEditing({item, ...props}) {
+    const {onUpdate, title, setTitle} = props;
+
+    return (
+        <Card.Header as={Form} onSubmit={e => {e.preventDefault(); onUpdate()}} className='d-md-flex justify-content-between' >
+            <Form.Group as={Row} className='d-flex flex-grow-1' >
+                <Form.Control 
+                    type='title'
+                    // as={Col} 
+                    // {...ColLayout[0]} 
+                    value={title} 
+                    onChange={(e) => setTitle(e.target.value)}
+                    />
+            </Form.Group>
+            <CompletedCheckbox item={item} />
+        </Card.Header>
+    )
+}
+
+function ItemBody({item, active, ...props}) {
+    const {theme} = useContext(ThemeContext);
+    const {editing, onUpdate, description, setDescription} = props;
+
+    return (
+        <Card.Body as={Alert} show={active} variant={theme}>
+            <Row className='d-flex justify-content-between'>
+
+                <Form.Group as={Col} {...ColLayout[0]} onSubmit={onUpdate} >
+                    <Form.Control
+
+                        as='textarea'
+                        rows={3}
+                        disabled={!editing}
+                        value={description || ''}
+                        onChange={(e) => setDescription(e.target.value)}
+                        />
+                </Form.Group>
+
+                <ButtonArray {...props}  />
+            </Row>
+        </Card.Body>
+    )
+}
+
+function ButtonArray(props) {
+    const {editing, setEditing, deleting, setDeleting, onUpdate, onDelete} = props;
+
+    let array;
+    if (editing) {
+        array = (
+            <>
+            <Button 
+                variant='primary'
+                className='round-button-sm my-1' 
+                size='sm' onClick={onUpdate}>✓</Button>
+            <Button 
+                variant='warning'
+                className='round-button-sm my-1' 
+                onKeyDown={(e) => {if (e.key === 'Escape') setEditing(false)}}
+                onClick={() => setEditing(false)}>↩</Button>
+            </> 
+        )
+    } else if (deleting) {
+        array = (
+            <>
+            <Button
+                variant='danger'
+                className='round-button-sm my-1' 
+                onClick={onDelete}>!!</Button>
+            <Button
+                variant='warning'
+                className='round-button-sm my-1' 
+                onClick={() => setDeleting(false)}>↩</Button>         
+            </>
+        )
+    } else {
+        array = (
+            <>
+            <Button
+                variant='primary'
+                className='round-button-sm my-1'
+                size='sm' onClick={() => setEditing(true)}>✎</Button>
+            <Button
+                variant='danger'
+                className='round-button-sm my-1'
+                onClick={() => setDeleting(true)}>X</Button>
+            </>
+        )
+    }
+
+    return (
+        <Col sm={1} className='d-inline-flex justify  ml-auto'>
+            <Container className='d-flex flex-column justify-content-center'>
+            { array }
+            </Container>
+        </Col>
+    )
+}
+
+function CompletedCheckbox({ item }) {
+    const {data = {}} = item;
+
+    const onCheck = (e) => {
+        item.update({completed: e.target.checked});
     };
 
     return (
-        <Form.Check className="todo-check" type='checkbox' checked={todo.completed} onChange={(e) => onCheck(todo, e)} />
+        <Form.Check className="todo-check" type='checkbox' checked={data.completed} onChange={onCheck} />
     )
 }
 
@@ -167,6 +325,61 @@ function TodoError({error}) {
     )
 }
 
+function TodoAddItem({addItem}) {
+    const {theme} = useContext(ThemeContext);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+
+    const [adding, setAdding] = useState(false);
+
+    const onSubmit = (e) => {
+        e.preventDefault();
+        addItem({title, description});
+        setAdding(false);
+        setTitle('');
+        setDescription('');
+    };
+
+    const onCancel = () => {
+        setAdding(false);
+        setTitle('');
+        setDescription('');
+    };
+
+    if (adding) {
+        return (
+            <ListGroup.Item as={Form}  className='d-flex' variant={theme}>
+                <Container as={Col} className='flex-grow-1'>
+                    <Form.Group as={Row} className='d-flex flex-grow-1' onSubmit={onSubmit}>
+                        <Form.Control
+                            type='title'
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            />
+                    </Form.Group>
+                    <Form.Group as={Row} className='d-flex flex-grow-1' onSubmit={onSubmit}>
+                        <Form.Control
+                            type='description'
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            />
+                    </Form.Group>
+                </Container>
+                <Container as={Col} sm={1} className='d-flex flex-column justify-content-end'>
+                    <Button variant='primary' className='round-button-sm my-1' onClick={onSubmit} >✓</Button>
+                    <Button variant='warning' className='round-button-sm my-1' onClick={onCancel} >↩</Button>
+                </Container>
+            </ListGroup.Item>
+        )
+    }
+
+    return (
+        <ListGroup.Item as={Form}  className='d-md-flex justify-content-center' variant={theme}>
+            <Button variant='primary' className='round-button-sm my-1' onClick={() => setAdding(true)} >+</Button>
+        </ListGroup.Item>
+    )
+}
+
 // An empty item to fill in the space when dragging
 function EmptyTodoItem(props) {
     const {theme} = useContext(ThemeContext);
@@ -175,4 +388,26 @@ function EmptyTodoItem(props) {
             <p> </p>
         </ListGroup.Item>
     )
+}
+
+function TrashCan({onDelete}) {
+    const {themeContrast1} = useContext(ThemeContext);
+    // const { setActive, setFormAction } = useContext(TodoAPIContext);
+    const [{canDrop, extraClass}, dropRef] = useDrop(() => ({
+        accept: [ItemTypes.CARD, ItemTypes.CardCompleted],
+        drop: (item, monitor) => {
+            onDelete(item.data);
+            item.delete();
+        },
+        collect: monitor => ({
+            canDrop: !monitor.canDrop(),
+            extraClass: monitor.canDrop() ? 'expandPoint' : 'collapsePoint',
+        }),
+    }), [onDelete]);
+
+    return (
+        <Button ref={dropRef} className={`round-button pos-bl ${extraClass}`} variant="primary">
+            <span style={{paddingBottom: 10}} className={`text-${themeContrast1}`}>🗑</span>
+        </Button>
+    );
 }

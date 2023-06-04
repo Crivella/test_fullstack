@@ -4,6 +4,7 @@ import ModalProvider from "./Modal";
 import PaginatorProvider from "./Pagination";
 import ThemeProvider from "./Theme";
 
+
 export default function CommonProviders({children, theme='dark', size=16}) {
     return (
         <ThemeProvider theme={theme}>

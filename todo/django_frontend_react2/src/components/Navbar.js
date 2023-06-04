@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { Container, Dropdown, DropdownButton, Form, Nav, Navbar } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../API/Contexts";
 import { ModalContext } from "../context/Contexts";
 import { useTheme } from "../context/Hooks";
@@ -12,7 +13,9 @@ export default function CustomNavbar() {
         <Navbar bg={theme === 'dark' ? 'black' : 'secondary'} variant={theme} text={themeContrast1} sticky="top" className={`border border-success`}>
             <Container fluid className="d-flex justify-content-between">
                 <Nav className="d-flex">
-                    <Navbar.Brand className={`text-${themeContrast1}`} href="#home">Todo</Navbar.Brand>
+                    <Navbar.Brand className={`text-${themeContrast1}`}>
+                        <Link to="/" className={`text-${themeContrast1}`}>Todo</Link>
+                    </Navbar.Brand>
                 </Nav>
                 <Form className="d-flex">
                     {ThemeSwitch}
@@ -46,9 +49,14 @@ function UserDropdown() {
     return (
         <DropdownButton className="mx-1" id="navbar-dropdown" title={user} variant={theme}>
             <Dropdown.Menu variant={theme}>
-                <Dropdown.Item variant={theme} onClick={() => setShowUserProfile(true)}>Edit Profile</Dropdown.Item>
+                <Dropdown.Item as={Link} to={`${user}`} variant={theme}>
+                    My Lists
+                </Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item onClick={logout}>Logout</Dropdown.Item>
+                <Dropdown.Item variant={theme} onClick={() => setShowUserProfile(true)}>Edit Profile</Dropdown.Item>
+                <Dropdown.Item as={Link} to='/' onClick={logout}>
+                    Logout
+                </Dropdown.Item>
             </Dropdown.Menu>
         </DropdownButton>
     )

@@ -3,7 +3,7 @@ import { Alert, Button, Container, Modal } from "react-bootstrap";
 import { LoginForm, PasswordResetForm, TodoForm } from "./Forms";
 
 import { AuthContext } from "../API/Auth";
-import { TodoAPIContext } from '../API/Todos';
+// import { TodoAPIContext } from '../API/Todos';
 import { ModalContext, ThemeContext } from "../context/Contexts";
 
 export function ModalFormWrapper({ children, show, setShow, onSubmit, header }) {
@@ -51,7 +51,7 @@ export function LoginModal() {
 }
 
 export function AddEditModal() {
-    const { todoAction, formAction } = useContext(TodoAPIContext);
+    const { todoAction, formAction } = useContext();
     const { showTodo: show, setShowTodo: setShow } = useContext(ModalContext);
 
     const newProps = {
@@ -68,7 +68,7 @@ export function AddEditModal() {
 }
 
 export function DeleteModal() {
-    const { active, todoAction } = useContext(TodoAPIContext);
+    const { active, todoAction } = useContext();
     const { showDelete: show, setShowDelete: setShow } = useContext(ModalContext);
 
     const handleSubmit = async () => {

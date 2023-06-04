@@ -1,7 +1,7 @@
 import APIAuthProvider from "./Auth";
 import APIFilterSortProvider from "./FilterSort";
 import APIPaginatorProvider from "./Pagination";
-import APITodosProvider from "./Todos";
+// import APITodosProvider from "./Todos";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -15,9 +15,9 @@ export default function APIProvider({children, size=16}) {
         <APIAuthProvider>
             <APIFilterSortProvider> 
                 <APIPaginatorProvider size={size}>
-                    <APITodosProvider>
+                    {/* <APITodosProvider> */}
                         {children}
-                    </APITodosProvider>
+                    {/* </APITodosProvider> */}
                 </APIPaginatorProvider>
             </APIFilterSortProvider>
         </APIAuthProvider>
@@ -25,5 +25,5 @@ export default function APIProvider({children, size=16}) {
     )
 }
 
-export { APIAuthProvider, APIFilterSortProvider, APIPaginatorProvider, APITodosProvider };
+export { APIAuthProvider, APIFilterSortProvider, APIPaginatorProvider };
 
