@@ -139,18 +139,26 @@ export function useTodoAPI({ id }) {
         },
         });
 
-    const serverUpdateMap = useMutation((data) => axios.post(`${mapEndpoint}/${id}`, data, {}), {
+    const serverAddMap = useMutation((data) => axios.post(`${mapEndpoint}/`, data, {}), {
+        onSuccess: ({data}) => {
+            queryClient.setQueryData(['todosMap', id], (old) => data);
+            queryClient.invalidateQueries(['todosMap', id]);
+        },
+        });
+
+
+    const serverUpdateMap = useMutation((data) => axios.patch(`${mapEndpoint}/${id}/`, data, {}), {
         onMutate: (data) => {
             queryClient.cancelQueries(['todosMap', id]);
             const oldMap = queryClient.getQueryData(['todosMap', id]);
-            queryClient.setQueryData(['todosMap', id], () => data);
+            queryClient.setQueryData(['todosMap', id], () => data.seq);
             return {oldMap};
         },
         onError: (err, data, context) => {
             queryClient.setQueryData(['todosMap', id], context.oldMap);
         },
         onSuccess: ({data}) => {
-            queryClient.setQueryData(['todosMap', id], (old) => data);
+            // queryClient.setQueryData(['todosMap', id], (old) => data);
             queryClient.invalidateQueries(['todosMap', id]);
         },
         });
@@ -160,12 +168,14 @@ export function useTodoAPI({ id }) {
         switch (type) {
             case 'delete':
                 return serverDelete.mutateAsync(data)
-                    .then(() => serverUpdateMap.mutateAsync(serverMap.data.filter((id) => id !== data.id)));
+                    .then(() => serverUpdateMap.mutateAsync(
+                        {seq: serverMap.data.filter((id) => id !== data.id)}
+                        ));
             case 'update':
                 return serverUpdate.mutateAsync(data);
             case 'add':
                 return serverAdd.mutateAsync(data)
-                    .then(({data}) => serverUpdateMap.mutateAsync([data.id, ...serverMap.data]));
+                    .then(({data}) => serverUpdateMap.mutateAsync({seq: [data.id, ...serverMap.data]}));
             case 'moveInsert': {
                 const newMap = [...serverMap.data];
                 const itm1 = action.data.itm1;
