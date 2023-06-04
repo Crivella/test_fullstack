@@ -6,8 +6,8 @@ import { ItemTypes } from '../Constants';
 import { ModalContext, ThemeContext } from '../context/Contexts';
 import { ListItemDragDropFrame } from './DragDrop';
 import { FilterSortHeader } from './FilterSort';
+import InfiniteScrollToolbar from './InfiniteScrollToolbar';
 import LoadingErrorFrame from './LoadingErrorFrame';
-import { PaginationToolbar } from './PaginationToolbar';
 import './TodoList.css';
 
 // const ColLayout = [{'sm': 3, 'md':2}, {'sm': 7, 'md':8}, {'sm': 2}]
@@ -30,7 +30,8 @@ export default function TodoList() {
                     <TodoBodyList list={list} setActive={setActive} />
                 </LoadingErrorFrame>
             </ListGroup>
-            <PaginationToolbar />
+            <InfiniteScrollToolbar />
+            {/* <PaginationToolbar /> */}
         </Container>
     );
 }
