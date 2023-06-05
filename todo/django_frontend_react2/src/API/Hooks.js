@@ -226,10 +226,26 @@ export function useTodoMapAPI(id) {
         return serverUpdateMap.mutateAsync({seq: newMap});
     }, [serverMap, serverUpdateMap]);
 
+    const onCheck = useCallback((itm) => {
+        const seq = serverMap.data.seq;
+        const filtered = seq.filter((id) => id !== itm.id);
+        const place = serverMap.data.first_completed - 1 || filtered.length
+        if (!itm.completed) {
+            filtered.splice(0, 0, itm.id);
+        }
+        else {
+            filtered.splice(place, 0, itm.id)
+         }
+         return serverUpdateMap.mutateAsync({
+             seq: filtered
+         });
+    }, [serverMap, serverUpdateMap]);
+    
     return { 
         'list': (serverMap.data?.seq || []).slice(0, page*pageSize),
         'addItem': addItem,
         'onSwap': onSwap,
+        'onCheck': onCheck,
         'loading': serverMap.isLoading,
         'error': serverMap.error,
     };

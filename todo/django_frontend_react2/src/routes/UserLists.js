@@ -65,7 +65,7 @@ export default function UserLists() {
                                 autoFocus
                             />
                             :
-                            <Form.Text className='text-muted'>{item.name}</Form.Text>
+                            <Form.Text className='text-muted'>{`${item.completed} / ${item.total}) ${item.name}`}</Form.Text>
                         }
                         <Form.Group controlId='formBasicCheckbox' className='d-flex'>
                             {

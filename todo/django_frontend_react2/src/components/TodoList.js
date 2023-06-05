@@ -292,9 +292,11 @@ function ButtonArray(props) {
 
 function CompletedCheckbox({ item }) {
     const {data = {}} = item;
+    const { onCheck: _onCheck } = useContext(mapContext);
 
     const onCheck = (e) => {
-        item.update({completed: e.target.checked});
+        item.update({completed: e.target.checked})
+            .then(({data}) => _onCheck(data));
     };
 
     return (

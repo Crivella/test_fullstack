@@ -12,6 +12,21 @@ class Owned(models.Model):
 class TodoListMap(Owned):
     name = models.CharField(max_length=256, blank=True, null=True)
     seq = models.JSONField(default=list)
+
+    @property
+    def count_completed(self):
+        return self.items.filter(completed=True).count()
+    
+    @property
+    def mapped_seq(self):
+        return [self.items.get(pk=pk) for pk in list(self.seq)]
+    
+    @property
+    def first_completed(self):
+        l = [_.completed for _ in self.mapped_seq]
+        if True in l:
+            return l.index(True)
+        return len(l)
     
 
 class TodoItem(Owned):

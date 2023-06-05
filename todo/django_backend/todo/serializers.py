@@ -24,9 +24,12 @@ class TodoSerializer(OwnedSerializer):
         return todo
 
 class TodoMapSerializer(OwnedSerializer):
+    total = serializers.ReadOnlyField(source='items.count')
+    completed = serializers.ReadOnlyField(source='count_completed')
+    first_completed = serializers.ReadOnlyField()
     class Meta:
         model = TodoListMap
-        fields = ('id', 'name', 'seq')
+        fields = ('id', 'name', 'seq', 'completed', 'total', 'first_completed')
 
 class UserSerializer(serializers.ModelSerializer):
     # todo_items = serializers.PrimaryKeyRelatedField(many=True, queryset=TodoItem.objects.all())
