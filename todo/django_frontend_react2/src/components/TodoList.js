@@ -22,7 +22,7 @@ const ColLayout = [{'sm': 10}, {'sm': 2}]
 export default function TodoList({id}) {
     const {theme} = useContext(ThemeContext);
     const map =  useTodoMapAPI(id);
-    const {loading, error, deleteItem } = map;
+    const {loading, error } = map;
 
     // Fix for small H-scroll https://stackoverflow.com/a/23768296/7604434
     return (
@@ -40,7 +40,7 @@ export default function TodoList({id}) {
             </ListGroup>
             <InfiniteScrollToolbar />
             {/* <PaginationToolbar /> */}
-            <TrashCan onDelete={deleteItem} />
+            <TrashCan />
         </Container>
         </mapContext.Provider>
     );
@@ -59,7 +59,7 @@ function TodoHeader() {
 
 function TodoBodyList() {
     const [active, setActive] = useState(null);
-    const {list = [], addItem, deleteItem, onSwap} = useContext(mapContext);
+    const {list = [], addItem} = useContext(mapContext);
 
     return (
         <>
@@ -73,13 +73,11 @@ function TodoBodyList() {
 
 function TodoItem({ id, active, setActive }) {
     const {loading, error, ...item} = useTodoItemAPI(id);
-    const { deleteItem } = useContext(mapContext);
 
     const onDelete = useCallback(() => {
-        deleteItem(item.data);
         item.delete();
         setActive(null);
-    }, [item, setActive, deleteItem]);
+    }, [item, setActive]);
 
     return (
         <LoadingErrorFrame 
@@ -389,20 +387,19 @@ function EmptyTodoItem(props) {
     )
 }
 
-function TrashCan({onDelete}) {
+function TrashCan() {
     const {themeContrast1} = useContext(ThemeContext);
     // const { setActive, setFormAction } = useContext(TodoAPIContext);
     const [{canDrop, extraClass}, dropRef] = useDrop(() => ({
         accept: [ItemTypes.CARD, ItemTypes.CardCompleted],
         drop: (item, monitor) => {
-            onDelete(item.data);
             item.delete();
         },
         collect: monitor => ({
             canDrop: !monitor.canDrop(),
             extraClass: monitor.canDrop() ? 'expandPoint' : 'collapsePoint',
         }),
-    }), [onDelete]);
+    }), []);
 
     return (
         <Button ref={dropRef} className={`round-button pos-bl ${extraClass}`} variant="primary">

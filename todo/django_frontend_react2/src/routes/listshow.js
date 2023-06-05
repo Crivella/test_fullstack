@@ -6,6 +6,6 @@ export function ListShow({props}) {
     const { id } = useParams();
     
     return (
-        <TodoList id={id} />
+        <TodoList id={Number(id)} />
     );
 }

@@ -19,6 +19,13 @@ class TodoItem(Owned):
     description = models.TextField(null=True, blank=True)
     completed = models.BooleanField(default=False)
 
+    todo_list = models.ForeignKey(
+        TodoListMap, 
+        related_name='items', 
+        on_delete=models.CASCADE, 
+        null=True, blank=True
+        )
+
     def __str__(self):
         return str(self.title)
     

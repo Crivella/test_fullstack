@@ -99,7 +99,9 @@ export function useTodoItemAPI(id) {
     const queryClient = useQueryClient();
     const { user } = useContext(AuthContext);
 
-    const data = useQuery({
+    const {updateMap} = useTodoAPI();
+
+    const item = useQuery({
         queryKey: ['todos', id], 
         queryFn: ({ signal }) => getTodoData({id, signal}),
         enabled: user !== undefined && id !== undefined,
@@ -123,24 +125,18 @@ export function useTodoItemAPI(id) {
         });
 
     const deleteMutation = useMutation((data) => axios.delete(`${todoEndpoint}/${id}/`, {}), {
-        onMutate: (data) => {
-            queryClient.cancelQueries(['todos', id]);
-            const oldData = queryClient.getQueryData(['todos', id]);
-            queryClient.setQueryData(['todos', id], () => {});
-            return {oldData};
-        },
-        onError: (err, data, context) => {
-            queryClient.setQueryData(['todos', id], context.oldData)
-        },
         onSuccess: (data) => {
+            const mapId = item.data.todo_list;
+            const oldMap = queryClient.getQueryData(['todosMap', mapId]);
+            updateMap({id: mapId, seq: oldMap.seq.filter((id) => id !== item.data.id)});
             queryClient.invalidateQueries(['todos', id]);
         },
         });
 
     return {
-        'data': data.data,
-        'loading': data.isLoading,
-        'error': data.error,
+        'data': item.data,
+        'loading': item.isLoading,
+        'error': item.error,
         'update': updateMutation.mutateAsync,
         'delete': deleteMutation.mutateAsync,
     };

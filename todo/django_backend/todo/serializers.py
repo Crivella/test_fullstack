@@ -12,14 +12,15 @@ class OwnedSerializer(serializers.ModelSerializer):
         abstract = True
 
 class TodoSerializer(OwnedSerializer):
+    todo_list = serializers.ReadOnlyField(source='todo_list.id')
     class Meta:
         model = TodoItem
-        fields = '__all__'
+        fields = ('id', 'title', 'description', 'completed', 'todo_list')
 
 class TodoMapSerializer(OwnedSerializer):
     class Meta:
         model = TodoListMap
-        fields = '__all__'
+        fields = ('id', 'name', 'seq')
 
 class UserSerializer(serializers.ModelSerializer):
     # todo_items = serializers.PrimaryKeyRelatedField(many=True, queryset=TodoItem.objects.all())
