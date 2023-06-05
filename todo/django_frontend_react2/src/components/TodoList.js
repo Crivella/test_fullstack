@@ -65,7 +65,7 @@ function TodoBodyList() {
         <>
             <TodoAddItem addItem={addItem} />
             {list.map((id) => (
-                <TodoItem id={id} key={id} active={active} setActive={setActive} deleteItem={deleteItem} onSwap={onSwap} />
+                <TodoItem id={id} key={id} active={active} setActive={setActive} />
                 ))}
         </>
     )
@@ -80,7 +80,6 @@ function TodoItem({ id, active, setActive }) {
         item.delete();
         setActive(null);
     }, [item, setActive, deleteItem]);
-
 
     return (
         <LoadingErrorFrame 

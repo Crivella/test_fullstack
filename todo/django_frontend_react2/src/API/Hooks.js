@@ -212,7 +212,6 @@ export function useTodoMapAPI(id) {
     }, [serverMap, serverUpdateMap]);
 
     const addItem = useCallback((data) => {
-        console.log(data);
         return serverAddItem(data)
             .then(({data}) => serverUpdateMap.mutateAsync({seq: [data.id, ...serverMap.data.seq]}));
     }, [serverMap, serverUpdateMap, serverAddItem]);
