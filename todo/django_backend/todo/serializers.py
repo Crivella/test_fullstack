@@ -12,10 +12,16 @@ class OwnedSerializer(serializers.ModelSerializer):
         abstract = True
 
 class TodoSerializer(OwnedSerializer):
-    todo_list = serializers.ReadOnlyField(source='todo_list.id')
+    todo_list = serializers.IntegerField(source='todo_list.id')
     class Meta:
         model = TodoItem
         fields = ('id', 'title', 'description', 'completed', 'todo_list')
+
+    def create(self, validated_data):
+        todo_list_id = validated_data.pop('todo_list')['id']
+        todo_list = TodoListMap.objects.get(pk=todo_list_id)
+        todo = TodoItem.objects.create(todo_list=todo_list, **validated_data)
+        return todo
 
 class TodoMapSerializer(OwnedSerializer):
     class Meta:

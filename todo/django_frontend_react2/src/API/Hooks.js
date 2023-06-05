@@ -109,6 +109,12 @@ export function useTodoItemAPI(id) {
         staleTime: 1000 * 60 * 5,
     });
 
+    useEffect(() => {
+        if (user) {
+            queryClient.invalidateQueries(['todos', id]);
+        }
+    }, [user, queryClient, id]);
+
     const updateMutation = useMutation((data) => axios.patch(`${todoEndpoint}/${id}/`, data, {}), {
         onMutate: (data) => {
             queryClient.cancelQueries(['todos', id]);
@@ -166,25 +172,28 @@ export function useTodoMapAPI(id) {
     });
 
     useEffect(() => {
-        queryClient.invalidateQueries(['todosMap', id]);
-        queryClient.invalidateQueries(['todos']);
-    }, [user, queryClient]);
+        if (user) {
+            queryClient.invalidateQueries(['todosMap', id]);
+        }
+    }, [user, queryClient, id]);
 
     // Prefetch
     useEffect(() => {
         const map = serverMap.data?.seq;
-        if (map && page < Math.ceil(count / pageSize)) {
-            map
-            .slice(page * pageSize, (page + 1) * pageSize)
-            .forEach((id) => {
-                queryClient.prefetchQuery({
-                    queryKey: ['todos', id],
-                    queryFn: ({ signal }) => getTodoData({id, signal}),
-                    staleTime: 1000 * 60 * 5,
-                })
-            });
+
+        if (map && page) {
+            if (page < Math.ceil(count / pageSize) ) {
+                map.slice(page * pageSize, (page + 1) * pageSize)
+                    .forEach((id) => {
+                        queryClient.prefetchQuery({
+                            queryKey: ['todos', id],
+                            queryFn: ({ signal }) => getTodoData({id, signal}),
+                            staleTime: 1000 * 60 * 5,
+                        })
+                });
+            }
         }
-      }, [serverMap, page, pageSize, queryClient, count])
+    }, [serverMap, page, pageSize, queryClient, count])
 
     // Mutations
     const serverUpdateMap = useMutation((data) => axios.patch(`${mapEndpoint}/${id}/`, data, {}), {
@@ -202,15 +211,10 @@ export function useTodoMapAPI(id) {
         },
         });
 
-    const deleteItem = useCallback((data) => {
-        const newSeq = serverMap.data.seq.filter((id) => id !== data.id);
-        return serverUpdateMap.mutateAsync({seq: newSeq});
-    }, [serverMap, serverUpdateMap]);
-
     const addItem = useCallback((data) => {
-        return serverAddItem(data)
+        return serverAddItem({...data, todo_list: id})
             .then(({data}) => serverUpdateMap.mutateAsync({seq: [data.id, ...serverMap.data.seq]}));
-    }, [serverMap, serverUpdateMap, serverAddItem]);
+    }, [serverMap, serverUpdateMap, serverAddItem, id]);
 
     const onSwap = useCallback((itm1, itm2) => {
         const newMap = [...serverMap.data.seq];
@@ -225,7 +229,6 @@ export function useTodoMapAPI(id) {
     return { 
         'list': (serverMap.data?.seq || []).slice(0, page*pageSize),
         'addItem': addItem,
-        'deleteItem': deleteItem,
         'onSwap': onSwap,
         'loading': serverMap.isLoading,
         'error': serverMap.error,
