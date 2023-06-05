@@ -25,7 +25,7 @@ export function useTodoAPI() {
     const { user } = useContext(AuthContext);
 
     const maps = useQuery({
-        queryKey: ['todosMap'],
+        queryKey: ['todosMap', user],
         queryFn: ({ signal }) => axios.get(`${mapEndpoint}/`, {
             headers: { 'Content-Type': 'application/json' },
             signal
@@ -37,54 +37,49 @@ export function useTodoAPI() {
 
     const addItemMutation = useMutation((data) => axios.post(`${todoEndpoint}/`, data, {}), {
         onSuccess: ({data}) => {
-            queryClient.setQueryData(['todos', data.id], () => data)
-            queryClient.invalidateQueries(['todos', data.id]);
+            queryClient.setQueryData(['todos', user, data.id], () => data)
+            queryClient.invalidateQueries(['todos', user, data.id]);
         },
         });
 
     const addMapMutation = useMutation((data) => axios.post(`${mapEndpoint}/`, data, {}), {
         onSuccess: ({data}) => {
-            queryClient.setQueryData(['todosMap', data.id], (old) => data);
-            queryClient.setQueryData(['todosMap'], (old) => [...old, data]);
-            queryClient.invalidateQueries(['todosMap']);
-            queryClient.invalidateQueries(['todosMap', data.id]);
+            queryClient.setQueryData(['todosMap', user, data.id], (old) => data);
+            queryClient.setQueryData(['todosMap',  user], (old) => [...old, data]);
+            queryClient.invalidateQueries(['todosMap', user,]);
+            queryClient.invalidateQueries(['todosMap', user, data.id]);
         },
         });
 
     const updateMutation = useMutation((data) => axios.patch(`${todoEndpoint}/${data.id}/`, data, {}), {
         onMutate: (data) => {
-            queryClient.cancelQueries(['todos', data.id]);
+            queryClient.cancelQueries(['todos', user, data.id]);
             const oldData = queryClient.getQueryData(['todos', data.id]);
-            queryClient.setQueryData(['todos', data.id], (old) => ({...old, ...data}));
+            queryClient.setQueryData(['todos', user, data.id], (old) => ({...old, ...data}));
             return {oldData};
         },
         onError: (err, data, context) => {
-            queryClient.setQueryData(['todos', data.id], context.oldData)
+            queryClient.setQueryData(['todos', user, data.id], context.oldData)
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries(['todos', data.id]);
+            queryClient.invalidateQueries(['todos', user, data.id]);
         },
         });
 
     const updateMapMutation = useMutation((data) => axios.patch(`${mapEndpoint}/${data.id}/`, data, {}), {
         onMutate: (data) => {
-            queryClient.cancelQueries(['todosMap', data.id]);
-            const oldData = queryClient.getQueryData(['todosMap', data.id]);
-            queryClient.setQueryData(['todosMap', data.id], (old) => ({...old, ...data}));
+            queryClient.cancelQueries(['todosMap', user, data.id]);
+            const oldData = queryClient.getQueryData(['todosMap', user, data.id]);
+            queryClient.setQueryData(['todosMap', user, data.id], (old) => ({...old, ...data}));
             return {oldData};
         },
         onError: (err, data, context) => {
-            queryClient.setQueryData(['todosMap', data.id], context.oldData)
+            queryClient.setQueryData(['todosMap', user, data.id], context.oldData)
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries(['todosMap', data.id]);
+            queryClient.invalidateQueries(['todosMap', user, data.id]);
         },
         });
-
-    useEffect(() => {
-        queryClient.invalidateQueries(['todos']);
-        queryClient.invalidateQueries(['todosMap']);
-    }, [user, queryClient]);
 
     return { 
         'maps': maps,
@@ -102,7 +97,7 @@ export function useTodoItemAPI(id) {
     const {updateMap} = useTodoAPI();
 
     const item = useQuery({
-        queryKey: ['todos', id], 
+        queryKey: ['todos', user, id], 
         queryFn: ({ signal }) => getTodoData({id, signal}),
         enabled: user !== undefined && id !== undefined,
         // placeholderData: {id: id},
@@ -111,31 +106,31 @@ export function useTodoItemAPI(id) {
 
     useEffect(() => {
         if (user) {
-            queryClient.invalidateQueries(['todos', id]);
+            queryClient.invalidateQueries(['todos', user, id]);
         }
     }, [user, queryClient, id]);
 
     const updateMutation = useMutation((data) => axios.patch(`${todoEndpoint}/${id}/`, data, {}), {
         onMutate: (data) => {
-            queryClient.cancelQueries(['todos', id]);
-            const oldData = queryClient.getQueryData(['todos', id]);
-            queryClient.setQueryData(['todos', id], (old) => ({...old, ...data}));
+            queryClient.cancelQueries(['todos', user, id]);
+            const oldData = queryClient.getQueryData(['todos', user, id]);
+            queryClient.setQueryData(['todos', user, id], (old) => ({...old, ...data}));
             return {oldData};
         },
         onError: (err, data, context) => {
-            queryClient.setQueryData(['todos', id], context.oldData)
+            queryClient.setQueryData(['todos', user, id], context.oldData)
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries(['todos', id]);
+            queryClient.invalidateQueries(['todos', user, id]);
         },
         });
 
     const deleteMutation = useMutation((data) => axios.delete(`${todoEndpoint}/${id}/`, {}), {
         onSuccess: (data) => {
             const mapId = item.data.todo_list;
-            const oldMap = queryClient.getQueryData(['todosMap', mapId]);
+            const oldMap = queryClient.getQueryData(['todosMap', user, mapId]);
             updateMap({id: mapId, seq: oldMap.seq.filter((id) => id !== item.data.id)});
-            queryClient.invalidateQueries(['todos', id]);
+            queryClient.invalidateQueries(['todos', user, id]);
         },
         });
 
@@ -166,16 +161,11 @@ export function useTodoMapAPI(id) {
 
     // Queries
     const serverMap = useQuery({
-        queryKey: ['todosMap', id], 
+        queryKey: ['todosMap', user, id], 
         queryFn: ({ signal }) => getTodoMap({signal}),
         enabled: user !== undefined,
     });
 
-    useEffect(() => {
-        if (user) {
-            queryClient.invalidateQueries(['todosMap', id]);
-        }
-    }, [user, queryClient, id]);
 
     // Prefetch
     useEffect(() => {
@@ -186,28 +176,28 @@ export function useTodoMapAPI(id) {
                 map.slice(page * pageSize, (page + 1) * pageSize)
                     .forEach((id) => {
                         queryClient.prefetchQuery({
-                            queryKey: ['todos', id],
+                            queryKey: ['todos', user, id],
                             queryFn: ({ signal }) => getTodoData({id, signal}),
                             staleTime: 1000 * 60 * 5,
                         })
                 });
             }
         }
-    }, [serverMap, page, pageSize, queryClient, count])
+    }, [serverMap, page, pageSize, queryClient, count, user])
 
     // Mutations
     const serverUpdateMap = useMutation((data) => axios.patch(`${mapEndpoint}/${id}/`, data, {}), {
         onMutate: (data) => {
-            queryClient.cancelQueries(['todosMap', id]);
-            const oldMap = queryClient.getQueryData(['todosMap', id]);
-            queryClient.setQueryData(['todosMap', id], () => data);
+            queryClient.cancelQueries(['todosMap', user, id]);
+            const oldMap = queryClient.getQueryData(['todosMap', user, id]);
+            queryClient.setQueryData(['todosMap', user, id], () => data);
             return {oldMap};
         },
         onError: (err, data, context) => {
-            queryClient.setQueryData(['todosMap', id], context.oldMap);
+            queryClient.setQueryData(['todosMap', user, id], context.oldMap);
         },
         onSuccess: ({data}) => {
-            queryClient.invalidateQueries(['todosMap', id]);
+            queryClient.invalidateQueries(['todosMap', user, id]);
         },
         });
 
