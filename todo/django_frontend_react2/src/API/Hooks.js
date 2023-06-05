@@ -45,6 +45,8 @@ export function useTodoAPI() {
     const addMapMutation = useMutation((data) => axios.post(`${mapEndpoint}/`, data, {}), {
         onSuccess: ({data}) => {
             queryClient.setQueryData(['todosMap', data.id], (old) => data);
+            queryClient.setQueryData(['todosMap'], (old) => [...old, data]);
+            queryClient.invalidateQueries(['todosMap']);
             queryClient.invalidateQueries(['todosMap', data.id]);
         },
         });

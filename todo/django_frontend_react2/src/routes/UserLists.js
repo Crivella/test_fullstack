@@ -6,7 +6,7 @@ import LoadingErrorFrame from '../components/LoadingErrorFrame';
 
 export default function UserLists() {
     const { user } = useParams();
-    const { maps, updateMap } = useTodoAPI();
+    const { maps, addMap, updateMap } = useTodoAPI();
     const {data, isLoading, isError, error} = maps;
 
     const [editing, setEditing] = useState(null); // [editing, setEditing
@@ -24,6 +24,14 @@ export default function UserLists() {
         setEditing(null);
     }
 
+    const handleAdd = () => {
+        addMap({})
+            .then(({data}) => {
+                console.log(data);
+                setEditing(data.id);
+            });
+    }
+
     return (
         <LoadingErrorFrame
             isLoading={isLoading}
@@ -31,16 +39,15 @@ export default function UserLists() {
             error={error}
         >
             <ListGroup>
-                <ListGroup.Item variant='primary'>
-                    Lists
-                </ListGroup.Item>
+                <ListGroup.Item variant='primary'>Lists</ListGroup.Item>
+
                 {data && data.map((item) => (
                     <ListGroup.Item key={item.id} className='d-flex justify-content-between' >
                         {
                             editing === item.id ?
                             <Form.Control
                                 type='text'
-                                value={name}
+                                value={name || ''}
                                 onChange={(e) => setName(e.target.value)}
                                 onKeyDown={(e) => {
                                     switch (e.key) {
@@ -76,6 +83,9 @@ export default function UserLists() {
                         </Form.Group>
                     </ListGroup.Item>
                 ))}
+                <ListGroup.Item className='d-flex justify-content-center'>
+                    <Button onClick={handleAdd} variant='success' className='round-button-sm mx-2'>+</Button>
+                </ListGroup.Item>
             </ListGroup>
         </LoadingErrorFrame>
 
