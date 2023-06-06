@@ -81,11 +81,22 @@ export function useTodoAPI() {
         },
         });
 
+    const deleteMapMutation = useMutation((data) => axios.delete(`${mapEndpoint}/${data.id}/`, {}), {
+        onSuccess: (data) => {
+            console.log(data);
+            queryClient.setQueryData(['todosMap', user, data.id], () => undefined);
+            queryClient.setQueryData(['todosMap', user], (old) => old.filter((item) => item.id !== data.id));
+            queryClient.invalidateQueries(['todosMap', user, data.id]);
+        },
+        });
+
+
     return { 
         'maps': maps,
         'updateMap': updateMapMutation.mutate,
         'addItem': addItemMutation.mutateAsync,
         'addMap': addMapMutation.mutateAsync,
+        'deleteMap': deleteMapMutation.mutateAsync,
     };
 }
 
