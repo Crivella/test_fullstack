@@ -91,8 +91,13 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         setTitle(title);
     }, [title]);
 
-    const _handleUpdate = () => {
-        handleUpdate({id, title: localTitle});
+    const _handleUpdate = (data) => {
+        if (handleAdd !== undefined) {
+            handleAdd(data || {title: localTitle});
+            setEditing(null);
+        } else {
+            handleUpdate(data || {id, title: localTitle});
+        }
         setEditing(null);
     }
 
@@ -143,10 +148,10 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                     onKeyDown={(e) => {
                         switch (e.key) {
                             case 'Enter':
-                                handleAdd ? handleAdd({title: localTitle}) : _handleUpdate();
+                                _handleUpdate();
                                 break;
                             case 'Escape':
-                                handleAdd && handleAdd({});
+                                _handleUpdate({});
                                 setEditing(null);
                                 setDeleting(null);
                                 break;
@@ -159,18 +164,12 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                 />
                 :
                 <Form.Text className='text-muted'>
-                    { 
-                        count_completed !== undefined
-                        ?
-                        <Badge 
-                            bg="primary" style={{marginRight: '10px'}} pill
-                            as={Link} to={`/${user}/${id}`}
-                            >
-                            {count_completed} / {count_childrens}
-                        </Badge>
-                        :
-                        ''
-                    }
+                    <Badge 
+                        bg="primary" style={{marginRight: '10px'}} pill
+                        as={Link} to={`/${user}/${id}`}
+                        >
+                        {count_completed ? `${count_completed}/${count_childrens}` : '.'}
+                    </Badge>
                     {title}
                 </Form.Text>
             }

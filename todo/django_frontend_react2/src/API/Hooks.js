@@ -80,7 +80,7 @@ export function useAPITodoItem(id) {
 
         updateItem({
             ordered_childrens: [newData, ...item.data.ordered_childrens,],
-            map: [newData.id, ...item.data.map,],
+            map: [newData.id, ...(item.data.map || [])],
         });
         return newData;
     }, [item.data, updateItem, addMutation, id]);

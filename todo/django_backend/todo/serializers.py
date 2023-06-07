@@ -31,6 +31,11 @@ class TodoSerializer(OwnedSerializer):
     #     return todo
     def update(self, instance, validated_data):
         if 'child_map' in validated_data:
+            if instance.child_map is None:
+                new = TodoListMap.objects.create(
+                    owner=instance.owner,
+                )
+                instance.child_map = new
             instance.child_map.seq = validated_data.pop('child_map')['seq']
             instance.child_map.save()
 
