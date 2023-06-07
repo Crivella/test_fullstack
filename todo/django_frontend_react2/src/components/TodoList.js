@@ -135,7 +135,7 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         <ListGroup.Item 
             // className='d-flex justify-content-between'
             // action={!item.completed}
-            action
+            // action
             // href='#'
             className={`d-flex justify-content-between ${completed ? 'todo-completed' : ''}`}
             >
