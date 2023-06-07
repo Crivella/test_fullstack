@@ -80,5 +80,15 @@
             },
             "django": true
         }
+    ],
+    "compounds": [
+        {
+            "name": "RDJ combo",
+            "configurations": [
+                "TODO>Backend>Django",
+                "TODO>frontend>React"
+            ],
+            "stopAll": true,
+        }
     ]
 }

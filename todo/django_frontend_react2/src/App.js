@@ -4,7 +4,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import './App.css';
 
 
-import { ListShow } from './routes/listshow';
 import { Root } from './routes/root';
 import UserLists from './routes/UserLists';
 
@@ -19,7 +18,7 @@ const router = createBrowserRouter([
             },
             {
                 path: ":user/:id",
-                element: <ListShow />,
+                element: <UserLists />,
             }
             ]
     },

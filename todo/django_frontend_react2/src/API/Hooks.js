@@ -166,6 +166,19 @@ export function useAPITodoItem(id) {
         return newData;
     }, [item.data, updateItem, addMutation, id]);
 
+    const swapItems = useCallback(async (itm1, itm2) => {
+        const newMap = [...item.data.map];
+        const idx1 = newMap.indexOf(itm1.id);
+        const idx2 = newMap.indexOf(itm2.id);
+
+        newMap.splice(idx1, 1);
+        newMap.splice(idx2, 0, itm1.id);
+        await updateItem({
+            ordered_childrens: newMap.map((id) => item.data.ordered_childrens.find((item) => item.id === id)),
+            map: newMap,
+        });
+    }, [item.data, updateItem]);
+
     return {
         'title': item.data?.title || '',
         'description': item.data?.description || '',
@@ -179,6 +192,7 @@ export function useAPITodoItem(id) {
         'addItem': addItem,
         'updateItem': updateItem,
         'deleteItem': deleteItem,
+        'swapItems': swapItems,
     }
 }
 

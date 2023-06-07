@@ -1,3 +1,10 @@
+/************************************************************/
+.list-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
 .list-container {
     overflow: auto;
     /* margin: auto; */
@@ -23,4 +30,8 @@
 .todo-completed {
     text-decoration: line-through;
     filter: brightness(70%);
+}
+
+.todo-light {
+    filter: brightness(150%);
 }

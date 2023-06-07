@@ -22,17 +22,21 @@ export function ListItemDragDropFrame({
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
         }),
+        end: (item, monitor) => {
+            if (!monitor.didDrop()) return;
+            setDropped(true);
+        }
     }), [data]);
 
     const [{}, dropRef] = useDrop(() => ({
         accept: type,
         drop: (item, monitor) => {
-            if (item.data.id === data.data.id) return;
+            if (item.id === data.id) return;
             if (onDrop) onDrop(item, data, monitor);
-            setDropped(true);
+            // setDropped(true);
         },
         hover: (item, monitor) => {
-            if (item.data.id === data.data.id) return;
+            if (item.id === data.id) return;
             if (onHover) onHover(item, data, monitor);
             const {x,y} = monitor.getDifferenceFromInitialOffset();
             setDraggedDir(Math.sign(y));
