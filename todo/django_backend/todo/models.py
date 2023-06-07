@@ -10,23 +10,7 @@ class Owned(models.Model):
         abstract = True
 
 class TodoListMap(Owned):
-    name = models.CharField(max_length=256, blank=True, null=True)
     seq = models.JSONField(default=list)
-
-    @property
-    def count_completed(self):
-        return self.items.filter(completed=True).count()
-    
-    @property
-    def mapped_seq(self):
-        return [self.items.get(pk=pk) for pk in list(self.seq)]
-    
-    @property
-    def first_completed(self):
-        l = [_.completed for _ in self.mapped_seq]
-        if True in l:
-            return l.index(True)
-        return len(l)
     
 
 class TodoItem(Owned):
@@ -34,12 +18,48 @@ class TodoItem(Owned):
     description = models.TextField(null=True, blank=True)
     completed = models.BooleanField(default=False)
 
-    todo_list = models.ForeignKey(
-        TodoListMap, 
-        related_name='items', 
-        on_delete=models.CASCADE, 
+    parent = models.ForeignKey(
+        'self',
+        related_name='childrens',
+        on_delete=models.CASCADE,
         null=True, blank=True
         )
+    
+    child_map = models.ForeignKey(
+        TodoListMap,
+        related_name='ordering',
+        on_delete=models.CASCADE,
+        null=True, blank=True
+        )
+    
+    @property
+    def map(self):
+        if self.child_map is None:
+            return []
+        return list(self.child_map.seq)
+    
+    @property
+    def ordered_childrens(self):
+        fields = ['id', 'title', 'completed']
+        app = [self.childrens.get(pk=pk) for pk in self.map]
+
+        return [dict(zip(fields, [getattr(_, f) for f in fields])) for _ in app]
+    
+    @property
+    def count_completed(self):
+        return self.childrens.filter(completed=True).count()
+    
+    @property
+    def count_childrens(self):
+        return self.childrens.count()
+    
+    @property
+    def first_completed(self):
+        m = self.child_map.seq
+        l = [_.completed for _ in [self.childrens.get(pk=pk) for pk in list(m)]]
+        if True in l:
+            return l.index(True)
+        return len(l)
 
     def __str__(self):
         return str(self.title)

@@ -74,9 +74,15 @@ class TodoView(SortedMixin, OwnerMixin, viewsets.ModelViewSet):
     filterset_class = TodoFilter
     filter_backends = [MyFilterBackend]
     # filterset_fields = ['completed', 'private']
+
+    def list(self, request: HttpRequest, *args, **kwargs):
+        q = super().get_queryset()
+        q = q.filter(parent=None)
+        return JsonResponse({'ordered_childrens': TodoSerializer(q, many=True).data})
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+    
 
 class TodoMapView(OwnerMixin, viewsets.ModelViewSet):
     serializer_class = TodoMapSerializer
@@ -87,7 +93,7 @@ class TodoMapView(OwnerMixin, viewsets.ModelViewSet):
     # filterset_class = TodoFilter
     # filter_backends = [MyFilterBackend]
     # filterset_fields = ['completed', 'private']
-    
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 

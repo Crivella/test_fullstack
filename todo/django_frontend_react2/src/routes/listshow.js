@@ -1,11 +1,11 @@
 import { useParams } from 'react-router-dom';
 
-import TodoList from '../components/TodoList';
+import UserLists from './UserLists';
 
-export function ListShow({props}) {
+export function ListShow() {
     const { id } = useParams();
     
     return (
-        <TodoList id={Number(id)} />
+        <UserLists id={Number(id)} />
     );
 }
