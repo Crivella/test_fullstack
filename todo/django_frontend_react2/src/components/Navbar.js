@@ -10,7 +10,10 @@ export default function CustomNavbar() {
     const {theme, themeContrast1, ThemeSwitch} = useTheme();
 
     return (
-        <Navbar bg={theme === 'dark' ? 'black' : 'secondary'} variant={theme} text={themeContrast1} sticky="top" className={`border border-success`}>
+        <Navbar 
+        bg={theme === 'dark' ? 'black' : 'secondary'} variant={theme} text={themeContrast1} 
+        sticky="top" className={`border border-success my-1 px-2`}
+        >
             <Container fluid className="d-flex justify-content-between">
                 <Nav className="d-flex">
                     <Navbar.Brand className={`text-${themeContrast1}`}>

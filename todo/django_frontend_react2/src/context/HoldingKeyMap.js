@@ -25,7 +25,7 @@ export default function HoldingKeyMapProvider({children}) {
     };
 
     return (
-        <Container fluid onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={-1} ref={ref}>
+        <Container fluid className="p-0 m-0" onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={-1} ref={ref}>
         <KeyMapContext.Provider value={keyMap}>
             {children}
         </KeyMapContext.Provider>

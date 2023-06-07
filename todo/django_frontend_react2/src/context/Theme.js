@@ -22,7 +22,7 @@ export default function ThemeProvider({children, theme: _theme}) {
     }
 
     return (
-        <Container fluid className={`vh-100 overflow-auto bg-${theme}`} data-bs-theme={theme}>
+        <Container fluid className={`vh-100 overflow-auto bg-${theme} m-0 p-0`} data-bs-theme={theme}>
             <ThemeContext.Provider value={newProps}>
                 {children}
             </ThemeContext.Provider>

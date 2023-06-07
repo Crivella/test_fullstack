@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Alert, Button, Container, Modal } from "react-bootstrap";
-import { LoginForm, PasswordResetForm, TodoForm } from "./Forms";
+import { LoginForm, PasswordResetForm } from "./Forms";
 
 import { AuthContext } from "../API/Auth";
 // import { TodoAPIContext } from '../API/Todos';
@@ -46,23 +46,6 @@ export function LoginModal() {
     return (
         <ModalFormWrapper header="Login" {...newProps} >
             <LoginForm />
-        </ModalFormWrapper>
-    )
-}
-
-export function AddEditModal() {
-    const { todoAction, formAction } = useContext();
-    const { showTodo: show, setShowTodo: setShow } = useContext(ModalContext);
-
-    const newProps = {
-        show: show,
-        setShow: setShow,
-        onSubmit: todoAction,
-    }
-
-    return (
-        <ModalFormWrapper header={formAction} {...newProps} >
-            <TodoForm />
         </ModalFormWrapper>
     )
 }

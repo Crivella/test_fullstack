@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 
-import TodoList from '../components/TodoList2';
+import TodoList from '../components/TodoList';
 
 export default function UserLists() {
     const { user, id } = useParams();

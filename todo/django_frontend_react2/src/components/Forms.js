@@ -1,83 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
 // import { TodoAPIContext } from "../API/Todos";
 import { ThemeContext } from "../context/Contexts";
-
-export function TodoForm({onSubmit}) {
-    const {list, formAction, active} = useContext();
-    const {theme} = useContext(ThemeContext);
-    
-    const [validated, setValidated] = useState(false);
-    const [failed, setFailed] = useState(false);
-    
-    const title = useRef();
-    const desc = useRef();
-    const priv = useRef();
-
-    useEffect(() => {
-        if (!active || formAction === 'add') return;
-        const data = active;
-        title.current.value = data.title;
-        desc.current.value = data.description;
-        priv.current.checked = data.private;
-    }, [list, active, formAction]);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setValidated(true);
-        const form = e.currentTarget;
-        if (form.checkValidity() === false) return false;
-
-        const app = formAction === 'add' ? {} : active;
-        
-        const data = {
-            ...app,
-            title: title.current.value,
-            description: desc.current.value,
-            private: priv.current.checked,
-        }
-
-        setValidated(false);
-        const res = await onSubmit(data);
-        if (!res) {
-            setFailed(true);
-            return false
-        }
-
-        return true;
-    };
-
-    return (
-        <Container className={`pt-3 bg-${theme}`}>
-            <Alert variant="danger" show={failed}  onClose={() => setFailed(false)} dismissible>
-                Failed submission
-            </Alert>
-            <Form validated={validated} onSubmit={handleSubmit} noValidate>
-                <Row className="g-3">
-                    <Form.Group as={Col} className="col-md-10" controlId="formBasicTitle">
-                        <Form.Label>Title</Form.Label>
-                        <Form.Control type="user" placeholder="Title" ref={title} required />
-                        <Form.Control.Feedback type="invalid">
-                            Please provide a valid title.
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group as={Col} className="col-md-2" controlId="formBasicPriv">
-                        <Form.Label>Private</Form.Label>
-                        <Form.Check type="checkbox" ref={priv} />
-                    </Form.Group>
-                    <Form.Group as={Col} className="col-md-12" controlId="formBasicDesc">
-                        <Form.Label>Description</Form.Label>
-                        <Form.Control type="text" placeholder="Description" ref={desc} />
-                    </Form.Group>
-                    <Button variant="primary" type="submit">
-                        Submit
-                    </Button>
-                </Row>
-            </Form>
-        </Container>
-    );
-}
 
 export function LoginForm ({ onSubmit }) {
     const {theme} = useContext(ThemeContext);
