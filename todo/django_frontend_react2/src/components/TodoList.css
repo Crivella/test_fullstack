@@ -28,10 +28,17 @@
 }
 
 .todo-completed {
-    text-decoration: line-through;
     filter: brightness(70%);
+}
+
+.todo-completed .form-text {
+    text-decoration: line-through;
 }
 
 .todo-light {
     filter: brightness(150%);
+}
+
+.form-text a:link { 
+    text-decoration: none; 
 }

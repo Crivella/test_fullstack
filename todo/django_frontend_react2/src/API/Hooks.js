@@ -70,9 +70,19 @@ export function useAPITodoItem(id) {
     }, [id, item.data, updateMutation, deleteMutation]);
 
     const updateItem = useCallback(async (data) => {
+        // console.log('UPDATE:', data);
+        if (data.id === undefined || data.id === id) {
+            // console.log('UPDATE parent:');
+            queryClient.setQueriesData(['todos', user, id], (old) => (
+                {
+                    ...old, 
+                    ordered_childrens: old.ordered_childrens.map((item) => item.id === data.id ? data : item),
+                }));
+        }
         const res = await updateMutation.mutateAsync({id, ...data});
+        // console.log('UPDATE after:', res.data);
         return res.data;
-    }, [id, updateMutation]);
+    }, [id, updateMutation, queryClient, user]);
 
     const addItem = useCallback(async (data) => {
         const res = await addMutation.mutateAsync({...data, parent: id});
@@ -85,13 +95,13 @@ export function useAPITodoItem(id) {
         return newData;
     }, [item.data, updateItem, addMutation, id]);
 
-    const swapItems = useCallback(async (itm1, itm2) => {
+    const swapItems = useCallback(async (id1, id2) => {
         const newMap = [...item.data.map];
-        const idx1 = newMap.indexOf(itm1.id);
-        const idx2 = newMap.indexOf(itm2.id);
+        const idx1 = newMap.indexOf(id1);
+        const idx2 = newMap.indexOf(id2);
 
         newMap.splice(idx1, 1);
-        newMap.splice(idx2, 0, itm1.id);
+        newMap.splice(idx2, 0, id1);
         await updateItem({
             ordered_childrens: newMap.map((id) => item.data.ordered_childrens.find((item) => item.id === id)),
             map: newMap,
@@ -105,6 +115,7 @@ export function useAPITodoItem(id) {
         'parent': item.data?.parent || null,
         'count_childrens': item.data?.count_childrens || 0,
         'count_completed': item.data?.count_completed || 0,
+        'first_completed': item.data?.first_completed || null,
         'list': item.data?.ordered_childrens || [],
         'loading': item.isLoading,
         'error': item.error,

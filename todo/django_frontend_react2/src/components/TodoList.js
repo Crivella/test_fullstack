@@ -11,15 +11,27 @@ import './ExtraButtons.css';
 import LoadingErrorFrame from './LoadingErrorFrame';
 import './TodoList.css';
 
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default function TodoList({user, id}) {
     const item = useAPITodoItem(id);
 
+    const [list1, setList1] = useState([]);
+    const [list2, setList2] = useState([]);
+
     const { 
-        title, description, completed,
+        title, description, completed, first_completed,
         list, count_childrens, count_completed, parent,
         addItem, deleteItem, updateItem, swapItems,
         loading, error
      } = item;
+
+     useEffect(() => {
+        setList1(list.filter((item) => !item.completed));
+        setList2(list.filter((item) => item.completed));
+        }, [list]);
 
     const {user: loggedUser} = useContext(AuthContext);
 
@@ -28,6 +40,10 @@ export default function TodoList({user, id}) {
     const handleAdd = async (data) => {
         if (data?.title) await addItem(data);
         setAdding(false);
+    }
+
+    const onDrop = (item1, item2) => {
+        swapItems(item1.id, item2.id);
     }
 
     return (
@@ -57,11 +73,24 @@ export default function TodoList({user, id}) {
                 {adding && <TodoItem user={user} 
                     handleAdd={handleAdd} />}
 
-                {list.map((item, idx) => (
+                {list1.map((item, idx) => (
                     <ListItemDragDropFrame
-                        type={completed ? ItemTypes.CardCompleted : ItemTypes.CARD} data={item}
+                        type={ItemTypes.CARD} data={item}
                         key={item.id}  
-                        onDrop={swapItems}
+                        onDrop={onDrop}
+                        placeHolder={<EmptyTodoItem />}
+                        >
+                        <TodoItem 
+                            item={item} user={user} key={item.id} 
+                            handleUpdate={updateItem} handleDelete={deleteItem}
+                            />
+                    </ListItemDragDropFrame>
+                ))}
+                {list2.map((item, idx) => (
+                    <ListItemDragDropFrame
+                        type={ItemTypes.CardCompleted} data={item}
+                        key={item.id}  
+                        onDrop={onDrop}
                         placeHolder={<EmptyTodoItem />}
                         >
                         <TodoItem 
@@ -83,8 +112,7 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         count_childrens, count_completed,
      } = item || {};
 
-     const [editing, setEditing] = useState(false); // [editing, setEditing
-     const [deleting, setDeleting] = useState(false); // [editing, setEditing
+     const [mode, setMode] = useState(null); // [editing, setEditing
      const [localTitle, setTitle] = useState('');
 
      useEffect(() => {
@@ -94,41 +122,48 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
     const _handleUpdate = (data) => {
         if (handleAdd !== undefined) {
             handleAdd(data || {title: localTitle});
-            setEditing(null);
         } else {
             handleUpdate(data || {id, title: localTitle});
         }
-        setEditing(null);
+        setMode(null);
     }
 
     const _handleDelete = () => {
         handleDelete({id});
-        setDeleting(null);
+        setMode(null);
     }
 
     const buttonArrayEdit = () => (
         <>
-        <Button onClick={() => setEditing(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
+        <Button onClick={() => setMode(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
         <Button onClick={_handleUpdate} variant='success' className='round-button-sm mx-2'>✓</Button>
         </>
     )
     const buttonArrayDelete = () => (
         <>
-        <Button onClick={() => setDeleting(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
+        <Button
+            autoFocus onKeyDown={(e) => {e.key === 'Escape' && setMode(null)}} 
+            onClick={() => setMode(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
         <Button onClick={_handleDelete} variant='success' className='round-button-sm mx-2'>✓</Button>
         </>
     )
     const buttonArrayNormal = () => (
         <>
-        <Button onClick={() => setEditing(true)} variant='warning' className='round-button-sm mx-2'>✎</Button>
-        <Button onClick={() => setDeleting(true)} variant='danger' className='round-button-sm mx-2'>🗑</Button>
+        <Button onClick={() => setMode('edit')} variant='warning' className='round-button-sm mx-2'>✎</Button>
+        <Button onClick={() => setMode('del')} variant='danger' className='round-button-sm mx-2'>🗑</Button>
         {/* <Button as={Link} to={`/${user}/${.id}`} variant='primary' className='round-button-sm mx-2'>⮞</Button> */}
         </>
     )
     const getButtonArray = () => {
-        if (editing || id === undefined) return buttonArrayEdit();
-        if (deleting) return buttonArrayDelete();
-        return buttonArrayNormal();
+        if (mode === 'edit' || id === undefined) return buttonArrayEdit();
+        if (mode === 'del') return buttonArrayDelete();
+        if (mode === 'show') return buttonArrayNormal();
+
+        return (
+            <>
+                <Button onClick={() => setMode('show')} variant='primary' className='round-button-sm mx-2'>⋮</Button>
+            </>
+        )
     }
 
      return (
@@ -140,7 +175,7 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
             className={`d-flex justify-content-between ${completed ? 'todo-completed' : ''}`}
             >
             {
-                editing || id === undefined ?
+                mode === 'edit' || id === undefined ?
                 <Form.Control
                     type='text'
                     value={localTitle || ''}
@@ -152,8 +187,9 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                                 break;
                             case 'Escape':
                                 _handleUpdate({});
-                                setEditing(null);
-                                setDeleting(null);
+                                setMode(null);
+                                // setEditing(null);
+                                // setDeleting(null);
                                 break;
                             default:
                                 break;
@@ -165,11 +201,10 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                 :
                 <Form.Text className='text-muted'>
                     <Badge 
-                        bg="primary" style={{marginRight: '10px'}} pill
+                        bg={count_childrens ? 'primary' : 'warning'} style={{marginRight: '10px'}} pill
                         as={Link} to={`/${user}/${id}`}
-                        >
-                        {count_completed ? `${count_completed}/${count_childrens}` : '.'}
-                    </Badge>
+                        >&zwnj;</Badge>
+                    <CompletedButton item={item} handleUpdate={handleUpdate} />
                     {title}
                 </Form.Text>
             }
@@ -180,6 +215,29 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
      )
 }
 
+function CompletedButton({item, handleUpdate, time = 500}) {
+    const { completed } = item || {};
+
+    const [persist, setPersist] = useState(false);
+    const [_completed, setCompleted] = useState(completed);
+
+    const _handleUpdate = () => {
+        setPersist(true);
+        timeout(time/2).then(() => setCompleted(!completed));
+        timeout(time*2/3).then(() => handleUpdate({id: item.id, completed: !completed}));
+        timeout(time).then(() => setPersist(false));
+    }
+
+    return (
+        <Button 
+            onClick={_handleUpdate} 
+            variant={ _completed ? 'success' : 'outline-primary' }
+            className={`round-button-sm mx-2 ${persist ? 'flip' : ''}`}
+            >
+            {_completed  ? '✓' : '✗'}
+        </Button>
+    )
+}
 
 function EmptyTodoItem() {
     return (
