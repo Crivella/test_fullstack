@@ -30,6 +30,7 @@ class TodoSerializer(OwnedSerializer):
     #     todo = TodoItem.objects.create(todo_list=todo_list, **validated_data)
     #     return todo
     def update(self, instance, validated_data):
+        print(validated_data)
         if 'child_map' in validated_data:
             if instance.child_map is None:
                 new = TodoListMap.objects.create(
@@ -49,7 +50,9 @@ class TodoSerializer(OwnedSerializer):
     
     def create(self, validated_data):
         print(validated_data)
-        parent_id = validated_data.pop('parent')['id']
+        parent_id=None
+        if 'parent' in validated_data:
+            parent_id = validated_data.pop('parent')['id']
         todo = TodoItem.objects.create(parent_id=parent_id, **validated_data)
         return todo
     
