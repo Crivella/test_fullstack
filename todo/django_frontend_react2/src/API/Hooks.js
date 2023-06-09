@@ -49,7 +49,10 @@ export function useAPITodoItem(id) {
 
     const deleteMutation = useMutation((data) => axios.delete(`${todoEndpoint}/${data?.id || id}/`, {}), {
         onSuccess: (data, variables, context) => {
-            queryClient.invalidateQueries(['todos', user, variables?.id || id]);
+            if (variables?.id) {
+                queryClient.invalidateQueries(['todos', user, variables?.id || id]);
+            }
+            queryClient.invalidateQueries(['todos', user, id]);
         },
         });
 
@@ -57,6 +60,7 @@ export function useAPITodoItem(id) {
         onSuccess: ({data}) => {
             queryClient.setQueryData(['todos', user, data.id], () => data);
             queryClient.invalidateQueries(['todos', user, data.id]);
+            queryClient.invalidateQueries(['todos', user, id]);
         },
         });
 
@@ -78,10 +82,14 @@ export function useAPITodoItem(id) {
         const res = await addMutation.mutateAsync({...data, parent: id});
         const newData = res.data;
 
-        updateItem({
-            ordered_childrens: [newData, ...item.data.ordered_childrens,],
-            map: [newData.id, ...(item.data.map || [])],
-        });
+        console.log('newData', newData, item.data);
+        if (item.data.id !== undefined) {
+            console.log('updateItem', item.data);
+            updateItem({
+                ordered_childrens: [newData, ...item.data.ordered_childrens,],
+                map: [newData.id, ...(item.data.map || [])],
+            });
+        }
         return newData;
     }, [item.data, updateItem, addMutation, id]);
 
