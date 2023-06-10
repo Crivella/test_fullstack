@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Alert, Badge, Button, Form, ListGroup, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap';
+import { Alert, Button, Container, Form, ListGroup, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap';
 import { useDrop } from 'react-dnd';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../API/Auth';
@@ -111,12 +111,31 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         count_childrens, count_completed,
      } = item || {};
 
-     const [mode, setMode] = useState(null); // [editing, setEditing
+     const [mode, setMode] = useState(null);
+     const [badgeColor, setBadgeColor] = useState('warning'); 
+
      const [localTitle, setLocalTitle] = useState('');
+     const [localDescription, setLocalDescription] = useState('');
 
      useEffect(() => {
         setLocalTitle(title);
     }, [title]);
+
+    useEffect(() => {
+        setLocalDescription(description);
+    }, [description]);
+
+    useEffect(() => {
+        if (count_childrens) {
+            if (count_childrens === count_completed) {
+                setBadgeColor('success');
+            } else {
+                setBadgeColor('primary');
+            }
+        } else {
+            setBadgeColor('secondary');
+        }
+    }, [count_childrens, count_completed]);
 
     const handelEscape = () => {
         if (handleAdd !== undefined) {
@@ -126,22 +145,43 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
     }
 
     const _handleUpdate = () => {
+        const data = {
+            title: localTitle,
+            description: localDescription,
+        }
         if (handleAdd !== undefined) {
-            handleAdd({title: localTitle});
+            handleAdd(data);
         } else {
-            handleUpdate({id, title: localTitle});
+            handleUpdate({id, ...data});
         }
         setMode(null);
     }
 
+    const handleFormKeyDown = (e) => {
+        switch (e.key) {
+            case 'Enter':
+                _handleUpdate();
+                break;
+            case 'Escape':
+                handelEscape(null);
+                setMode(null);
+                break;
+            default:
+                break;
+        }
+    }
+
     const buttonArrayEdit = () => (
         <>
-        <Button onClick={() => setMode(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
-        <Button onClick={_handleUpdate} variant='success' className='round-button-sm mx-2'>✓</Button>
+        <Button onClick={() => setMode(null)} onKeyDown={handleFormKeyDown} variant='danger' className='round-button-sm mx-2'>✗</Button>
+        <Button onClick={_handleUpdate} onKeyDown={handleFormKeyDown} variant='success' className='round-button-sm mx-2'>✓</Button>
         </>
     )
     const buttonArrayNormal = () => (
+        <>
         <Button onClick={() => setMode('edit')} variant='warning' className='round-button-sm mx-2'>✎</Button>
+        {/* <Button as={Link} to={`/${user}/${id}`} variant={badgeColor} className='round-button-sm mx-2'>➤</Button> */}
+        </>
     )
     const getButtonArray = () => {
         if (mode === 'edit' || id === undefined) return buttonArrayEdit();
@@ -149,7 +189,7 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
     }
 
     const renderDescription = () => {
-        if (mode === 'edit' || id === undefined) return (<></>)
+        if (mode !== null) return (<></>)
 
         return (
             <Tooltip id='tooltip-description' placement='bottom' className='in' style={{opacity: 1}}>
@@ -160,40 +200,41 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         )
     }
 
+    return (
+        <>
 
-     return (
         <ListGroup.Item 
-            className={`d-flex justify-content-between ${completed ? 'todo-completed' : ''}`}
+            className={`d-flex justify-content-between px-0 ${completed ? 'todo-completed' : ''}`}
             >
+
             {
                 mode === 'edit' || id === undefined ?
-                <Form.Control
-                    type='text'
-                    value={localTitle || ''}
-                    onChange={(e) => setLocalTitle(e.target.value)}
-                    onKeyDown={(e) => {
-                        switch (e.key) {
-                            case 'Enter':
-                                _handleUpdate();
-                                break;
-                            case 'Escape':
-                                handelEscape(null);
-                                setMode(null);
-                                break;
-                            default:
-                                break;
-                        }
-                    }}
-                    // onBlur={() => setEditing(null)}
-                    autoFocus
-                />
+                <Container>
+                    <Form.Control
+                        type='text'
+                        value={localTitle || ''}
+                        onChange={(e) => setLocalTitle(e.target.value)}
+                        onKeyDown={handleFormKeyDown}
+                        // onBlur={() => setEditing(null)}
+                        autoFocus
+                        />
+                    <Form.Control
+                        type='textarea'
+                        value={localDescription || ''}
+                        onChange={(e) => setLocalDescription(e.target.value)}
+                        onKeyDown={handleFormKeyDown}
+                        placeholder='Description'
+                        />
+                </Container>
                 :
                 <>
                     <Form.Text className='text-muted'>
-                        <Badge
-                            bg={count_childrens ? 'primary' : 'warning'} style={{marginRight: '10px'}} pill
+                        <Container
+                            className={`bg-${badgeColor} m-0 px-2 py-2`}
+                            bg={badgeColor}
                             as={Link} to={`/${user}/${id}`}
-                            >&zwnj;</Badge>
+                            style={{borderRadius: 5}}
+                            />
                         <CompletedButton item={item} handleUpdate={handleUpdate} />
                         {title}
                         {
@@ -216,6 +257,7 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                 {getButtonArray()}
             </Form.Group>
         </ListGroup.Item>
+        </>
      )
 }
 
