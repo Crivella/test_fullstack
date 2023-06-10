@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Alert, Badge, Button, Form, ListGroup, Spinner } from 'react-bootstrap';
+import { Alert, Badge, Button, Form, ListGroup, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap';
 import { useDrop } from 'react-dnd';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../API/Auth';
@@ -37,7 +37,7 @@ export default function TodoList({user, id}) {
     const [adding, setAdding] = useState(null); // [editing, setEditing
 
     const handleAdd = async (data) => {
-        if (data?.title) await addItem(data);
+        if (data != null) await addItem(data);
         setAdding(false);
     }
 
@@ -118,17 +118,19 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         setLocalTitle(title);
     }, [title]);
 
-    const _handleUpdate = (data) => {
+    const handelEscape = () => {
         if (handleAdd !== undefined) {
-            handleAdd(data || {title: localTitle});
-        } else {
-            handleUpdate(data || {id, title: localTitle});
+            handleAdd(null);
         }
         setMode(null);
     }
 
-    const _handleDelete = () => {
-        handleDelete({id});
+    const _handleUpdate = () => {
+        if (handleAdd !== undefined) {
+            handleAdd({title: localTitle});
+        } else {
+            handleUpdate({id, title: localTitle});
+        }
         setMode(null);
     }
 
@@ -146,6 +148,19 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         return buttonArrayNormal();
     }
 
+    const renderDescription = () => {
+        if (mode === 'edit' || id === undefined) return (<></>)
+
+        return (
+            <Tooltip id='tooltip-description' placement='bottom' className='in' style={{opacity: 1}}>
+                <div className='tooltip-inner'>
+                    {description}
+                </div>
+            </Tooltip>
+        )
+    }
+
+
      return (
         <ListGroup.Item 
             className={`d-flex justify-content-between ${completed ? 'todo-completed' : ''}`}
@@ -162,7 +177,7 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                                 _handleUpdate();
                                 break;
                             case 'Escape':
-                                _handleUpdate({});
+                                handelEscape(null);
                                 setMode(null);
                                 break;
                             default:
@@ -173,16 +188,31 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                     autoFocus
                 />
                 :
-                <Form.Text className='text-muted'>
-                    <Badge 
-                        bg={count_childrens ? 'primary' : 'warning'} style={{marginRight: '10px'}} pill
-                        as={Link} to={`/${user}/${id}`}
-                        >&zwnj;</Badge>
-                    <CompletedButton item={item} handleUpdate={handleUpdate} />
-                    {title}
-                </Form.Text>
+                <>
+                    <Form.Text className='text-muted'>
+                        <Badge
+                            bg={count_childrens ? 'primary' : 'warning'} style={{marginRight: '10px'}} pill
+                            as={Link} to={`/${user}/${id}`}
+                            >&zwnj;</Badge>
+                        <CompletedButton item={item} handleUpdate={handleUpdate} />
+                        {title}
+                        {
+                            description && (
+                                <OverlayTrigger
+                                    placement='bottom'
+                                    delay={{ show: 250, hide: 100 }}
+                                    overlay={renderDescription()}
+                                >
+                                    <Button variant='outline-primary' className='round-button-sm mx-2'>?</Button>
+                                </OverlayTrigger>
+                            )
+                        }
+                    </Form.Text>
+                </>
+
             }
-            <Form.Group controlId='formBasicCheckbox' className='d-flex'>
+          
+            <Form.Group controlId='formButtonArray' className='d-flex'>
                 {getButtonArray()}
             </Form.Group>
         </ListGroup.Item>

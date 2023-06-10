@@ -39,7 +39,7 @@ class TodoItem(Owned):
     
     @property
     def ordered_childrens(self):
-        fields = ['id', 'title', 'completed', 'count_childrens', 'count_completed']
+        fields = ['id', 'title', 'description', 'completed', 'count_childrens', 'count_completed']
         app = [self.childrens.get(pk=pk) for pk in self.map]
 
         return [dict(zip(fields, [getattr(_, f) for f in fields])) for _ in app]
