@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../API/Auth';
 import { useAPITodoItem } from '../API/Hooks';
 import { ItemTypes } from '../Constants';
-import { ThemeContext } from '../context/Theme';
+import { ThemeContext } from '../context/Contexts';
 import { ListItemDragDropFrame } from './DragDrop';
 import LoadingErrorFrame from './LoadingErrorFrame';
 import './TodoList.css';
@@ -133,36 +133,17 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
     }
 
     const buttonArrayEdit = () => (
-        <div className='expandX'>
+        <>
         <Button onClick={() => setMode(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
         <Button onClick={_handleUpdate} variant='success' className='round-button-sm mx-2'>✓</Button>
-        </div>
-    )
-    const buttonArrayDelete = () => (
-        <div className='expandX'>
-        <Button
-            autoFocus onKeyDown={(e) => {e.key === 'Escape' && setMode(null)}} 
-            onClick={() => setMode(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
-        <Button onClick={_handleDelete} variant='success' className='round-button-sm mx-2'>✓</Button>
-        </div>
+        </>
     )
     const buttonArrayNormal = () => (
-        <div className='expandX'>
         <Button onClick={() => setMode('edit')} variant='warning' className='round-button-sm mx-2'>✎</Button>
-        <Button onClick={() => setMode('del')} variant='danger' className='round-button-sm mx-2'>🗑</Button>
-        {/* <Button as={Link} to={`/${user}/${.id}`} variant='primary' className='round-button-sm mx-2'>⮞</Button> */}
-        </div>
     )
     const getButtonArray = () => {
         if (mode === 'edit' || id === undefined) return buttonArrayEdit();
-        if (mode === 'del') return buttonArrayDelete();
-        if (mode === 'show') return buttonArrayNormal();
-
-        return (
-            <>
-                <Button onClick={() => setMode('show')} variant='primary' className='round-button-sm mx-2'>⋮</Button>
-            </>
-        )
+        return buttonArrayNormal();
     }
 
      return (

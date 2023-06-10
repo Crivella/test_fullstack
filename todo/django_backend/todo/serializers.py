@@ -5,6 +5,18 @@ from .models import TodoItem, TodoListMap
 
 User = get_user_model()
 
+def create_or_update_map(instance, map, prepend=False):
+    if not hasattr(instance, 'child_map'):
+        TodoListMap.objects.create(
+            owner=instance.owner,
+            parent=instance,
+            seq=[]
+        )
+    if prepend:
+        map = map + instance.child_map.seq
+    instance.child_map.seq = map
+    instance.child_map.save()
+
 class OwnedSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
 
@@ -24,21 +36,10 @@ class TodoSerializer(OwnedSerializer):
         model = TodoItem
         fields = ('id', 'title', 'parent', 'completed', 'ordered_childrens', 'map', 'count_childrens', 'count_completed', 'first_completed')
 
-    # def create(self, validated_data):
-    #     todo_list_id = validated_data.pop('todo_list')['id']
-    #     todo_list = TodoListMap.objects.get(pk=todo_list_id)
-    #     todo = TodoItem.objects.create(todo_list=todo_list, **validated_data)
-    #     return todo
     def update(self, instance, validated_data):
-        print(validated_data)
+        print('UPDATE:', validated_data)
         if 'child_map' in validated_data:
-            if instance.child_map is None:
-                new = TodoListMap.objects.create(
-                    owner=instance.owner,
-                )
-                instance.child_map = new
-            instance.child_map.seq = validated_data.pop('child_map')['seq']
-            instance.child_map.save()
+            create_or_update_map(instance, validated_data.pop('child_map')['seq'])
 
         if 'parent' in validated_data:
             instance.parent_id = validated_data.pop('parent')['id']
@@ -49,13 +50,12 @@ class TodoSerializer(OwnedSerializer):
         return instance
     
     def create(self, validated_data):
-        print(validated_data)
-        parent_id=None
-        if 'parent' in validated_data:
-            parent_id = validated_data.pop('parent')['id']
+        print('CREATE:', validated_data)
+        parent_id = validated_data.pop('parent', {'id': None})['id']
         todo = TodoItem.objects.create(parent_id=parent_id, **validated_data)
-        return todo
-    
+        if parent_id is not None:
+            create_or_update_map(todo.parent, [todo.id], prepend=True)
+        return todo  
 
 class TodoMapSerializer(OwnedSerializer):
     class Meta:

@@ -11,8 +11,14 @@ class Owned(models.Model):
 
 class TodoListMap(Owned):
     seq = models.JSONField(default=list)
-    
 
+    parent = models.OneToOneField(
+        'TodoItem',
+        related_name='child_map',
+        on_delete=models.CASCADE,
+        null=True, blank=True
+        )
+    
 class TodoItem(Owned):
     title = models.CharField(max_length=256)
     description = models.TextField(null=True, blank=True)
@@ -21,13 +27,6 @@ class TodoItem(Owned):
     parent = models.ForeignKey(
         'self',
         related_name='childrens',
-        on_delete=models.CASCADE,
-        null=True, blank=True
-        )
-    
-    child_map = models.ForeignKey(
-        TodoListMap,
-        related_name='ordering',
         on_delete=models.CASCADE,
         null=True, blank=True
         )
@@ -64,3 +63,11 @@ class TodoItem(Owned):
     def __str__(self):
         return str(self.title)
     
+    def delete(self, *args, **kwargs):
+        print('DELETE:', self)
+        if self.parent is not None:
+            print('DELETE: parent map', self.parent.child_map.seq)
+            self.parent.child_map.seq.remove(self.id)
+            self.parent.child_map.save()
+
+        super().delete(*args, **kwargs)    

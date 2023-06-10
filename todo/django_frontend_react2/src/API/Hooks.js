@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from './Auth';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -23,6 +23,16 @@ export function useAPITodoItem(id) {
     const queryClient = useQueryClient();
     const { user } = useContext(AuthContext);
 
+    const [list, setList] = useState([]);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [completed, setCompleted] = useState(false);
+    const [parent, setParent] = useState(null);
+    const [countChildrens, setCountChildrens] = useState(0);
+    const [countCompleted, setCountCompleted] = useState(0);
+    const [firstCompleted, setFirstCompleted] = useState(null);
+
+
     const item = useQuery({
         queryKey: ['todos', user, id],
         queryFn: ({ signal }) => getTodoData({id, signal}),
@@ -30,6 +40,19 @@ export function useAPITodoItem(id) {
         // placeholderData: {id: id},
         staleTime: 1000 * 60 * 5,
     });
+
+    useEffect(() => {
+        if (item.data) {
+            setTitle(item.data.title || '');
+            setDescription(item.data.description || '');
+            setCompleted(item.data.completed || false);
+            setParent(item.data.parent || null);
+            setCountChildrens(item.data.count_childrens || 0);
+            setCountCompleted(item.data.count_completed || 0);
+            setFirstCompleted(item.data.first_completed || 0);
+            setList(item.data.ordered_childrens || []);
+        }
+    }, [item.data]);
 
     const updateMutation = useMutation((data) => axios.patch(`${todoEndpoint}/${data.id}/`, data, {}), {
         onMutate: (data) => {
@@ -48,9 +71,24 @@ export function useAPITodoItem(id) {
         });
 
     const deleteMutation = useMutation((data) => axios.delete(`${todoEndpoint}/${data?.id || id}/`, {}), {
+        onMutate: (data) => {
+            queryClient.cancelQueries(['todos', user, data?.id || id]);
+            const oldData = queryClient.getQueryData(['todos', user, id]);
+            if (data?.id) {
+                queryClient.setQueryData(['todos', user, id], (old) => ({
+                    ...old,
+                    ordered_childrens: item.data.ordered_childrens.filter((item) => item.id !== data.id),
+                    map: item.data.map ? item.data.map.filter((item) => item !== data.id) : null,
+                }));
+            }
+            return {oldData};
+        },
+        onError: (err, data, context) => {
+            queryClient.setQueryData(['todos', user, id], context.oldData)
+        },
         onSuccess: (data, variables, context) => {
             if (variables?.id) {
-                queryClient.invalidateQueries(['todos', user, variables?.id || id]);
+                queryClient.invalidateQueries(['todos', user, variables.id]);
             }
             queryClient.invalidateQueries(['todos', user, id]);
         },
@@ -65,45 +103,23 @@ export function useAPITodoItem(id) {
         });
 
     const deleteItem = useCallback(async (data) => {
+        console.log('DELETE:', data);
         await deleteMutation.mutateAsync(data);
-        await updateMutation.mutateAsync({
-            id,
-            ordered_childrens: item.data.ordered_childrens.filter((item) => item.id !== data.id),
-            map: item.data.map.filter((item) => item !== data.id),
-        });
-    }, [id, item.data, updateMutation, deleteMutation]);
+    }, [deleteMutation]);
 
     const updateItem = useCallback(async (data) => {
-        // console.log('UPDATE:', data);
-        if (data.id === undefined || data.id === id) {
-            // console.log('UPDATE parent:');
-            queryClient.setQueriesData(['todos', user, id], (old) => (
-                {
-                    ...old, 
-                    ordered_childrens: old.ordered_childrens.map((item) => item.id === data.id ? data : item),
-                }));
-        }
         const res = await updateMutation.mutateAsync({id, ...data});
-        // console.log('UPDATE after:', res.data);
         return res.data;
-    }, [id, updateMutation, queryClient, user]);
+    }, [id, updateMutation]);
 
     const addItem = useCallback(async (data) => {
         const res = await addMutation.mutateAsync({...data, parent: id});
         const newData = res.data;
-
-        console.log('newData', newData, item.data);
-        if (item.data.id !== undefined) {
-            console.log('updateItem', item.data);
-            updateItem({
-                ordered_childrens: [newData, ...item.data.ordered_childrens,],
-                map: [newData.id, ...(item.data.map || [])],
-            });
-        }
         return newData;
-    }, [item.data, updateItem, addMutation, id]);
+    }, [addMutation, id]);
 
     const swapItems = useCallback(async (id1, id2) => {
+        if (!item.data.map) return;
         const newMap = [...item.data.map];
         const idx1 = newMap.indexOf(id1);
         const idx2 = newMap.indexOf(id2);
@@ -117,14 +133,14 @@ export function useAPITodoItem(id) {
     }, [item.data, updateItem]);
 
     return {
-        'title': item.data?.title || '',
-        'description': item.data?.description || '',
-        'completed': item.data?.completed || false,
-        'parent': item.data?.parent || null,
-        'count_childrens': item.data?.count_childrens || 0,
-        'count_completed': item.data?.count_completed || 0,
-        'first_completed': item.data?.first_completed || null,
-        'list': item.data?.ordered_childrens || [],
+        'title': title,
+        'description': description,
+        'completed': completed,
+        'parent': parent,
+        'count_childrens': countChildrens,
+        'count_completed': countCompleted,
+        'first_completed': firstCompleted,
+        'list': list,
         'loading': item.isLoading,
         'error': item.error,
         'addItem': addItem,
