@@ -1,4 +1,64 @@
 /************************************************************/
+@keyframes expandPoint {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+@keyframes collapsePoint {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+
+@keyframes flip {
+    0% {
+        transform: rotateY(0deg);
+    }
+    100% {
+        transform: rotateY(180deg);
+    }
+}
+
+@keyframes expandX {
+    0% {
+        /* width: 0px; */
+        transform: scaleX(0);
+    }
+    100% {
+        /* width: auto; */
+        transform: scaleX(1);
+    }
+}
+
+.flip {
+    animation: flip 0.5s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+.expandX > button {
+    /* float: right; */
+    animation: expandX 0.5s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+.expandPoint {
+    animation: expandPoint 0.3s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+.collapsePoint {
+    animation: collapsePoint 0.3s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
 .list-title {
     font-size: 1.7rem;
     font-weight: 700;
@@ -41,4 +101,44 @@
 
 .form-text a:link { 
     text-decoration: none; 
+}
+
+.round-button {
+    text-align: center;
+    /* width: 149px;
+    height: 149px; */
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    font-weight: bold;
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+.round-button-sm {
+    text-align: center;
+    /* width: 149px;
+    height: 149px; */
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+.pos-bl {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
 }

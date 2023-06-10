@@ -7,7 +7,6 @@ import { useAPITodoItem } from '../API/Hooks';
 import { ItemTypes } from '../Constants';
 import { ThemeContext } from '../context/Theme';
 import { ListItemDragDropFrame } from './DragDrop';
-import './ExtraButtons.css';
 import LoadingErrorFrame from './LoadingErrorFrame';
 import './TodoList.css';
 
@@ -31,7 +30,7 @@ export default function TodoList({user, id}) {
      useEffect(() => {
         setList1(list.filter((item) => !item.completed));
         setList2(list.filter((item) => item.completed));
-        }, [list]);
+    }, [list]);
 
     const {user: loggedUser} = useContext(AuthContext);
 
@@ -113,10 +112,10 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
      } = item || {};
 
      const [mode, setMode] = useState(null); // [editing, setEditing
-     const [localTitle, setTitle] = useState('');
+     const [localTitle, setLocalTitle] = useState('');
 
      useEffect(() => {
-        setTitle(title);
+        setLocalTitle(title);
     }, [title]);
 
     const _handleUpdate = (data) => {
@@ -134,25 +133,25 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
     }
 
     const buttonArrayEdit = () => (
-        <>
+        <div className='expandX'>
         <Button onClick={() => setMode(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
         <Button onClick={_handleUpdate} variant='success' className='round-button-sm mx-2'>✓</Button>
-        </>
+        </div>
     )
     const buttonArrayDelete = () => (
-        <>
+        <div className='expandX'>
         <Button
             autoFocus onKeyDown={(e) => {e.key === 'Escape' && setMode(null)}} 
             onClick={() => setMode(null)} variant='danger' className='round-button-sm mx-2'>✗</Button>
         <Button onClick={_handleDelete} variant='success' className='round-button-sm mx-2'>✓</Button>
-        </>
+        </div>
     )
     const buttonArrayNormal = () => (
-        <>
+        <div className='expandX'>
         <Button onClick={() => setMode('edit')} variant='warning' className='round-button-sm mx-2'>✎</Button>
         <Button onClick={() => setMode('del')} variant='danger' className='round-button-sm mx-2'>🗑</Button>
         {/* <Button as={Link} to={`/${user}/${.id}`} variant='primary' className='round-button-sm mx-2'>⮞</Button> */}
-        </>
+        </div>
     )
     const getButtonArray = () => {
         if (mode === 'edit' || id === undefined) return buttonArrayEdit();
@@ -168,10 +167,6 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
 
      return (
         <ListGroup.Item 
-            // className='d-flex justify-content-between'
-            // action={!item.completed}
-            // action
-            // href='#'
             className={`d-flex justify-content-between ${completed ? 'todo-completed' : ''}`}
             >
             {
@@ -179,7 +174,7 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                 <Form.Control
                     type='text'
                     value={localTitle || ''}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => setLocalTitle(e.target.value)}
                     onKeyDown={(e) => {
                         switch (e.key) {
                             case 'Enter':
@@ -188,8 +183,6 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                             case 'Escape':
                                 _handleUpdate({});
                                 setMode(null);
-                                // setEditing(null);
-                                // setDeleting(null);
                                 break;
                             default:
                                 break;
