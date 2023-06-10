@@ -23,6 +23,7 @@ class TodoItem(Owned):
     title = models.CharField(max_length=256)
     description = models.TextField(null=True, blank=True)
     completed = models.BooleanField(default=False)
+    favorite = models.BooleanField(default=False)
 
     parent = models.ForeignKey(
         'self',

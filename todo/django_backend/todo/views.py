@@ -55,6 +55,17 @@ class TodoView(SortedMixin, OwnerMixin, viewsets.ModelViewSet):
         q = q.filter(parent=None)
         return JsonResponse({'ordered_childrens': TodoSerializer(q, many=True).data})
     
+    def retrieve(self, request: HttpRequest, pk=None, *args, **kwargs):
+        q = super().get_queryset()
+        if pk.lower() == 'favorites':
+            print('FAVORITES')
+            q = q.filter(favorite=True)
+            return JsonResponse({'ordered_childrens': TodoSerializer(q, many=True).data})
+
+        q = q.filter(pk=pk)
+        item = q.first()
+        return JsonResponse(TodoSerializer(item).data)
+    
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
     

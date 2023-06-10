@@ -45,6 +45,12 @@ export default function TodoList({user, id}) {
         swapItems(item1.id, item2.id);
     }
 
+    const getTitle = () => {
+        if (id === undefined) return 'Lists';
+        if (id === 'fav') return 'Favorites';
+        return title;
+    }
+
     return (
         <>
         <LoadingErrorFrame
@@ -53,7 +59,7 @@ export default function TodoList({user, id}) {
             onError={(e) => <TodoError error={e} />}
             onLoading={() => <TodoLoading />}
         >
-            <ListGroup className='list-container mx-auto'>
+            <ListGroup className='list-container h-100'>
                 <ListGroup.Item variant='primary d-flex'>
                     <div className='d-inline-flex flex-column align-items-center justify-content-center p-0 m-0'>
                         <Button hidden={parent === null} as={Link} to={`/${user}/${parent}`} variant='primary' className='round-button-sm mx-2'>⮜</Button>
@@ -61,13 +67,22 @@ export default function TodoList({user, id}) {
                         style={{marginRight:5}}>⮜</Button>
                     </div>
                     <p className='list-title m-auto'>
-                    {title ? `${title} (${count_completed}/${count_childrens})` : 'Lists'}
+                    {getTitle()}
                     </p>
+                    { 
+                        (id !== undefined && id !== 'favorites' ) 
+                        && 
+                        <FavoriteButton item={item} handleUpdate={updateItem} />
+                    }
                 </ListGroup.Item>
 
-                <ListGroup.Item className='d-flex justify-content-center'>
-                    <Button hidden={user !== loggedUser} onClick={() => setAdding(true)} variant='success' className='round-button-sm mx-2'>+</Button>
-                </ListGroup.Item>
+                {
+                    id !== 'favorites'
+                    &&
+                    <ListGroup.Item className='d-flex justify-content-center'>
+                        <Button hidden={user !== loggedUser} onClick={() => setAdding(true)} variant='success' className='round-button-sm mx-2'>+</Button>
+                    </ListGroup.Item>
+                }
 
                 {adding && <TodoItem user={user} 
                     handleAdd={handleAdd} />}
@@ -285,6 +300,30 @@ function CompletedButton({item, handleUpdate, time = 500}) {
     )
 }
 
+function FavoriteButton({item, handleUpdate, time = 500}) {
+    const { favorite } = item || {};
+    
+    const [persist, setPersist] = useState(false);
+    const [_favorite, setFavorite] = useState(favorite);
+
+    const _handleUpdate = () => {
+        setPersist(true);
+        timeout(time/2).then(() => setFavorite(!favorite));
+        timeout(time*2/3).then(() => handleUpdate({id: item.id, favorite: !favorite}));
+        timeout(time).then(() => setPersist(false));
+    }
+
+    return (
+        <Button
+            onClick={_handleUpdate}
+            variant={ _favorite ? 'warning' : 'outline-primary' }
+            className={`round-button-sm mx-2 ${persist ? 'flip' : ''}`}
+            >
+            {_favorite ? '⭐' : '☆'}
+        </Button>
+    )
+}
+
 function EmptyTodoItem() {
     return (
         <ListGroup.Item className='d-flex justify-content-between todo-light'>
@@ -298,7 +337,7 @@ function EmptyTodoItem() {
 // An empty loading item
 function TodoLoading() {
     return (
-        <ListGroup.Item as={Alert} variant='primary'>
+        <ListGroup.Item as={Alert} variant='primary' className='list-container'>
             <Alert.Heading>Loading...</Alert.Heading>
             <Spinner animation='border' variant='primary' />
         </ListGroup.Item>
@@ -308,7 +347,7 @@ function TodoLoading() {
 // An empty error item
 function TodoError({error}) {
     return (
-        <ListGroup.Item as={Alert} variant='danger'>
+        <ListGroup.Item as={Alert} variant='danger' className='list-container'>
             <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
             <p>{error?.message}</p>
         </ListGroup.Item>

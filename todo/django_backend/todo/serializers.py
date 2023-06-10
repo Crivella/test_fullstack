@@ -34,7 +34,12 @@ class TodoSerializer(OwnedSerializer):
 
     class Meta:
         model = TodoItem
-        fields = ('id', 'title', 'description', 'parent', 'completed', 'ordered_childrens', 'map', 'count_childrens', 'count_completed', 'first_completed')
+        fields = (
+            'id', 'title', 'description', 
+            'favorite', 'completed', 
+            'parent', 'map', 
+            'ordered_childrens', 'count_childrens', 'count_completed', 'first_completed'
+            )
 
     def update(self, instance, validated_data):
         print('UPDATE:', validated_data)
