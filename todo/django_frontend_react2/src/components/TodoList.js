@@ -316,10 +316,13 @@ function FavoriteButton({item, handleUpdate, time = 500}) {
     return (
         <Button
             onClick={_handleUpdate}
-            variant={ _favorite ? 'warning' : 'outline-primary' }
-            className={`round-button-sm mx-2 ${persist ? 'flip' : ''}`}
+            variant={'outline-primary'}
+            className={`
+            ${_favorite ? 'text-warning' : ''}
+            round-button-sm mx-2 ${persist ? 'flip' : ''}
+            `}
             >
-            {_favorite ? '⭐' : '☆'}
+            {_favorite ? '★' : '☆'}
         </Button>
     )
 }

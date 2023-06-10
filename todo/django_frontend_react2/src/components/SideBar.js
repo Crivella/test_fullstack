@@ -17,7 +17,7 @@ export default function CustomNavbar() {
         bg={theme === 'dark' ? 'black' : 'secondary'} 
         variant={theme} text={themeContrast1} 
         sticky="left" 
-        className={`d-flex justify-content-between flex-column`}
+        className={`d-flex justify-content-between flex-column side-navbar`}
         >
             <Nav className="d-flex flex-column">
                 <Navbar.Brand className={`text-${themeContrast1}`}>
@@ -37,24 +37,26 @@ export default function CustomNavbar() {
 }
 
 const navs = [
-    ['Home', '/'],
-    ['Explore', '/explore'],
+    ['⌂', 'Home', '/'],
+    ['🔍︎', 'Explore', '/explore'],
 ]
 
 const userNavs = [
-    ['My Lists', ''],
-    ['Favorites', 'favorites'],
+    ['🕮', 'My Lists', ''],
+    ['☆', 'Favorites', 'favorites'],
 ]
 
 function GeneralNav() {
-    const {theme, themeContrast1, ThemeSwitch} = useTheme();
-    const {user, logout} = useContext(AuthContext);
-    const {setShowUserProfile} = useContext(ModalContext);
+    const {themeContrast1 } = useTheme();
 
     return (
-        navs.map(([title, link], idx) => (
+        navs.map(([symbol, title, link], idx) => (
             <Nav className="my-1" key={idx}>
-                <Link to={`${link}`} className={`text-${themeContrast1}`}>{title}</Link>
+                
+                <Link to={`${link}`} className={`text-${themeContrast1}`}>
+                    <span className={`text-${themeContrast1} symbol`}>{symbol}</span>
+                    {title}
+                </Link>
             </Nav>
         ))
     )
@@ -63,14 +65,16 @@ function GeneralNav() {
 
 
 function LoggedInNav() {
-    const {theme, themeContrast1, ThemeSwitch} = useTheme();
-    const {user, logout} = useContext(AuthContext);
-    const {setShowUserProfile} = useContext(ModalContext);
+    const { themeContrast1 } = useTheme();
+    const { user } = useContext(AuthContext);
 
     return (
-        userNavs.map(([title, link], idx) => (
+        userNavs.map(([symbol, title, link], idx) => (
             <Nav className="my-1" key={idx}>
-                <Link to={`${user}/${link}`} className={`text-${themeContrast1}`}>{title}</Link>
+                <Link to={`${user}/${link}`} className={`text-${themeContrast1}`}>
+                    <span className={`text-${themeContrast1} symbol`}>{symbol}</span>
+                    {title}
+                </Link>
             </Nav>
         ))
     )
