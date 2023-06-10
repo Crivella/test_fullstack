@@ -1,0 +1,9 @@
+.navbar-nav {
+    padding-top: 0.7rem;
+
+}
+
+.navbar-nav a:link {
+    text-decoration: none;
+    color: white;
+}

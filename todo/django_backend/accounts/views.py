@@ -32,7 +32,7 @@ def loginView(request):
                     login(request, user)
                     return redirect('/accounts/login/success')
                 
-            return JsonResponse({'error': 'Invalid Credentials'}, status=400)
+            return JsonResponse({'error': 'Invalid Credentials'}, status=200)
     return JsonResponse({'info': 'User not logged in'}, status=200)
 
 @login_required

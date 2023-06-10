@@ -26,6 +26,7 @@ export function useAPITodoItem(id) {
     const [list, setList] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [favorite, setFavorite] = useState(false);
     const [completed, setCompleted] = useState(false);
     const [parent, setParent] = useState(null);
     const [countChildrens, setCountChildrens] = useState(0);
@@ -45,6 +46,7 @@ export function useAPITodoItem(id) {
         if (item.data) {
             setTitle(item.data.title || '');
             setDescription(item.data.description || '');
+            setFavorite(item.data.favorite || false);
             setCompleted(item.data.completed || false);
             setParent(item.data.parent || null);
             setCountChildrens(item.data.count_childrens || 0);
@@ -133,10 +135,12 @@ export function useAPITodoItem(id) {
     }, [item.data, updateItem]);
 
     return {
+        'id': id,
         'title': title,
         'description': description,
         'completed': completed,
         'parent': parent,
+        'favorite': favorite,
         'count_childrens': countChildrens,
         'count_completed': countCompleted,
         'first_completed': firstCompleted,

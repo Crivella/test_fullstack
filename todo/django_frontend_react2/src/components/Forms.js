@@ -25,6 +25,7 @@ export function LoginForm ({ onSubmit }) {
 
         setValidated(false);
         const user = await onSubmit(fdata);
+        console.log(user);
         if (!user) setFailed(true);
     };
     

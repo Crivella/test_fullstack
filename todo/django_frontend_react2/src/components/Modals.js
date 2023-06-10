@@ -50,31 +50,31 @@ export function LoginModal() {
     )
 }
 
-export function DeleteModal() {
-    const { active, todoAction } = useContext();
-    const { showDelete: show, setShowDelete: setShow } = useContext(ModalContext);
+// export function DeleteModal() {
+//     const { active, todoAction } = useContext();
+//     const { showDelete: show, setShowDelete: setShow } = useContext(ModalContext);
 
-    const handleSubmit = async () => {
-        if (!active) return false;
-        console.log(active);
-        const res = await todoAction(active);
-        setShow(!res);
-        return res;
-    } 
+//     const handleSubmit = async () => {
+//         if (!active) return false;
+//         console.log(active);
+//         const res = await todoAction(active);
+//         setShow(!res);
+//         return res;
+//     } 
 
-    return (
-        <ModalFormWrapper header="Delete item?" show={show} setShow={setShow} >
-            <Container>
-                <p>Are you sure you want to delete this item?</p>
-                <p>"{active ? active.title : ''}"</p>
-                <Container fluid className="d-flex justify-content-between">
-                    <Button variant="secondary" onClick={() => setShow(false)}>NO</Button>
-                    <Button variant="danger" onClick={handleSubmit}>YES</Button>
-                </Container>
-            </Container>
-        </ModalFormWrapper>
-    )
-}
+//     return (
+//         <ModalFormWrapper header="Delete item?" show={show} setShow={setShow} >
+//             <Container>
+//                 <p>Are you sure you want to delete this item?</p>
+//                 <p>"{active ? active.title : ''}"</p>
+//                 <Container fluid className="d-flex justify-content-between">
+//                     <Button variant="secondary" onClick={() => setShow(false)}>NO</Button>
+//                     <Button variant="danger" onClick={handleSubmit}>YES</Button>
+//                 </Container>
+//             </Container>
+//         </ModalFormWrapper>
+//     )
+// }
 
 export function UserProfileModal() {
     const { user, passwordChange } = useContext(AuthContext);
