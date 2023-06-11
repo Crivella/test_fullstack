@@ -127,6 +127,8 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
 
      const { active, setActive } = useContext(ActiveContext);
 
+     const { themeContrast1 } = useContext(ThemeContext);
+
      const [mode, setMode] = useState(null);
      const [badgeColor, setBadgeColor] = useState('warning'); 
 
@@ -285,7 +287,7 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                             as={Link} to={`/${user}/${id}`}
                             style={{borderRadius: 5}}
                             />
-                        <div className='d-inline-flex' style={{inlineSize: '640px'}}>
+                        <div className={`d-inline-flex text-${themeContrast1}`} style={{inlineSize: '640px'}}>
                             {title}
                             {
                                 description && (
