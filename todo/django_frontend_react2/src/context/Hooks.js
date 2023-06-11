@@ -5,9 +5,15 @@ import { FilterSortContext, PaginationContext, ThemeContext } from "../context/C
 export function useTheme() {
     const {theme, setTheme, themeContrast1, themeContrast2} = useContext(ThemeContext);
 
-    const ThemeSwitch = (
-        <Form.Check type="switch" checked={theme === 'dark'} onChange={(e) => {e.target.checked ? setTheme('dark') : setTheme('light')}} />
-    )
+    const ThemeSwitch = (props) => {
+        const baseProps = {
+            type: "switch",
+            checked: theme === 'dark',
+            onChange: (e) => {e.target.checked ? setTheme('dark') : setTheme('light')},
+            ...props,
+        }
+        return <Form.Check {...baseProps} />
+    }
     return {theme, themeContrast1, themeContrast2, ThemeSwitch};
 }
 

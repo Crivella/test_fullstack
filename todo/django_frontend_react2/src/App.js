@@ -1,7 +1,7 @@
-import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/scss/bootstrap.scss';
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import './App.css';
+import './App.scss';
 
 
 import Content from './routes/Content';

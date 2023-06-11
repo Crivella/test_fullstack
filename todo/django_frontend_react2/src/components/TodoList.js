@@ -8,7 +8,7 @@ import { ItemTypes } from '../Constants';
 import { ThemeContext } from '../context/Contexts';
 import { ListItemDragDropFrame } from './DragDrop';
 import LoadingErrorFrame from './LoadingErrorFrame';
-import './TodoList.css';
+import './TodoList.scss';
 
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

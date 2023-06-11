@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
-import './DragDrop.css';
+import './DragDrop.scss';
 
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
