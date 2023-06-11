@@ -8,16 +8,12 @@
     color: white;
 }
 
-.navbar-nav .symbol {
-    font-size: 1.5rem;
-    margin-right: 0.5rem;
-}
-
-/* .side-navbar {
+.side-navbar {
     min-width: 120px;
+    max-width: 200px;
     height: 100%;
     flex-grow: 1;
-} */
+}
 
 @media (max-width: 840px) {
     .side-navbar {

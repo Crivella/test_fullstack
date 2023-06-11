@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Dropdown, DropdownButton, Nav, Navbar } from "react-bootstrap";
+import { Dropdown, DropdownButton, Image, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../API/Auth";
 import { useTheme } from "../context/Hooks";
@@ -36,14 +36,16 @@ export default function CustomNavbar() {
     );
 }
 
+const icosize = 32;
+const fontsize = '1.3rem';
 const navs = [
-    ['⌂', 'Home', '/'],
-    ['🔍︎', 'Explore', '/explore'],
+    ['home', 'Home', '/'],
+    ['search', 'Explore', '/explore'],
 ]
 
 const userNavs = [
-    ['🕮', 'My Lists', ''],
-    ['☆', 'Favorites', 'favorites'],
+    ['tiles', 'My Lists', ''],
+    ['star', 'Favorites', 'favorites'],
 ]
 
 function GeneralNav() {
@@ -53,8 +55,9 @@ function GeneralNav() {
         navs.map(([symbol, title, link], idx) => (
             <Nav className="my-1" key={idx}>
                 
-                <Link to={`${link}`} className={`text-${themeContrast1}`}>
-                    <span className={`text-${themeContrast1} symbol`}>{symbol}</span>
+                <Link to={`${link}`} className={`text-${themeContrast1}`} style={{fontSize: fontsize}} >
+                    <Image src={`/navbar/${symbol}.png`} className="mx-2" width={icosize} height={icosize}/>
+                    {/* <span className={`text-${themeContrast1} symbol`}>{symbol}</span> */}
                     {title}
                 </Link>
             </Nav>
@@ -71,8 +74,9 @@ function LoggedInNav() {
     return (
         userNavs.map(([symbol, title, link], idx) => (
             <Nav className="my-1" key={idx}>
-                <Link to={`${user}/${link}`} className={`text-${themeContrast1}`}>
-                    <span className={`text-${themeContrast1} symbol`}>{symbol}</span>
+                <Link to={`${user}/${link}`} className={`text-${themeContrast1}`} style={{fontSize: fontsize}}>
+                <Image src={`/navbar/${symbol}.png`} className="mx-2" width={icosize} height={icosize}/>
+                    {/* <span className={`text-${themeContrast1} symbol`}>{symbol}</span> */}
                     {title}
                 </Link>
             </Nav>

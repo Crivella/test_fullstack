@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Alert, Button, Container, Form, ListGroup, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap';
+import { Alert, Button, Container, Form, Image, ListGroup, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap';
 import { useDrop } from 'react-dnd';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../API/Auth';
@@ -322,7 +322,7 @@ function FavoriteButton({item, handleUpdate, time = 500}) {
             round-button-sm mx-2 ${persist ? 'flip' : ''}
             `}
             >
-            {_favorite ? '★' : '☆'}
+            <Image src={`/todos/star${_favorite ? '-full' : ''}.png`} width={16} height={16} />
         </Button>
     )
 }
@@ -373,7 +373,8 @@ export function TrashCan({onDelete}) {
 
     return (
         <Button ref={dropRef} className={`round-button pos-bl ${extraClass}`} variant="primary">
-            <span style={{paddingBottom: 10}} className={`text-${themeContrast1}`}>🗑</span>
+            <Image src={`/todos/trashcan.png`} width={55} height={55} />
+            {/* <span style={{paddingBottom: 10}} className={`text-${themeContrast1}`}>🗑</span> */}
         </Button>
     );
 }
