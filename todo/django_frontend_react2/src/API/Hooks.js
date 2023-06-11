@@ -11,6 +11,7 @@ axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
 const getTodoData = async ({id, signal}) => {
+    console.log('getTodoData', id);
     const strId = id === undefined ? '' : id + '/';
     const {data} = await axios.get(`${todoEndpoint}/${strId}`, {
         headers: { 'Content-Type': 'application/json' },
@@ -36,7 +37,7 @@ export function useAPITodoItem(id) {
 
 
     const item = useQuery({
-        queryKey: ['todos', user, id],
+        queryKey: ['todos', user, String(id)],
         queryFn: ({ signal }) => getTodoData({id, signal}),
         enabled: user !== undefined,
         // placeholderData: {id: id},
@@ -60,32 +61,31 @@ export function useAPITodoItem(id) {
 
     const updateMutation = useMutation((data) => axios.patch(`${todoEndpoint}/${data.id}/`, data, {}), {
         onMutate: (data) => {
-            queryClient.cancelQueries(['todos', user, data.id]);
+            queryClient.cancelQueries(['todos', user, String(data.id)]);
             const oldData = queryClient.getQueryData(['todos', user, data.id]);
-            queryClient.setQueryData(['todos', user, data.id], (old) => ({...old, ...data}));
+            queryClient.setQueryData(['todos', user, String(data.id)], (old) => ({...old, ...data}));
             return {oldData};
         },
         onError: (err, data, context) => {
             queryClient.setQueryData(['todos', user, data.id], context.oldData)
         },
         onSettled: ({data}, variables, context) => {
-            queryClient.invalidateQueries(['todos', user, data.id]);
-            queryClient.invalidateQueries(['todos', user, id]);
-            queryClient.invalidateQueries(['todos', user, parent]);
-            queryClient.setQueriesData(['todos', user, parent], (old) => ({
+            queryClient.invalidateQueries(['todos', user, String(data.id)]);
+            queryClient.invalidateQueries(['todos', user, String(id)]);
+            queryClient.invalidateQueries(['todos', user, String(parent)]);
+            queryClient.setQueryData(['todos', user, String(parent)], (old) => ({
                 ...old, 
                 ordered_childrens: old.ordered_childrens.map((item) => item.id === data.id ? data : item),
             }));
-            console.log('updateMutation', user, data.id, id, parent);
         },
         });
 
     const deleteMutation = useMutation((data) => axios.delete(`${todoEndpoint}/${data?.id || id}/`, {}), {
         onMutate: (data) => {
-            queryClient.cancelQueries(['todos', user, data?.id || id]);
-            const oldData = queryClient.getQueryData(['todos', user, id]);
+            queryClient.cancelQueries(['todos', user, String(data?.id || id)]);
+            const oldData = queryClient.getQueryData(['todos', user, String(id)]);
             if (data?.id) {
-                queryClient.setQueryData(['todos', user, id], (old) => ({
+                queryClient.setQueryData(['todos', user, String(id)], (old) => ({
                     ...old,
                     ordered_childrens: item.data.ordered_childrens.filter((item) => item.id !== data.id),
                     map: item.data.map ? item.data.map.filter((item) => item !== data.id) : null,
@@ -94,21 +94,21 @@ export function useAPITodoItem(id) {
             return {oldData};
         },
         onError: (err, data, context) => {
-            queryClient.setQueryData(['todos', user, id], context.oldData)
+            queryClient.setQueryData(['todos', user, String(id)], context.oldData)
         },
         onSuccess: (data, variables, context) => {
             if (variables?.id) {
-                queryClient.invalidateQueries(['todos', user, variables.id]);
+                queryClient.invalidateQueries(['todos', user, String(variables.id)]);
             }
-            queryClient.invalidateQueries(['todos', user, id]);
+            queryClient.invalidateQueries(['todos', user, String(id)]);
         },
         });
 
     const addMutation = useMutation((data) => axios.post(`${todoEndpoint}/`, data, {}), {
         onSuccess: ({data}) => {
-            queryClient.setQueryData(['todos', user, data.id], () => data);
-            queryClient.invalidateQueries(['todos', user, data.id]);
-            queryClient.invalidateQueries(['todos', user, id]);
+            queryClient.setQueryData(['todos', user, String(data.id)], () => data);
+            queryClient.invalidateQueries(['todos', user, String(data.id)]);
+            queryClient.invalidateQueries(['todos', user, String(id)]);
         },
         });
 
