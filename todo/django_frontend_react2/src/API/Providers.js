@@ -1,3 +1,4 @@
+import ActiveProvider from "./Active";
 import APIAuthProvider from "./Auth";
 import APIFilterSortProvider from "./FilterSort";
 import APIPaginatorProvider from "./Pagination";
@@ -13,6 +14,7 @@ export default function APIProvider({children, size=16}) {
     return (
         <QueryClientProvider client={queryClient}>
         <APIAuthProvider>
+            <ActiveProvider>
             <APIFilterSortProvider> 
                 <APIPaginatorProvider size={size}>
                     {/* <APITodosProvider> */}
@@ -20,10 +22,11 @@ export default function APIProvider({children, size=16}) {
                     {/* </APITodosProvider> */}
                 </APIPaginatorProvider>
             </APIFilterSortProvider>
+            </ActiveProvider>
         </APIAuthProvider>
         </QueryClientProvider>
     )
 }
 
-export { APIAuthProvider, APIFilterSortProvider, APIPaginatorProvider };
+export { APIAuthProvider, APIFilterSortProvider, APIPaginatorProvider, ActiveProvider };
 

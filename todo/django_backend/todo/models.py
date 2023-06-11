@@ -40,10 +40,23 @@ class TodoItem(Owned):
     
     @property
     def ordered_childrens(self):
-        fields = ['id', 'title', 'description', 'completed', 'count_childrens', 'count_completed']
+        fields = ['id', 'title', ('owner', 'owner__username'), 'description', 'completed', 'count_childrens', 'count_completed']
         app = [self.childrens.get(pk=pk) for pk in self.map]
 
-        return [dict(zip(fields, [getattr(_, f) for f in fields])) for _ in app]
+        res = []
+        for child in app:
+            dct = {}
+            for field in fields:
+                aname = field
+                if isinstance(field, tuple):
+                    field, aname = field
+                ptr = child
+                for f in aname.split('__'):
+                    ptr = getattr(ptr, f)
+                dct[field] = ptr
+            res.append(dct)
+
+        return res
     
     @property
     def count_completed(self):

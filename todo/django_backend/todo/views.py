@@ -55,7 +55,7 @@ class TodoView(SortedMixin, OwnerMixin, viewsets.ModelViewSet):
         q = q.filter(parent=None)
         return JsonResponse({'ordered_childrens': TodoSerializer(q, many=True).data})
     
-    def retrieve(self, request: HttpRequest, pk=None, *args, **kwargs):
+    def retrieve(self, request: HttpRequest, *args, pk=None, **kwargs):
         q = super().get_queryset()
         if pk.lower() == 'favorites':
             print('FAVORITES')

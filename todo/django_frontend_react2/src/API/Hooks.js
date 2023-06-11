@@ -26,6 +26,7 @@ export function useAPITodoItem(id) {
     const [list, setList] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [owner, setOwner] = useState(null); 
     const [favorite, setFavorite] = useState(false);
     const [completed, setCompleted] = useState(false);
     const [parent, setParent] = useState(null);
@@ -46,6 +47,7 @@ export function useAPITodoItem(id) {
         if (item.data) {
             setTitle(item.data.title || '');
             setDescription(item.data.description || '');
+            setOwner(item.data.owner || null);
             setFavorite(item.data.favorite || false);
             setCompleted(item.data.completed || false);
             setParent(item.data.parent || null);
@@ -69,6 +71,12 @@ export function useAPITodoItem(id) {
         onSettled: ({data}, variables, context) => {
             queryClient.invalidateQueries(['todos', user, data.id]);
             queryClient.invalidateQueries(['todos', user, id]);
+            queryClient.invalidateQueries(['todos', user, parent]);
+            queryClient.setQueriesData(['todos', user, parent], (old) => ({
+                ...old, 
+                ordered_childrens: old.ordered_childrens.map((item) => item.id === data.id ? data : item),
+            }));
+            console.log('updateMutation', user, data.id, id, parent);
         },
         });
 
@@ -138,6 +146,7 @@ export function useAPITodoItem(id) {
         'id': id,
         'title': title,
         'description': description,
+        'owner': owner,
         'completed': completed,
         'parent': parent,
         'favorite': favorite,

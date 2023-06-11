@@ -3,17 +3,14 @@ import { Alert, Button, Container, Form, Image, ListGroup, OverlayTrigger, Spinn
 import { useDrop } from 'react-dnd';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../API/Auth';
+import { ActiveContext } from '../API/Contexts';
 import { useAPITodoItem } from '../API/Hooks';
 import { ItemTypes } from '../Constants';
 import { ThemeContext } from '../context/Contexts';
 import { ListItemDragDropFrame } from './DragDrop';
-import FlippableButton from './FlippableButton';
+import { CompletedButton, FavoriteButton } from './FlippableButton';
 import LoadingErrorFrame from './LoadingErrorFrame';
 import './TodoList.css';
-
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 export default function TodoList({user, id}) {
     const item = useAPITodoItem(id);
@@ -29,6 +26,7 @@ export default function TodoList({user, id}) {
      } = item;
 
      useEffect(() => {
+        console.log('LIST:', list);
         setList1(list.filter((item) => !item.completed));
         setList2(list.filter((item) => item.completed));
     }, [list]);
@@ -127,6 +125,8 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         count_childrens, count_completed,
      } = item || {};
 
+     const { active, setActive } = useContext(ActiveContext);
+
      const [mode, setMode] = useState(null);
      const [badgeColor, setBadgeColor] = useState('warning'); 
 
@@ -216,11 +216,27 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         )
     }
 
+    const onClick = () => {
+        if (mode === 'edit') return;
+        if (id === undefined) return;
+        if (active === id) {
+            setActive(null);
+            return;
+        }
+        setActive(item.id);
+    }
+
     return (
         <>
-
         <ListGroup.Item 
-            className={`d-flex justify-content-between px-0 ${completed ? 'todo-completed' : ''}`}
+            className={`
+                d-flex justify-content-between list-item px-0 
+                ${completed ? 'todo-completed' : ''}
+                ${active === id ? 'border-primary' : ''}
+            `}
+            onClick={onClick}
+            // action
+            // active={active === id}
             >
 
             {
@@ -243,75 +259,41 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
                         />
                 </Container>
                 :
-                <>
-                    <Form.Text className='text-muted'>
+                <div>
+                    <CompletedButton item={item} handleUpdate={handleUpdate} />
+                    <Form.Text>
                         <Container
                             className={`bg-${badgeColor} m-0 px-2 py-2`}
                             bg={badgeColor}
                             as={Link} to={`/${user}/${id}`}
                             style={{borderRadius: 5}}
                             />
-                        <CompletedButton item={item} handleUpdate={handleUpdate} />
-                        {title}
-                        {
-                            description && (
-                                <OverlayTrigger
-                                    placement='bottom'
-                                    delay={{ show: 250, hide: 100 }}
-                                    overlay={renderDescription()}
-                                >
-                                    <Button variant='outline-primary' className='round-button-sm mx-2'>?</Button>
-                                </OverlayTrigger>
-                            )
-                        }
+                        <div className='d-inline-flex' style={{inlineSize: '640px'}}>
+                            {title}
+                            {
+                                description && (
+                                    <OverlayTrigger
+                                        placement='bottom'
+                                        delay={{ show: 250, hide: 100 }}
+                                        overlay={renderDescription()}
+                                    >
+                                        <Button variant='outline-primary' className='round-button-sm mx-2'>?</Button>
+                                    </OverlayTrigger>
+                                )
+                            }
+                        </div>
                     </Form.Text>
-                </>
+                </div>
 
             }
           
             <Form.Group controlId='formButtonArray' className='d-flex'>
-                {getButtonArray()}
+                {active === id && getButtonArray()}
             </Form.Group>
         </ListGroup.Item>
         </>
      )
 }
-
-function CompletedButton({item, handleUpdate}) {
-    const { completed } = item || {};
-
-    const handleAsync = () => {
-        handleUpdate({id: item.id, completed: !completed});
-    }
-
-    return (
-        <FlippableButton
-            completed={completed}
-            offState='✗'
-            onState='✓'
-            onVariant='success'
-            handleAsync={handleAsync}
-            />
-    )
-}
-
-function FavoriteButton({item, handleUpdate}) {
-    const { favorite } = item || {};
-
-    const handleAsync = () => {
-        handleUpdate({id: item.id, favorite: !favorite});
-    }
-
-    return (
-        <FlippableButton
-            completed={favorite}
-            offState={<Image src={`/todos/star.png`} width={16} height={16} />}
-            onState={<Image src={`/todos/star-full.png`} width={16} height={16} />}
-            handleAsync={handleAsync}
-            />
-    )
-}
-
 
 function EmptyTodoItem() {
     return (
@@ -343,22 +325,36 @@ function TodoError({error}) {
     )
 }
 
+const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 export function TrashCan({onDelete}) {
     const {themeContrast1} = useContext(ThemeContext);
     // const { setActive, setFormAction } = useContext(TodoAPIContext);
-    const [{canDrop, extraClass}, dropRef] = useDrop(() => ({
+    const [canDrop, setCanDrop] = useState(false);
+
+    const [{_canDrop, extraClass}, dropRef] = useDrop(() => ({
         accept: [ItemTypes.CARD, ItemTypes.CardCompleted],
         drop: (item, monitor) => {
             onDelete(item);
         },
         collect: monitor => ({
-            canDrop: !monitor.canDrop(),
+            _canDrop: monitor.canDrop(),
             extraClass: monitor.canDrop() ? 'expandPoint' : 'collapsePoint',
         }),
     }), [onDelete]);
 
+    useEffect(() => {
+        if (_canDrop) {
+            setCanDrop(true);
+        }
+        else{
+            timeout(300).then(() => setCanDrop(false))
+        }
+    }, [_canDrop]);
+
+
     return (
-        <Button ref={dropRef} className={`round-button pos-bl ${extraClass}`} variant="primary">
+        <Button hidden={!canDrop} ref={dropRef} className={`round-button pos-bl ${extraClass}`} variant="primary">
             <Image src={`/todos/trashcan.png`} width={55} height={55} />
             {/* <span style={{paddingBottom: 10}} className={`text-${themeContrast1}`}>🗑</span> */}
         </Button>
