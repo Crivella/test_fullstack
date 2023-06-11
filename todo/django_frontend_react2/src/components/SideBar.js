@@ -28,9 +28,7 @@ export default function CustomNavbar() {
             </Nav>
             <Nav className="d-flex flex-column justify-content-end align-content-center">
                 {ThemeSwitch({className: 'mx-auto'})}
-                {/* <Form className="d-flex flex-column justify-content-center"> */}
                 {user ? <UserDropdown /> : <AnonDropdown />}
-                {/* </Form> */}
             </Nav>
         </Navbar>
     );
@@ -44,8 +42,9 @@ const navs = [
 ]
 
 const userNavs = [
-    ['tiles', 'My Lists', ''],
+    ['tiles', 'My Lists', 'lists'],
     ['star', 'Favorites', 'favorites'],
+    ['user', 'Profile', 'profile']
 ]
 
 function GeneralNav() {
@@ -54,10 +53,8 @@ function GeneralNav() {
     return (
         navs.map(([symbol, title, link], idx) => (
             <Nav className="my-1" key={idx}>
-                
                 <Link to={`${link}`} className={`text-${themeContrast1}`} style={{fontSize: fontsize}} >
                     <Image src={`/navbar/${symbol}.png`} className="mx-2" width={icosize} height={icosize}/>
-                    {/* <span className={`text-${themeContrast1} symbol`}>{symbol}</span> */}
                     {title}
                 </Link>
             </Nav>
