@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container } from 'react-bootstrap';
+import { Container, Image } from 'react-bootstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import './DragDrop.css';
 
@@ -80,12 +80,16 @@ export function ListItemDragDropFrame({
     if (isDragging) return (placeHolderComp);
     
     return (
-        <Container ref={dropRef} fluid className={`m-0 p-0 ${extraClass}`} >
-        {draggedDir === -1 ? placeHolderExp : null}
-        <Container  ref={dragRef} fluid className='m-0 p-0' >
-            {children}
-        </Container>
-        {draggedDir === 1 ? placeHolderExp : null}
+        <Container ref={dropRef} fluid className={`m-0 p-0 d-flex ${extraClass}`} >
+            <div ref={dragRef} className="drag-button d-flex flex-column justify-content-center">
+                <Image className='my-auto' src="/todos/drag.png" width={32} height={32} />
+            </div>
+            <Container fluid className='m-0 p-0 flex-grow-1' >
+                {draggedDir === -1 ? placeHolderExp : null}
+                {children}
+                {draggedDir === 1 ? placeHolderExp : null}
+            </Container>
         </Container>
     )
 }
+
