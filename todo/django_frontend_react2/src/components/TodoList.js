@@ -7,6 +7,7 @@ import { useAPITodoItem } from '../API/Hooks';
 import { ItemTypes } from '../Constants';
 import { ThemeContext } from '../context/Contexts';
 import { ListItemDragDropFrame } from './DragDrop';
+import FlippableButton from './FlippableButton';
 import LoadingErrorFrame from './LoadingErrorFrame';
 import './TodoList.css';
 
@@ -276,56 +277,41 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
      )
 }
 
-function CompletedButton({item, handleUpdate, time = 500}) {
+function CompletedButton({item, handleUpdate}) {
     const { completed } = item || {};
 
-    const [persist, setPersist] = useState(false);
-    const [_completed, setCompleted] = useState(completed);
-
-    const _handleUpdate = () => {
-        setPersist(true);
-        timeout(time/2).then(() => setCompleted(!completed));
-        timeout(time*2/3).then(() => handleUpdate({id: item.id, completed: !completed}));
-        timeout(time).then(() => setPersist(false));
+    const handleAsync = () => {
+        handleUpdate({id: item.id, completed: !completed});
     }
 
     return (
-        <Button 
-            onClick={_handleUpdate} 
-            variant={ _completed ? 'success' : 'outline-primary' }
-            className={`round-button-sm mx-2 ${persist ? 'flip' : ''}`}
-            >
-            {_completed  ? '✓' : '✗'}
-        </Button>
+        <FlippableButton
+            completed={completed}
+            offState='✗'
+            onState='✓'
+            onVariant='success'
+            handleAsync={handleAsync}
+            />
     )
 }
 
-function FavoriteButton({item, handleUpdate, time = 500}) {
+function FavoriteButton({item, handleUpdate}) {
     const { favorite } = item || {};
-    
-    const [persist, setPersist] = useState(false);
-    const [_favorite, setFavorite] = useState(favorite);
 
-    const _handleUpdate = () => {
-        setPersist(true);
-        timeout(time/2).then(() => setFavorite(!favorite));
-        timeout(time*2/3).then(() => handleUpdate({id: item.id, favorite: !favorite}));
-        timeout(time).then(() => setPersist(false));
+    const handleAsync = () => {
+        handleUpdate({id: item.id, favorite: !favorite});
     }
 
     return (
-        <Button
-            onClick={_handleUpdate}
-            variant={'outline-primary'}
-            className={`
-            ${_favorite ? 'text-warning' : ''}
-            round-button-sm mx-2 ${persist ? 'flip' : ''}
-            `}
-            >
-            <Image src={`/todos/star${_favorite ? '-full' : ''}.png`} width={16} height={16} />
-        </Button>
+        <FlippableButton
+            completed={favorite}
+            offState={<Image src={`/todos/star.png`} width={16} height={16} />}
+            onState={<Image src={`/todos/star-full.png`} width={16} height={16} />}
+            handleAsync={handleAsync}
+            />
     )
 }
+
 
 function EmptyTodoItem() {
     return (
