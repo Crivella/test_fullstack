@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap";
 import { useTheme } from "../context/Hooks";
-import './SidePanel.scss';
+import './SidePanel.css';
 
 
 
