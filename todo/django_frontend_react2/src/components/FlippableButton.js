@@ -20,7 +20,10 @@ export default function FlippableButton({
         setCompleted(on);
     }, [on]);
 
-    const _handleUpdate = () => {
+    const _handleUpdate = (e) => {
+        if (e) e.preventDefault();
+        if (e) e.stopPropagation();
+        
         setPersist(true);
         timeout(time/2).then(() => setCompleted(!on));
         if (handleAsync) timeout(time*2/3).then(() => handleAsync());

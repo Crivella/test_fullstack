@@ -160,7 +160,10 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         setMode(null);
     }
 
-    const _handleUpdate = () => {
+    const _handleUpdate = (e) => {
+        if (e) e.preventDefault();
+        if (e) e.stopPropagation();
+
         const data = {
             title: localTitle,
             description: localDescription,
@@ -171,6 +174,20 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
             handleUpdate({id, ...data});
         }
         setMode(null);
+    }
+
+    const handleCancel = (e) => {
+        if (e) e.preventDefault();
+        if (e) e.stopPropagation();
+
+        setMode(null);
+    }
+
+    const handleEdit = (e) => {
+        if (e) e.preventDefault();
+        if (e) e.stopPropagation();
+
+        setMode('edit');
     }
 
     const handleFormKeyDown = (e) => {
@@ -189,13 +206,13 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
 
     const buttonArrayEdit = () => (
         <>
-        <Button onClick={() => setMode(null)} onKeyDown={handleFormKeyDown} variant='danger' className='round-button-sm mx-2'>✗</Button>
+        <Button onClick={handleCancel} onKeyDown={handleFormKeyDown} variant='danger' className='round-button-sm mx-2'>✗</Button>
         <Button onClick={_handleUpdate} onKeyDown={handleFormKeyDown} variant='success' className='round-button-sm mx-2'>✓</Button>
         </>
     )
     const buttonArrayNormal = () => (
         <>
-        <Button onClick={() => setMode('edit')} variant='warning' className='round-button-sm mx-2'>✎</Button>
+        <Button onClick={handleEdit} variant='warning' className='round-button-sm mx-2'>✎</Button>
         {/* <Button as={Link} to={`/${user}/${id}`} variant={badgeColor} className='round-button-sm mx-2'>➤</Button> */}
         </>
     )
