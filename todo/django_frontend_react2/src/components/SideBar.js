@@ -27,9 +27,9 @@ export default function CustomNavbar() {
                 {user ? <LoggedInNav /> : <AnonNav />}
             </Nav>
             <Nav className="d-flex flex-column justify-content-end align-content-center">
-                {ThemeSwitch}
+                {ThemeSwitch({className: 'mx-auto'})}
                 {/* <Form className="d-flex flex-column justify-content-center"> */}
-                    {user ? <UserDropdown /> : <AnonDropdown />}
+                {user ? <UserDropdown /> : <AnonDropdown />}
                 {/* </Form> */}
             </Nav>
         </Navbar>
@@ -118,15 +118,16 @@ function UserDropdown() {
     const {setShowUserProfile} = useContext(ModalContext);
 
     return (
+        <>
         <DropdownButton 
-            className="mx-1" 
+            className="mx-1 d-none d-lg-block" 
             id="navbar-dropdown" 
             title={user} variant={theme}
             drop="up"
             >
             <Dropdown.Menu variant={theme}>
                 <Dropdown.Item as={Link} to={`${user}`} variant={theme}>
-                    My Lists
+                    <div className="d-none">My Lists</div>
                 </Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Item variant={theme} onClick={() => setShowUserProfile(true)}>Edit Profile</Dropdown.Item>
@@ -135,6 +136,24 @@ function UserDropdown() {
                 </Dropdown.Item>
             </Dropdown.Menu>
         </DropdownButton>
+        <DropdownButton
+            className="mx-1 d-lg-none" 
+            id="navbar-dropdown" 
+            title={'P'} variant={theme}
+            drop="up"
+            >
+            <Dropdown.Menu variant={theme}>
+                <Dropdown.Item as={Link} to={`${user}`} variant={theme}>
+                    <div className="d-none">My Lists</div>
+                </Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item variant={theme} onClick={() => setShowUserProfile(true)}>Edit Profile</Dropdown.Item>
+                <Dropdown.Item as={Link} to='/' onClick={logout}>
+                    Logout
+                </Dropdown.Item>
+            </Dropdown.Menu>
+        </DropdownButton>
+        </>
     )
 }
 
