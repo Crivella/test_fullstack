@@ -35,7 +35,6 @@ export default function CustomNavbar() {
 }
 
 const icosize = 32;
-const fontsize = '1.3rem';
 const navs = [
     ['home', 'Home', '/'],
     ['search', 'Explore', '/explore'],
@@ -43,7 +42,7 @@ const navs = [
 
 const userNavs = [
     ['tiles', 'My Lists', 'lists'],
-    ['star', 'Favorites', 'favorites'],
+    ['star', 'Favorite', 'favorites'],
     ['user', 'Profile', 'profile']
 ]
 
@@ -53,7 +52,7 @@ function GeneralNav() {
     return (
         navs.map(([symbol, title, link], idx) => (
             <Nav className="my-1" key={idx}>
-                <Link to={`${link}`} className={`text-${themeContrast1}`} style={{fontSize: fontsize}} >
+                <Link to={`${link}`} className={`text-${themeContrast1}`} >
                     <Image src={`/navbar/${symbol}.png`} className="mx-2" width={icosize} height={icosize}/>
                     {title}
                 </Link>
@@ -71,7 +70,7 @@ function LoggedInNav() {
     return (
         userNavs.map(([symbol, title, link], idx) => (
             <Nav className="my-1" key={idx}>
-                <Link to={`${user}/${link}`} className={`text-${themeContrast1}`} style={{fontSize: fontsize}}>
+                <Link to={`${user}/${link}`} className={`text-${themeContrast1}`}>
                 <Image src={`/navbar/${symbol}.png`} className="mx-2" width={icosize} height={icosize}/>
                     {/* <span className={`text-${themeContrast1} symbol`}>{symbol}</span> */}
                     {title}
