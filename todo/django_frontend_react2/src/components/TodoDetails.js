@@ -9,7 +9,7 @@ import { CompletedButton, FavoriteButton } from './FlippableButton';
 export default function TodoDetails() {
     const { active: id, setActive } = useContext(ActiveContext);
     const item = useAPITodoItem(id);
-    const { owner, title, updateItem } = item
+    const { owner, title, description, updateItem } = item
     
     const { theme, themeContrast1 } = useTheme();
 
@@ -34,6 +34,7 @@ export default function TodoDetails() {
             <p>{id}</p>
             <p>{owner}</p>
             <p>{title}</p>
+            <p>{description}</p>
         </Container>
     )
 }

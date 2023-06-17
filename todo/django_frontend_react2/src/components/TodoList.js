@@ -26,7 +26,6 @@ export default function TodoList({user, id}) {
      } = item;
 
      useEffect(() => {
-        console.log('LIST:', list);
         setList1(list.filter((item) => !item.completed));
         setList2(list.filter((item) => item.completed));
     }, [list]);
@@ -46,7 +45,7 @@ export default function TodoList({user, id}) {
 
     const getTitle = () => {
         if (id === undefined) return 'Lists';
-        if (id === 'fav') return 'Favorites';
+        if (id === 'favorites') return 'Favorites';
         return title;
     }
 
@@ -120,68 +119,18 @@ export default function TodoList({user, id}) {
 }
 
 function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
-    const { 
-        id, title, description, completed,
-        count_childrens, count_completed,
-     } = item || {};
+    const { id, completed } = item || {};
 
      const { active, setActive } = useContext(ActiveContext);
 
-     const { themeContrast1 } = useContext(ThemeContext);
-
      const [mode, setMode] = useState(null);
-     const [badgeColor, setBadgeColor] = useState('warning'); 
 
-     const [localTitle, setLocalTitle] = useState('');
-     const [localDescription, setLocalDescription] = useState('');
-
-     useEffect(() => {
-        setLocalTitle(title);
-    }, [title]);
-
-    useEffect(() => {
-        setLocalDescription(description);
-    }, [description]);
-
-    useEffect(() => {
-        if (count_childrens) {
-            if (count_childrens === count_completed) {
-                setBadgeColor('success');
-            } else {
-                setBadgeColor('primary');
-            }
-        } else {
-            setBadgeColor('secondary');
-        }
-    }, [count_childrens, count_completed]);
-
-    const handelEscape = () => {
-        if (handleAdd !== undefined) {
-            handleAdd(null);
-        }
-        setMode(null);
-    }
-
-    const _handleUpdate = (e) => {
-        if (e) e.preventDefault();
-        if (e) e.stopPropagation();
-
-        const data = {
-            title: localTitle,
-            description: localDescription,
-        }
+    const _handleUpdate = (data) => {
         if (handleAdd !== undefined) {
             handleAdd(data);
         } else {
-            handleUpdate({id, ...data});
+            if (data !== null) handleUpdate({id, ...data});
         }
-        setMode(null);
-    }
-
-    const handleCancel = (e) => {
-        if (e) e.preventDefault();
-        if (e) e.stopPropagation();
-
         setMode(null);
     }
 
@@ -190,49 +139,6 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         if (e) e.stopPropagation();
 
         setMode('edit');
-    }
-
-    const handleFormKeyDown = (e) => {
-        switch (e.key) {
-            case 'Enter':
-                _handleUpdate();
-                break;
-            case 'Escape':
-                handelEscape(null);
-                setMode(null);
-                break;
-            default:
-                break;
-        }
-    }
-
-    const buttonArrayEdit = () => (
-        <>
-        <Button onClick={handleCancel} onKeyDown={handleFormKeyDown} variant='danger' className='round-button-sm mx-2'>✗</Button>
-        <Button onClick={_handleUpdate} onKeyDown={handleFormKeyDown} variant='success' className='round-button-sm mx-2'>✓</Button>
-        </>
-    )
-    const buttonArrayNormal = () => (
-        <>
-        <Button onClick={handleEdit} variant='warning' className='round-button-sm mx-2'>✎</Button>
-        {/* <Button as={Link} to={`/${user}/${id}`} variant={badgeColor} className='round-button-sm mx-2'>➤</Button> */}
-        </>
-    )
-    const getButtonArray = () => {
-        if (mode === 'edit' || id === undefined) return buttonArrayEdit();
-        return buttonArrayNormal();
-    }
-
-    const renderDescription = () => {
-        if (mode !== null) return (<></>)
-
-        return (
-            <Tooltip id='tooltip-description' placement='bottom' className='in' style={{opacity: 1}}>
-                <div className='tooltip-inner'>
-                    {description}
-                </div>
-            </Tooltip>
-        )
     }
 
     const onClick = () => {
@@ -246,7 +152,6 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
     }
 
     return (
-        <>
         <ListGroup.Item 
             className={`
                 d-flex justify-content-between list-item px-0 
@@ -260,58 +165,157 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
 
             {
                 mode === 'edit' || id === undefined ?
-                <Container>
-                    <Form.Control
-                        type='text'
-                        value={localTitle || ''}
-                        onChange={(e) => setLocalTitle(e.target.value)}
-                        onKeyDown={handleFormKeyDown}
-                        // onBlur={() => setEditing(null)}
-                        autoFocus
-                        />
-                    <Form.Control
-                        type='textarea'
-                        value={localDescription || ''}
-                        onChange={(e) => setLocalDescription(e.target.value)}
-                        onKeyDown={handleFormKeyDown}
-                        placeholder='Description'
-                        />
-                </Container>
+                <TodoForm item={item} handleUpdate={_handleUpdate} />
                 :
+                <>
                 <div>
                     <CompletedButton item={item} handleUpdate={handleUpdate} />
-                    <Form.Text>
-                        <Container
-                            className={`bg-${badgeColor} m-0 px-2 py-2`}
-                            bg={badgeColor}
-                            as={Link} to={`/${user}/${id}`}
-                            style={{borderRadius: 5}}
-                            />
-                        <div className={`d-inline-flex text-${themeContrast1}`} style={{inlineSize: '640px'}}>
-                            {title}
-                            {
-                                description && (
-                                    <OverlayTrigger
-                                        placement='bottom'
-                                        delay={{ show: 250, hide: 100 }}
-                                        overlay={renderDescription()}
-                                    >
-                                        <Button variant='outline-primary' className='round-button-sm mx-2'>?</Button>
-                                    </OverlayTrigger>
-                                )
-                            }
-                        </div>
-                    </Form.Text>
+                    <TodoNormal item={item} user={user} />
                 </div>
+                <Form.Group controlId='formButtonArray' className='d-flex'>
+                    {
+                        active === id && 
+                        <Button onClick={handleEdit} variant='warning' className='round-button-sm mx-2'>
+                            ✎
+                        </Button>
+                    }
+                </Form.Group>
+                </>
 
             }
-          
-            <Form.Group controlId='formButtonArray' className='d-flex'>
-                {active === id && getButtonArray()}
-            </Form.Group>
+        
         </ListGroup.Item>
-        </>
      )
+}
+
+function ChildBadge({ item, user }) {
+    const {id, count_childrens, count_completed} = item || {};
+    const [badgeColor, setBadgeColor] = useState('secondary');
+
+    useEffect(() => {
+        if (count_childrens) {
+            if (count_childrens === count_completed) {
+                setBadgeColor('success');
+            } else {
+                setBadgeColor('primary');
+            }
+        } else {
+            setBadgeColor('secondary');
+        }
+    }, [count_childrens, count_completed]);
+
+    return (
+        <Container
+            className={`bg-${badgeColor} m-0 px-2 py-2`}
+            as={Link} to={`/${user}/${id}`}
+            onClick={(e) => e.stopPropagation()}
+            bg={badgeColor}
+            style={{borderRadius: 5}}
+            />
+    )
+}
+
+function TodoNormal({item, user,}) {
+    const { title, description } = item || {};
+
+    const { themeContrast1 } = useContext(ThemeContext);
+
+    const renderDescription = () => {
+        return (
+            <Tooltip id='tooltip-description' placement='bottom' className='in' style={{opacity: 1}}>
+                <div className='tooltip-inner'>
+                    {description}
+                </div>
+            </Tooltip>
+        )
+    }
+
+    return (
+        <Form.Text>
+            <ChildBadge item={item} user={user} />
+            <div className={`d-inline-flex text-${themeContrast1}`} style={{inlineSize: '640px'}}>
+                {title}
+                {
+                    description && (
+                        <OverlayTrigger
+                            placement='bottom'
+                            delay={{ show: 250, hide: 100 }}
+                            overlay={renderDescription()}
+                        >
+                            <Button variant='outline-primary' className='round-button-sm mx-2'>?</Button>
+                        </OverlayTrigger>
+                    )
+                }
+            </div>
+        </Form.Text>
+    )
+}
+
+function TodoForm({ item, handleUpdate }) {
+    const { title, description } = item || {};
+    const [localTitle, setLocalTitle] = useState('');
+    const [localDescription, setLocalDescription] = useState('');
+
+    useEffect(() => {
+        setLocalTitle(title);
+    }, [title]);
+
+    useEffect(() => {
+        setLocalDescription(description);
+    }, [description]);
+    
+    const handleCancel = () => {
+        handleUpdate(null);
+    }
+    
+    const handleFormKeyDown = (e) => {
+        switch (e.key) {
+            case 'Escape':
+                handleUpdate(null);
+                break;
+            default:
+                break;
+        }
+    }
+
+    const onSubmit = (e) => {
+        e.preventDefault();
+
+        const data = {
+            title: localTitle,
+            description: localDescription,
+        }
+        handleUpdate(data);
+    }
+
+    return (
+        <Form 
+            className='d-flex justify-content-between w-100'
+            onSubmit={onSubmit}>
+            <div className='flex-grow-1'>
+            <Form.Control
+                type='text'
+                value={localTitle || ''}
+                onChange={(e) => setLocalTitle(e.target.value)}
+                onKeyDown={handleFormKeyDown}
+                // onBlur={() => setEditing(null)}
+                placeholder='Title'
+                autoFocus
+                />
+            <Form.Control
+                as='textarea'
+                value={localDescription || ''}
+                onChange={(e) => setLocalDescription(e.target.value)}
+                onKeyDown={handleFormKeyDown}
+                placeholder='Description'
+                />
+            </div>
+            <div>
+            <Button onClick={handleCancel} onKeyDown={handleFormKeyDown} variant='danger' className='round-button-sm mx-2'>✗</Button>
+            <Button type='submit' onKeyDown={handleFormKeyDown} variant='success' className='round-button-sm mx-2'>✓</Button>
+            </div>
+        </Form>
+    )
 }
 
 function EmptyTodoItem() {
@@ -348,12 +352,14 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function TrashCan({onDelete}) {
     const {themeContrast1} = useContext(ThemeContext);
+    const { setActive } = useContext(ActiveContext);
     // const { setActive, setFormAction } = useContext(TodoAPIContext);
     const [canDrop, setCanDrop] = useState(false);
 
     const [{_canDrop, extraClass}, dropRef] = useDrop(() => ({
         accept: [ItemTypes.CARD, ItemTypes.CardCompleted],
         drop: (item, monitor) => {
+            setActive(null);
             onDelete(item);
         },
         collect: monitor => ({

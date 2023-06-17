@@ -11,7 +11,6 @@ axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
 const getTodoData = async ({id, signal}) => {
-    console.log('getTodoData', id);
     const strId = id === undefined ? '' : id + '/';
     const {data} = await axios.get(`${todoEndpoint}/${strId}`, {
         headers: { 'Content-Type': 'application/json' },
@@ -72,11 +71,13 @@ export function useAPITodoItem(id) {
         onSettled: ({data}, variables, context) => {
             queryClient.invalidateQueries(['todos', user, String(data.id)]);
             queryClient.invalidateQueries(['todos', user, String(id)]);
-            queryClient.invalidateQueries(['todos', user, String(parent)]);
-            queryClient.setQueryData(['todos', user, String(parent)], (old) => ({
-                ...old, 
-                ordered_childrens: old.ordered_childrens.map((item) => item.id === data.id ? data : item),
-            }));
+            if (parent) {
+                queryClient.invalidateQueries(['todos', user, String(parent)]);
+                queryClient.setQueryData(['todos', user, String(parent)], (old) => ({
+                    ...old, 
+                    ordered_childrens: old.ordered_childrens.map((item) => item.id === data.id ? data : item),
+                }));
+            }
         },
         });
 
