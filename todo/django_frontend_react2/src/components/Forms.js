@@ -38,7 +38,7 @@ export function LoginForm ({ onSubmit }) {
                 <Row className="g-3">
                     <Form.Group as={Col} className="col-md-4" controlId="formBasicUsername">
                         <Form.Label>Username</Form.Label>
-                        <Form.Control type="user" placeholder="Username" ref={Username} required />
+                        <Form.Control type="text" placeholder="Username" ref={Username} required />
                         <Form.Control.Feedback type="invalid">
                             Please provide a valid username.
                         </Form.Control.Feedback>
