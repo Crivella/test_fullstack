@@ -43,7 +43,8 @@ const navs = [
 const userNavs = [
     ['tiles', 'My Lists', 'lists'],
     ['star', 'Favorite', 'favorites'],
-    ['user', 'Profile', 'profile']
+    ['share', 'Shared', 'shared'],
+    ['user', 'Profile', 'profile'],
 ]
 
 function GeneralNav() {

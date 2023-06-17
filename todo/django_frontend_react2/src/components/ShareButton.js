@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Container, Form, Image, ListGroup, Overlay, Popover } from "react-bootstrap";
+import { Button, Form, Image, ListGroup, Overlay, Popover } from "react-bootstrap";
 import { useAPIUser } from "../API/Hooks";
 import FlippableButton from "./FlippableButton";
 
 export default function ShareButton({ item }) {
     const [variant, setVariant] = useState('outline-primary'); // ['outline-primary', 'success'
+    const [src, setSrc] = useState('/todos/share.png'); // ['/todos/share.png', '/todos/share2.png'
     const [target, setTarget] = useState(null);
     const [show, setShow] = useState(false);
 
     useEffect(() => {
-        if (item.sharedWith.length > 0) setVariant('success');
-        else setVariant('outline-primary');
+        const check = item.sharedWith.length > 0;
+        check ? setSrc('/todos/share-full.png') : setSrc('/todos/share.png');
+        check ? setVariant('success') : setVariant('outline-primary');
     }, [item]);
 
     const ref = useRef(null);
@@ -25,9 +27,9 @@ export default function ShareButton({ item }) {
     }
 
     return (
-        <Container ref={ref} className="p-0 m-0">
-            <Button className="mx-1"  onClick={onClick} variant={variant}>
-                <Image src='/todos/share.png' width={20} height={20}/>
+        <div ref={ref}>
+            <Button className="mx-1 round-button-sm"  onClick={onClick} variant={variant}>
+                <Image src={src} width={20} height={20}/>
             </Button>
             <Overlay 
                 target={target} container={ref} 
@@ -42,7 +44,7 @@ export default function ShareButton({ item }) {
                     </Popover.Body>
                 </Popover>
             </Overlay>
-        </Container>
+        </div>
     )
 }
 

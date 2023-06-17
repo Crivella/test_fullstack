@@ -12,6 +12,12 @@ import { CompletedButton, FavoriteButton } from './FlippableButton';
 import LoadingErrorFrame from './LoadingErrorFrame';
 import './TodoList.css';
 
+const noadd = [
+    'favorites',
+    'shared',
+    'profile',
+]
+
 export default function TodoList({id, user}) {
     const item = useAPITodoItem(id, user);
 
@@ -68,14 +74,14 @@ export default function TodoList({id, user}) {
                     {getTitle()}
                     </p>
                     { 
-                        (id !== undefined && id !== 'favorites' ) 
+                        (id !== undefined && !noadd.includes(id) ) 
                         && 
                         <FavoriteButton item={item} handleUpdate={updateItem} />
                     }
                 </ListGroup.Item>
 
                 {
-                    id !== 'favorites'
+                    !noadd.includes(id)
                     &&
                     <ListGroup.Item className='d-flex justify-content-center'>
                         <Button hidden={user !== loggedUser} onClick={() => setAdding(true)} variant='success' className='round-button-sm mx-2'>+</Button>

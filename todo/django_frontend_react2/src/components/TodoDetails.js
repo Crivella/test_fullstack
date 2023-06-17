@@ -24,12 +24,17 @@ export default function TodoDetails({ id, user }) {
                     <Button as={Link} to={`/${owner}/${id}`} className="mr-1" variant="outline-primary">
                         <Image src='/todos/details.png' width={20} height={20}/>
                     </Button>
-                    <ShareButton item={item} />
                 </Container>
                 <Container className="p-0 m-0 d-flex justify-content-end">
-                    <CompletedButton item={item} handleUpdate={updateItem} />
-                    <PrivateButton item={item} handleUpdate={updateItem} />
-                    <FavoriteButton item={item} handleUpdate={updateItem} />
+                    {
+                    owner === user &&
+                    <>
+                        <CompletedButton item={item} handleUpdate={updateItem} />
+                        <ShareButton item={item} />
+                        <PrivateButton item={item} handleUpdate={updateItem} />
+                        <FavoriteButton item={item} handleUpdate={updateItem} />
+                    </>
+                    }
                 </Container>
             </Container>
             <p>{id}</p>

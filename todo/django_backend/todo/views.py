@@ -26,7 +26,11 @@ def index(request):
 class OwnerMixin:
     def get_queryset(self):
         q = super().get_queryset()
-        q = q.filter(Q(private=False) | Q(owner=self.request.user.id))
+        q = q.filter(
+            Q(private=False) | 
+            Q(owner=self.request.user.id) | 
+            Q(shared=self.request.user)
+            )
         return q
     
 class SortedMixin:
@@ -61,6 +65,13 @@ class TodoView(SortedMixin, OwnerMixin, viewsets.ModelViewSet):
         print(list(request.GET.items()))
         user = request.GET.get('user', request.user.username)
         q = super().get_queryset()
+
+        if pk.lower() == 'shared':
+            print('SHARED', request.user, type(request.user.username))
+            print(q.all())
+            q = q.filter(shared=request.user)
+            return JsonResponse({'ordered_childrens': TodoSerializer(q, many=True).data})
+        
         q = q.filter(owner__username=user)
         if pk.lower() == 'favorites':
             print('FAVORITES')
