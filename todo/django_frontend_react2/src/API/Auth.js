@@ -39,6 +39,7 @@ export default function APIAuthProvider({children, endpoint=process.env.REACT_AP
         onSuccess: (data) => {
             queryClient.setQueryData(['user'], '');
             queryClient.invalidateQueries(['user']);
+            queryClient.invalidateQueries([user.data]);
         },
     });
 
