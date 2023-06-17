@@ -76,3 +76,21 @@ export function FavoriteButton({item, handleUpdate}) {
             />
     )
 }
+
+export function PrivateButton({item, handleUpdate}) {
+    const { isPrivate } = item || {};
+
+    const handleAsync = () => {
+        handleUpdate({id: item.id, private: !isPrivate});
+    }
+
+    return (
+        <FlippableButton
+            on={isPrivate}
+            offState={<Image src={`/todos/visible.png`} width={16} height={16} />}
+            onState={<Image src={`/todos/lock.png`} width={16} height={16} />}
+            onVariant='success'
+            handleAsync={handleAsync}
+            />
+    )
+}

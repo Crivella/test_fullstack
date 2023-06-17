@@ -25,6 +25,8 @@ class TodoItem(Owned):
     completed = models.BooleanField(default=False)
     favorite = models.BooleanField(default=False)
 
+    private = models.BooleanField(default=False)
+
     parent = models.ForeignKey(
         'self',
         related_name='childrens',

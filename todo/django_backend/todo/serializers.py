@@ -37,7 +37,7 @@ class TodoSerializer(OwnedSerializer):
         model = TodoItem
         fields = (
             'id', 'owner', 'title', 'description', 
-            'favorite', 'completed', 
+            'favorite', 'completed', 'private',
             'parent', 'map', 
             'ordered_childrens', 'count_childrens', 'count_completed', 'first_completed'
             )
@@ -59,6 +59,8 @@ class TodoSerializer(OwnedSerializer):
         print('CREATE:', validated_data)
         parent_id = validated_data.pop('parent', {'id': None})['id']
         todo = TodoItem.objects.create(parent_id=parent_id, **validated_data)
+        todo.private = todo.parent.private
+        todo.save()
         if parent_id is not None:
             create_or_update_map(todo.parent, [todo.id], prepend=True)
         return todo  

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { ActiveContext } from "../API/Active";
 import { useAPITodoItem } from "../API/Hooks";
 import { useTheme } from "../context/Hooks";
-import { CompletedButton, FavoriteButton } from './FlippableButton';
+import { CompletedButton, FavoriteButton, PrivateButton } from './FlippableButton';
 
 export default function TodoDetails() {
     const { active: id, setActive } = useContext(ActiveContext);
@@ -28,6 +28,7 @@ export default function TodoDetails() {
                 </Container>
                 <Container className="p-0 m-0 d-flex justify-content-end">
                     <CompletedButton item={item} handleUpdate={updateItem} />
+                    <PrivateButton item={item} handleUpdate={updateItem} />
                     <FavoriteButton item={item} handleUpdate={updateItem} />
                 </Container>
             </Container>

@@ -26,7 +26,7 @@ def index(request):
 class OwnerMixin:
     def get_queryset(self):
         q = super().get_queryset()
-        q = q.filter(owner=self.request.user.id)
+        q = q.filter(Q(private=False) | Q(owner=self.request.user.id))
         return q
     
 class SortedMixin:
@@ -75,11 +75,16 @@ class TodoView(SortedMixin, OwnerMixin, viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
     
 
-class TodoMapView(OwnerMixin, viewsets.ModelViewSet):
+class TodoMapView(viewsets.ModelViewSet):
     serializer_class = TodoMapSerializer
     queryset = TodoListMap.objects.all()
 
     permission_classes = [IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        q = super().get_queryset()
+        q = q.filter(owner=self.request.user.id)
+        return q
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

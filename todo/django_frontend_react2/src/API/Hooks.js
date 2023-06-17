@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { useCallback, useContext, useEffect, useState } from 'react';
-import { AuthContext } from './Auth';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -29,6 +28,7 @@ export function useAPITodoItem(id, user) {
     const [description, setDescription] = useState('');
     const [owner, setOwner] = useState(null); 
     const [favorite, setFavorite] = useState(false);
+    const [isPrivate, setIsPrivate] = useState(false);
     const [completed, setCompleted] = useState(false);
     const [parent, setParent] = useState(null);
     const [countChildrens, setCountChildrens] = useState(0);
@@ -50,6 +50,7 @@ export function useAPITodoItem(id, user) {
             setDescription(item.data.description || '');
             setOwner(item.data.owner || null);
             setFavorite(item.data.favorite || false);
+            setIsPrivate(item.data.private || false);
             setCompleted(item.data.completed || false);
             setParent(item.data.parent || null);
             setCountChildrens(item.data.count_childrens || 0);
@@ -152,6 +153,7 @@ export function useAPITodoItem(id, user) {
         'completed': completed,
         'parent': parent,
         'favorite': favorite,
+        'isPrivate': isPrivate,
         'count_childrens': countChildrens,
         'count_completed': countCompleted,
         'first_completed': firstCompleted,
