@@ -18,7 +18,7 @@ export default function TodoDetails({ id, user }) {
             text-${themeContrast1}
             d-flex flex-column
             `}>
-            <Container className="p-0 m-0 d-flex justify-content-xl-between">
+            <Container className="p-0 mt-2 d-flex justify-content-xl-between">
                 <Container className="p-0 m-0 d-flex">
                     <Button as={Link} to={`/${owner}/${id}`} variant="outline-primary">
                         <Image src='/todos/details.png' width={20} height={20}/>

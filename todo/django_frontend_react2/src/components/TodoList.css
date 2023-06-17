@@ -55,13 +55,13 @@
 
 .list-container {
     overflow: auto;
-    /* margin: auto; */
-    /* width: 6%; */
-    /* min-width: 700px;
-    max-width: 900px; */
     width: 800px;
-    height: 85%;
-    /* display: flex; */
+}
+@media (max-width: 1200px) {
+    .list-container {
+        overflow: auto;
+        width: 100%;
+    }
 }
 
 .list-item {

@@ -19,6 +19,7 @@ export default function SidePanel({ user }) {
                 side-panel 
                 d-flex flex-column
                 m-0 p-0
+                ${active ? '' : 'd-none'}
                 bg-${theme === 'dark' ? 'black' : 'secondary'}`
             }
             >
