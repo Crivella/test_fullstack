@@ -24,8 +24,10 @@ class TodoItem(Owned):
     description = models.TextField(null=True, blank=True)
     completed = models.BooleanField(default=False)
     favorite = models.BooleanField(default=False)
-
     private = models.BooleanField(default=False)
+
+    # editors = models.ManyToManyField(User, related_name='%(class)s_editor', blank=True)
+    shared = models.ManyToManyField(User, related_name='%(class)s_shared', blank=True)
 
     parent = models.ForeignKey(
         'self',

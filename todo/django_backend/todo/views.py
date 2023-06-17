@@ -89,8 +89,20 @@ class TodoMapView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-
-
 class UserView(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+def share_todo(request: HttpRequest):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        print(data)
+        user = User.objects.get(username=data['user'])
+        todo = TodoItem.objects.get(pk=data['todo'])
+        if todo.owner != request.user:
+            return JsonResponse({'error': 'You are not the owner of this todo'}, status=403)
+        todo.shared.add(user)
+        todo.save()
+        return JsonResponse({'info': 'Todo shared successfully'}, status=200)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+

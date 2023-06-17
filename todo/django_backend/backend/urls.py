@@ -28,6 +28,7 @@ router.register(r'user', todo_views.UserView, 'api_user')
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path("api/todo/map/", todo_views.TodoMapView),
+    path("api/share/", todo_views.share_todo),
     path("api/", include(router.urls)),
     path('todo/', include('todo.urls')),
     path('accounts/', include('accounts.urls')),

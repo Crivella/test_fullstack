@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { useAPITodoItem } from "../API/Hooks";
 import { useTheme } from "../context/Hooks";
 import { CompletedButton, FavoriteButton, PrivateButton } from './FlippableButton';
+import ShareButton from "./ShareButton";
 
 export default function TodoDetails({ id, user }) {
     // const { active: id, setActive } = useContext(ActiveContext);
     const item = useAPITodoItem(id, user);
-    const { owner, title, description, updateItem } = item
+    const { owner, title, description, updateItem, shareItem } = item
     
     const { theme, themeContrast1 } = useTheme();
 
@@ -20,9 +21,10 @@ export default function TodoDetails({ id, user }) {
             `}>
             <Container className="p-0 mt-2 d-flex justify-content-xl-between">
                 <Container className="p-0 m-0 d-flex">
-                    <Button as={Link} to={`/${owner}/${id}`} variant="outline-primary">
+                    <Button as={Link} to={`/${owner}/${id}`} className="mr-1" variant="outline-primary">
                         <Image src='/todos/details.png' width={20} height={20}/>
                     </Button>
+                    <ShareButton handleShare={shareItem} />
                 </Container>
                 <Container className="p-0 m-0 d-flex justify-content-end">
                     <CompletedButton item={item} handleUpdate={updateItem} />
