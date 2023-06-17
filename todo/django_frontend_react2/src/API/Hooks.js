@@ -10,18 +10,19 @@ axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
-const getTodoData = async ({id, signal}) => {
+const getTodoData = async ({id, user, signal}) => {
     const strId = id === undefined ? '' : id + '/';
     const {data} = await axios.get(`${todoEndpoint}/${strId}`, {
         headers: { 'Content-Type': 'application/json' },
+        params: { user: user },
         signal
     });
     return data;
 }
 
-export function useAPITodoItem(id) {
+export function useAPITodoItem(id, user) {
     const queryClient = useQueryClient();
-    const { user } = useContext(AuthContext);
+    // const { user } = useContext(AuthContext);
 
     const [list, setList] = useState([]);
     const [title, setTitle] = useState('');
@@ -37,7 +38,7 @@ export function useAPITodoItem(id) {
 
     const item = useQuery({
         queryKey: ['todos', user, String(id)],
-        queryFn: ({ signal }) => getTodoData({id, signal}),
+        queryFn: ({ signal }) => getTodoData({id, user, signal}),
         enabled: user !== undefined,
         // placeholderData: {id: id},
         staleTime: 1000 * 60 * 5,

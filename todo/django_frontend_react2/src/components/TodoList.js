@@ -12,8 +12,8 @@ import { CompletedButton, FavoriteButton } from './FlippableButton';
 import LoadingErrorFrame from './LoadingErrorFrame';
 import './TodoList.css';
 
-export default function TodoList({user, id}) {
-    const item = useAPITodoItem(id);
+export default function TodoList({id, user}) {
+    const item = useAPITodoItem(id, user);
 
     const [list1, setList1] = useState([]);
     const [list2, setList2] = useState([]);
