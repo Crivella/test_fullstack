@@ -43,6 +43,10 @@ class TodoItem(Owned):
         return list(self.child_map.seq)
     
     @property
+    def shared_with(self):
+        return [_.username for _ in self.shared.all()]
+    
+    @property
     def ordered_childrens(self):
         fields = ['id', 'title', ('owner', 'owner__username'), 'description', 'completed', 'count_childrens', 'count_completed']
         app = [self.childrens.get(pk=pk) for pk in self.map]

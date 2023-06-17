@@ -9,6 +9,8 @@ axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.withCredentials = true
 
+const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const getTodoData = async ({id, user, signal}) => {
     const strId = id === undefined ? '' : id + '/';
     const {data} = await axios.get(`${todoEndpoint}/${strId}`, {
@@ -19,11 +21,10 @@ const getTodoData = async ({id, user, signal}) => {
     return data;
 }
 
-const share = async ({id, user}) => {
-    console.log('SHARE:', id, user);
+const share = async ({id, username}) => {
     axios.post(`${APIendpoint}/share/`, {
          todo: id, 
-         user: user
+         user: username
     });
 }
 
@@ -39,6 +40,7 @@ export function useAPITodoItem(id, user) {
     const [isPrivate, setIsPrivate] = useState(false);
     const [completed, setCompleted] = useState(false);
     const [parent, setParent] = useState(null);
+    const [sharedWith, setSharedWith] = useState([])
     const [countChildrens, setCountChildrens] = useState(0);
     const [countCompleted, setCountCompleted] = useState(0);
     const [firstCompleted, setFirstCompleted] = useState(null);
@@ -61,6 +63,7 @@ export function useAPITodoItem(id, user) {
             setIsPrivate(item.data.private || false);
             setCompleted(item.data.completed || false);
             setParent(item.data.parent || null);
+            setSharedWith(item.data.shared_with || []);
             setCountChildrens(item.data.count_childrens || 0);
             setCountCompleted(item.data.count_completed || 0);
             setFirstCompleted(item.data.first_completed || 0);
@@ -124,7 +127,6 @@ export function useAPITodoItem(id, user) {
         });
 
     const deleteItem = useCallback(async (data) => {
-        console.log('DELETE:', data);
         await deleteMutation.mutateAsync(data);
     }, [deleteMutation]);
 
@@ -153,9 +155,10 @@ export function useAPITodoItem(id, user) {
         });
     }, [item.data, updateItem]);
 
-    const shareItem = useCallback(async (user) => {
-        await share({id, user});
-    }, [id]);
+    const shareItem = useCallback(async (username) => {
+        await share({id, username});
+        timeout(100).then(() => queryClient.invalidateQueries(['todos', user, String(id)]));
+    }, [id, queryClient, user]);
 
     return {
         'id': id,
@@ -166,6 +169,7 @@ export function useAPITodoItem(id, user) {
         'parent': parent,
         'favorite': favorite,
         'isPrivate': isPrivate,
+        'sharedWith': sharedWith,
         'count_childrens': countChildrens,
         'count_completed': countCompleted,
         'first_completed': firstCompleted,

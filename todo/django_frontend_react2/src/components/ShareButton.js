@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Container, Form, Image, ListGroup, Overlay, Popover } from "react-bootstrap";
 import { useAPIUser } from "../API/Hooks";
+import FlippableButton from "./FlippableButton";
 
-export default function ShareButton({ handleShare }) {
-
+export default function ShareButton({ item }) {
+    const [variant, setVariant] = useState('outline-primary'); // ['outline-primary', 'success'
     const [target, setTarget] = useState(null);
     const [show, setShow] = useState(false);
+
+    useEffect(() => {
+        if (item.sharedWith.length > 0) setVariant('success');
+        else setVariant('outline-primary');
+    }, [item]);
 
     const ref = useRef(null);
 
@@ -15,14 +21,12 @@ export default function ShareButton({ handleShare }) {
     };
 
     const handleSubmit = (value) => {
-        console.log('handleSubmit');
         setShow(false);
-        handleShare(value);
     }
 
     return (
-        <Container ref={ref} className="p-0 m-0 ">
-            <Button className="mx-1"  onClick={onClick} >
+        <Container ref={ref} className="p-0 m-0">
+            <Button className="mx-1"  onClick={onClick} variant={variant}>
                 <Image src='/todos/share.png' width={20} height={20}/>
             </Button>
             <Overlay 
@@ -34,7 +38,7 @@ export default function ShareButton({ handleShare }) {
                 >
                 <Popover id="popover-contained">
                     <Popover.Body>
-                        <UserForm handleSubmit={handleSubmit} />
+                        <UserForm item={item} handleSubmit={handleSubmit} />
                     </Popover.Body>
                 </Popover>
             </Overlay>
@@ -42,31 +46,33 @@ export default function ShareButton({ handleShare }) {
     )
 }
 
-function UserForm({ handleSubmit }) {
+function UserForm({ item, handleSubmit }) {
     const users = useAPIUser();
 
     return (
-        <AutocompleteField items={users} handleSubmit={handleSubmit} />
+        <AutocompleteField item={item} items={users} handleSubmit={handleSubmit} />
     )
 }
 
-function AutocompleteField({items = [], handleSubmit}) {
+function AutocompleteField({item, items = [], handleSubmit}) {
+    const { owner, sharedWith, shareItem } = item || {}
     const [active, setActive] = useState(null); // [id, username
     const [value, setValue] = useState('');
     const [flist, setFlist] = useState([]);
+    const [slist, setSlist] = useState([]); // [id, username
 
     useEffect(() => {
-        if (value === '') setFlist([...items]);
-        else {
-            setFlist(items.filter((item) => item.username.startsWith(value)));
-        }
-    }, [value, items]);
+        const res = items.filter((item) => item.username !== owner);
+        setSlist(res.filter((item) => sharedWith.includes(item.username)));
+        setFlist(res
+            .filter((item) => !sharedWith.includes(item.username))
+            .filter((item) => item.username.includes(value))
+            );
+    }, [value, items, owner, sharedWith]);
 
     const onSubmit = (e) => {
         e.preventDefault();
-        console.log('onSubmit');
-        console.log(value);
-        console.log(items);
+        shareItem(value);
         handleSubmit(value);
     }
 
@@ -105,8 +111,19 @@ function AutocompleteField({items = [], handleSubmit}) {
         <Form onSubmit={onSubmit}>
             <ListGroup>
                 {flist.map((user,idx) => (
-                    <ListGroup.Item key={user.id} disabled active={active === idx}>
+                    <ListGroup.Item key={user.id} active={active === idx}>
+                        <div className="d-flex justify-content-between">
                         {user.username}
+                        <ShareToUserButton item={item} user={user.username} />
+                        </div>
+                    </ListGroup.Item>
+                ))}
+                {slist.map((user,idx) => (
+                    <ListGroup.Item key={user.id} active={active === idx}>
+                        <div className="d-flex justify-content-between">
+                        {user.username}
+                        <ShareToUserButton item={item} user={user.username} />
+                        </div>
                     </ListGroup.Item>
                 ))}
             </ListGroup>
@@ -117,5 +134,31 @@ function AutocompleteField({items = [], handleSubmit}) {
                 onKeyDown={onKeydown}
                 />
         </Form>
+    )
+}
+
+function ShareToUserButton({ item, user }) {
+    const { sharedWith, shareItem } = item || {};
+
+    const [isShared, setIsShared] = useState(false);
+
+    useEffect(() => {
+        setIsShared(sharedWith.includes(user));
+    }, [sharedWith, user]);
+
+    const handleAsync = () => {
+        shareItem(user);
+    }
+
+    return (
+        <FlippableButton 
+            on={isShared}
+            offState="→"
+            onState="→"
+            onVariant='success'
+            handleAsync={handleAsync}
+            >
+            {user}
+        </FlippableButton>
     )
 }

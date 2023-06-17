@@ -101,7 +101,10 @@ def share_todo(request: HttpRequest):
         todo = TodoItem.objects.get(pk=data['todo'])
         if todo.owner != request.user:
             return JsonResponse({'error': 'You are not the owner of this todo'}, status=403)
-        todo.shared.add(user)
+        if user not in todo.shared.all():
+            todo.shared.add(user)
+        else:
+            todo.shared.remove(user)
         todo.save()
         return JsonResponse({'info': 'Todo shared successfully'}, status=200)
     return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -28,6 +28,7 @@ class TodoSerializer(OwnedSerializer):
     count_completed = serializers.ReadOnlyField()
     first_completed = serializers.ReadOnlyField()
     ordered_childrens = serializers.ReadOnlyField()
+    shared_with = serializers.ReadOnlyField()
     owner = serializers.ReadOnlyField(source='owner.username')
     parent = serializers.IntegerField(source='parent.id', required=False)
     map = serializers.JSONField(required=False, source='child_map.seq')
@@ -39,6 +40,7 @@ class TodoSerializer(OwnedSerializer):
             'id', 'owner', 'title', 'description', 
             'favorite', 'completed', 'private',
             'parent', 'map', 
+            'shared_with',
             'ordered_childrens', 'count_childrens', 'count_completed', 'first_completed'
             )
 
