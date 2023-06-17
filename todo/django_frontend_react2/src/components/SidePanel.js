@@ -14,11 +14,11 @@ export default function SidePanel({ user }) {
     
     return (
         <Container 
-            // fluid 
+            fluid 
             className={`
                 side-panel 
-                d-flex flex-column 
-                m-0 p-0 h-100 
+                d-flex flex-column
+                m-0 p-0
                 bg-${theme === 'dark' ? 'black' : 'secondary'}`
             }
             >

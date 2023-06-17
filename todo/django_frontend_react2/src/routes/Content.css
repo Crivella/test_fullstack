@@ -1,0 +1,9 @@
+.content-container {
+    flex-direction: row;
+}
+
+@media (max-width: 1200px) {
+    .content-container {
+        flex-direction: column;
+    }
+}
