@@ -1,14 +1,12 @@
-import { useContext } from "react";
 import { Button, Container, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { ActiveContext } from "../API/Active";
 import { useAPITodoItem } from "../API/Hooks";
 import { useTheme } from "../context/Hooks";
 import { CompletedButton, FavoriteButton, PrivateButton } from './FlippableButton';
 
-export default function TodoDetails() {
-    const { active: id, setActive } = useContext(ActiveContext);
-    const item = useAPITodoItem(id);
+export default function TodoDetails({ id, user }) {
+    // const { active: id, setActive } = useContext(ActiveContext);
+    const item = useAPITodoItem(id, user);
     const { owner, title, description, updateItem } = item
     
     const { theme, themeContrast1 } = useTheme();

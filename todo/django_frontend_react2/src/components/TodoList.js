@@ -232,7 +232,7 @@ function TodoNormal({item, user,}) {
 
     return (
         <Form.Text>
-            <ChildBadge item={item} user={user} />
+            {/* <ChildBadge item={item} user={user} /> */}
             <div className={`d-inline-flex text-${themeContrast1}`} style={{inlineSize: '640px'}}>
                 {title}
                 {

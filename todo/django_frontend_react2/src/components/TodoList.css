@@ -90,7 +90,7 @@
     filter: brightness(70%);
 }
 
-.todo-completed .form-text {
+.todo-completed .form-text * {
     text-decoration: line-through;
 }
 

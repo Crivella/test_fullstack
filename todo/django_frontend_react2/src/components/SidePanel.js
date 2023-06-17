@@ -7,7 +7,7 @@ import TodoDetails from "./TodoDetails";
 
 
 
-export default function SidePanel() {
+export default function SidePanel({ user }) {
     const {theme, themeContrast1, ThemeSwitch} = useTheme();
 
     const { active } = useContext(ActiveContext);
@@ -22,7 +22,7 @@ export default function SidePanel() {
                 bg-${theme === 'dark' ? 'black' : 'secondary'}`
             }
             >
-                {active ? <TodoDetails id={active}/> : <></>}
+                {active ? <TodoDetails id={active} user={user} /> : <></>}
         </Container>
     )
 }

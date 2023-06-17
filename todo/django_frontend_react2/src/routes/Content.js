@@ -9,7 +9,7 @@ export default function Content() {
     return (
         <>
         <TodoList id={id} user={user} />
-        <SidePanel />
+        <SidePanel user={user} />
         </>
     );
 }
