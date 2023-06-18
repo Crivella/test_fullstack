@@ -24,6 +24,8 @@ export default function TodoList({id, user}) {
     const [list1, setList1] = useState([]);
     const [list2, setList2] = useState([]);
 
+    const [value, setValue] = useState(''); // [value, setValue
+
     const { 
         title, description, completed, first_completed,
         list, count_childrens, count_completed, parent,
@@ -32,9 +34,16 @@ export default function TodoList({id, user}) {
      } = item;
 
      useEffect(() => {
-        setList1(list.filter((item) => !item.completed));
-        setList2(list.filter((item) => item.completed));
-    }, [list]);
+        const base1 = list.filter((item) => !item.completed);
+        const base2 = list.filter((item) => item.completed);
+        if (value === '') {
+            setList1(base1);
+            setList2(base2);
+        } else {
+            setList1(base1.filter((item) => item.title.toLowerCase().includes(value.toLowerCase())));
+            setList2(base2.filter((item) => item.title.toLowerCase().includes(value.toLowerCase())));
+        }
+    }, [list, value]);
 
     const {user: loggedUser} = useContext(AuthContext);
 
@@ -73,11 +82,14 @@ export default function TodoList({id, user}) {
                     <p className='list-title m-auto'>
                     {getTitle()}
                     </p>
+                    <>
+                    <SearchBar value={value} setValue={setValue} />
                     { 
                         (id !== undefined && !noadd.includes(id) ) 
                         && 
                         <FavoriteButton item={item} handleUpdate={updateItem} />
                     }
+                    </>
                 </ListGroup.Item>
 
                 {
@@ -192,6 +204,59 @@ function TodoItem({item, user, handleAdd, handleDelete, handleUpdate}) {
         
         </ListGroup.Item>
      )
+}
+
+function SearchBar({value, setValue}) {
+    const [visible, setVisible] = useState(false);
+
+    const handleClose = () => {
+        setVisible(false);
+        setValue('');
+    }
+
+    const handleKeyDown = (e) => {
+        switch (e.key) {
+            case 'Escape':
+                handleClose();
+                break;
+            default:
+                break;
+        }
+    }
+
+    return (
+        <>
+        <Form.Group controlId='formSearchBar' className='d-flex'>
+            <Form.Control
+                type='text'
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder='Search'
+                hidden={!visible}
+                />
+        </Form.Group>
+        {
+            visible
+            ?
+            <Button
+                onClick={handleClose}
+                variant='outline-primary'
+                className='round-button-sm mx-2'
+                >
+                ✕
+            </Button>
+            :
+            <Button
+                onClick={() => setVisible(!visible)}
+                variant='outline-primary'
+                className='round-button-sm mx-2'
+                >
+                    <Image src='/todos/search.png' width={20} height={20}/>
+            </Button>
+        }
+        </>
+    )
 }
 
 function ChildBadge({ item, user }) {
