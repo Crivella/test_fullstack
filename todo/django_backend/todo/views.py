@@ -29,7 +29,7 @@ class OwnerMixin:
         q = q.filter(
             Q(private=False) | 
             Q(owner=self.request.user.id) | 
-            Q(shared=self.request.user)
+            Q(shared=self.request.user.id)
             )
         return q
     
