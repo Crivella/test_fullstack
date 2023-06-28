@@ -1,4 +1,4 @@
-import { Button, Container, Image } from "react-bootstrap";
+import { Button, Container, FormControl, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useAPITodoItem } from "../API/Hooks";
 import { useTheme } from "../context/Hooks";
@@ -40,7 +40,8 @@ export default function TodoDetails({ id, user }) {
             <p>{id}</p>
             <p>{owner}</p>
             <p>{title}</p>
-            <p>{description}</p>
+            <FormControl as='textarea' value={description} disabled />
+            {/* <p>{description}</p> */}
         </Container>
     )
 }
